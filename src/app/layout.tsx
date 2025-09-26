@@ -15,14 +15,17 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="vi" suppressHydrationWarning>
-      <body className="antialiased bg-background text-foreground">
+      <body className="antialiased" style={{ backgroundColor: '#ffffff' }}>
         <ThemeProvider
           attribute="class"
           defaultTheme="light"
-          enableSystem
-          enableColorScheme
+          forcedTheme="light"
+          enableSystem={false}
+          enableColorScheme={false}
         >
-          {children}
+          <div style={{ backgroundColor: '#ffffff', minHeight: '100vh' }}>
+            {children}
+          </div>
         </ThemeProvider>
       </body>
     </html>

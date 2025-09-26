@@ -2,13 +2,13 @@ import Header from "@/components/Header";
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-background transition-colors duration-300">
+    <div className="min-h-screen transition-colors duration-300" style={{ backgroundColor: '#ffffff' }}>
       {/* Header Component */}
       <Header />
 
       {/* Main Content */}
-      <main className="min-h-screen bg-background transition-colors duration-300">
-        <div className="text-center py-20">
+      <main className="min-h-screen transition-colors duration-300" style={{ backgroundColor: '#ffffff' }}>
+        <div className="text-center py-20" style={{ backgroundColor: '#ffffff' }}>
           <h1 className="text-3xl font-bold text-foreground mb-4 transition-colors duration-300">
             Sẵn sàng thiết kế từng phần!
           </h1>

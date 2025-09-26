@@ -25,9 +25,10 @@ export default function Header() {
       clearSearch();
     }
   };
+
   return (
-    <header className="bg-background border-b border-border sticky top-0 z-50">
-      <div className="container mx-auto px-4 py-3 flex items-center justify-between">
+    <header className="border-b border-border sticky top-0 z-50" style={{ backgroundColor: '#ffffff' }}>
+      <div className="container mx-auto px-4 py-3 flex items-center justify-between" style={{ backgroundColor: '#ffffff' }}>
         {/* Logo Section */}
         <div className="flex items-center gap-3">
           <a href="/" className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg transition-all duration-200 cursor-pointer hover:scale-105">
@@ -52,7 +53,8 @@ export default function Header() {
               onChange={handleSearchChange}
               onKeyDown={handleKeyDown}
               aria-label="Tìm kiếm"
-              className="w-full pl-12 pr-12 py-3 border border-border rounded-full bg-card text-card-foreground text-sm placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
+              className="w-full pl-12 pr-12 py-3 border border-border rounded-full text-card-foreground text-sm placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
+              style={{ backgroundColor: '#ffffff' }}
             />
             {searchValue && (
               <span
@@ -74,23 +76,22 @@ export default function Header() {
             <Search className="h-5 w-5" />
           </a>
 
-          {/* Theme Toggle */}
+          {/* Theme Toggle - Vô hiệu hóa vì chỉ dùng light mode */}
           <motion.button
-            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+            onClick={() => {/* Không làm gì cả */}}
             className="p-2 rounded-xl text-muted-foreground hover:bg-muted transition-all duration-200 cursor-pointer"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            aria-label={`Chuyển sang ${theme === "dark" ? "light" : "dark"} mode`}
-            title={`Chuyển sang ${theme === "dark" ? "light" : "dark"} mode`}
+            aria-label="Light mode"
+            title="Light mode"
           >
             <motion.div
-              key={theme}
               initial={{ rotate: -90, opacity: 0 }}
               animate={{ rotate: 0, opacity: 1 }}
               exit={{ rotate: 90, opacity: 0 }}
               transition={{ duration: 0.3 }}
             >
-              {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+              <Sun className="h-5 w-5" />
             </motion.div>
           </motion.button>
 
@@ -108,4 +109,4 @@ export default function Header() {
       </div>
     </header>
   );
-} 
+}
