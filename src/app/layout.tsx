@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { ThemeProvider } from "next-themes";
 
 export const metadata: Metadata = {
   title: "DHV LearnX - Nền tảng học lập trình trực tuyến",
@@ -13,9 +14,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="vi">
-      <body className="antialiased bg-white text-gray-900">
-        {children}
+    <html lang="vi" suppressHydrationWarning>
+      <body className="antialiased bg-background text-foreground">
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="light"
+          enableSystem
+          enableColorScheme
+        >
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );
