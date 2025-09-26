@@ -78,7 +78,7 @@ html {
 
 /* Dark mode classes - giữ background trắng */
 html.dark {
-  color-scheme: light;
+  color-scheme: dark;
 }
 
 html.light {
