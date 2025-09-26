@@ -1,36 +1,87 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# F8 - Học Lập Trình Để Đi Làm
 
-## Getting Started
+F8 là nền tảng học lập trình hàng đầu Việt Nam, được thiết kế để giúp học viên trở thành developer chuyên nghiệp với lộ trình học tập bài bản và thực tiễn.
 
-First, run the development server:
+## Công nghệ sử dụng
 
+- **Frontend Framework**: Next.js 15 với App Router
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS với thiết kế hiện đại
+- **Icons**: Lucide React
+- **Fonts**: System UI (font hệ thống)
+- **Primary Color**: Indigo-500 (#6366f1)
+
+## Tính năng nổi bật
+
+- 🎯 **Lộ trình học rõ ràng**: Từ cơ bản đến nâng cao
+- 💻 **Thực hành ngay**: 80% thời gian thực hành với dự án thực tế
+- 👥 **Cộng đồng lớn mạnh**: Kết nối với hàng nghìn developer
+- 🏆 **Chứng chỉ giá trị**: Được các doanh nghiệp lớn công nhận
+- 📱 **Responsive Design**: Tối ưu cho mọi thiết bị
+- 🌙 **Dark Mode**: Chuyển đổi mượt mà giữa chế độ sáng/tối
+- ⚡ **Header Modern**: Component tái sử dụng với hiệu ứng đẹp mắt
+- 🎨 **Giao diện hiện đại**: Thiết kế gradient với system-ui font
+
+## Cài đặt và chạy
+
+1. Cài đặt dependencies:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Chạy development server:
+```bash
+npm run dev
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. Mở trình duyệt và truy cập [http://localhost:3000](http://localhost:3000)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Cấu trúc Project
 
-## Learn More
+```
+src/
+├── app/                    # App Router pages
+│   ├── layout.tsx         # Root layout với system-ui font
+│   ├── page.tsx           # Homepage với Header component
+│   └── globals.css        # Global styles với indigo theme & smooth transitions
+└── components/            # Reusable components
+    └── Header.tsx         # Clean header với buttons bo tròn & hover effects
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Trạng thái hiện tại
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- ✅ **Header hoàn chỉnh**: Logo gradient, search interactive, buttons bo tròn, modern animations
+- ✅ **System UI Font**: Font hệ thống cho hiệu suất tối ưu
+- ✅ **Modern Design**: Gradient backgrounds, shadows, smooth transitions
+- ✅ **Responsive Design**: Mobile-first với breakpoints tối ưu
+- ✅ **Clean Codebase**: Loại bỏ dark mode, tập trung vào thiết kế header
+- 🔄 **Sẵn sàng thiết kế**: Content sections đơn giản, dễ mở rộng
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Đặc điểm Header
 
-## Deploy on Vercel
+- **Background**: Màu trắng thuần với border dưới
+- **Logo DHV LearnX**: Gradient background từ indigo-500 đến purple-600 với shadow effects
+- **Search Bar**: Interactive với focus states, clear button, và smooth transitions
+- **Buttons**: Tất cả button đều có cursor pointer và border-radius 999px (fully rounded)
+- **Auth Buttons**: Gradient backgrounds, scale animations, và smooth hover effects
+- **Mobile Responsive**: Mobile-first design với menu và search riêng cho từng breakpoint
+- **Sticky Header**: Cố định với smooth transitions
+- **Reusable Component**: Hoàn toàn độc lập, có thể sử dụng ở mọi trang
+- **Modern Design**: Gradient backgrounds, rounded corners, và modern typography
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Kế hoạch tiếp theo
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. **Sidebar Navigation**: Menu điều hướng bên trái
+2. **Hero Section**: Banner quảng cáo khóa học chính
+3. **Course Cards**: Hiển thị các khóa học nổi bật
+4. **Footer**: Thông tin liên hệ và links hữu ích
+
+## Đội ngũ phát triển
+
+F8 được phát triển bởi các chuyên gia lập trình hàng đầu Việt Nam với nhiều năm kinh nghiệm trong ngành công nghệ.
+
+## Liên hệ
+
+- Website: [https://f8.edu.vn](https://f8.edu.vn)
+- Email: contact@f8.edu.vn
+- Hotline: 1900-xxxx
