@@ -1,6 +1,27 @@
+"use client";
+
 import { Search, X } from "lucide-react";
+import { useState } from "react";
 
 export default function Header() {
+  const [searchValue, setSearchValue] = useState("");
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchValue(e.target.value);
+  };
+
+  const clearSearch = () => {
+    setSearchValue("");
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      // Handle search logic here
+      console.log('Searching for:', searchValue);
+    } else if (e.key === 'Escape') {
+      clearSearch();
+    }
+  };
   return (
     <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
       <div className="container mx-auto px-4 py-3 flex items-center justify-between">
@@ -24,11 +45,22 @@ export default function Header() {
             <input
               type="text"
               placeholder="Tìm kiếm khóa học, bài viết, video..."
+              value={searchValue}
+              onChange={handleSearchChange}
+              onKeyDown={handleKeyDown}
+              aria-label="Tìm kiếm"
               className="w-full pl-12 pr-12 py-3 border border-gray-300 rounded-full bg-white text-gray-900 text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
             />
-            <span className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 cursor-pointer">
-              <X className="h-5 w-5" />
-            </span>
+            {searchValue && (
+              <span
+                className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 cursor-pointer hover:text-gray-600 transition-colors duration-200"
+                onClick={clearSearch}
+                title="Xóa tìm kiếm"
+                aria-label="Xóa tìm kiếm"
+              >
+                <X className="h-5 w-5" />
+              </span>
+            )}
           </div>
         </div>
 
