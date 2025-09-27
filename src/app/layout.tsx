@@ -3,6 +3,7 @@ import "./globals.css";
 import { ThemeProvider } from "next-themes";
 import Menu from "@/components/Menu";
 import Header from "@/components/Header";
+import HeroSection from "@/components/HeroSection";
 
 export const metadata: Metadata = {
   title: "DHV LearnX - Nền tảng học lập trình trực tuyến",
@@ -29,6 +30,7 @@ export default function RootLayout({
             <Menu />
             <div className="flex-1">
               <Header />
+              <HeroSection />
               <main style={{ backgroundColor: '#ffffff' }}>
                 {children}
               </main>

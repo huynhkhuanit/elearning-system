@@ -92,6 +92,10 @@ html.light {
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+a, button {
+  cursor: pointer;
+}
+
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
@@ -108,4 +112,20 @@ html.light {
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--accent-foreground);
+}
+
+/* Grid pattern background for hero section */
+.bg-grid-pattern {
+  background-image:
+    linear-gradient(rgba(99, 102, 241, 0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(99, 102, 241, 0.1) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+/* Line clamp utility */
+.line-clamp-2 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
