@@ -28,14 +28,14 @@ export default function Header() {
 
   return (
     <header className="border-b border-border sticky top-0 z-50" style={{ backgroundColor: '#ffffff' }}>
-      <div className="container mx-auto px-4 py-3 flex items-center justify-between" style={{ backgroundColor: '#ffffff' }}>
+      <div className="mx-auto px-[28px] h-[66px] flex items-center justify-between" style={{ backgroundColor: '#ffffff' }}>
         {/* Logo Section */}
         <div className="flex items-center gap-3">
-          <a href="/" className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg transition-all duration-200 cursor-pointer hover:scale-105">
+          <a href="/" className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg transition-all duration-200 cursor-pointer">
             <span className="text-white font-bold text-xl">DHV</span>
           </a>
           <div className="hidden sm:block">
-            <a href="/" className="text-2xl font-bold text-foreground transition-colors duration-200 hover:text-primary">
+            <a href="/" className="text-2xl font-[900] text-foreground transition-colors duration-200 hover:text-primary">
               LearnX
             </a>
             <p className="text-xs text-muted-foreground">Nền tảng học lập trình trực tuyến</p>
