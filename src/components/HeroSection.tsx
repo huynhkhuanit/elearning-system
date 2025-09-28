@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronLeft, ChevronRight, Star, Award } from "lucide-react";
+import { ChevronLeft, ChevronRight, Star, Award, Users, Clock, ArrowRight } from "lucide-react";
 import Badge from "@/components/Badge";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
