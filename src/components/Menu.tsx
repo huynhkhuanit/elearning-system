@@ -2,6 +2,8 @@
 
 import { Home, BookOpen, MessageCircle, Menu as MenuIcon } from "lucide-react";
 import { useState } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 interface MenuItem {
   id: string;
@@ -18,10 +20,10 @@ const menuItems: MenuItem[] = [
     href: "/",
   },
   {
-    id: "courses",
+    id: "roadmap",
     icon: MenuIcon,
     label: "Lộ trình",
-    href: "/courses",
+    href: "/roadmap",
   },
   {
     id: "articles",
@@ -38,7 +40,7 @@ const menuItems: MenuItem[] = [
 ];
 
 export default function Menu() {
-  const [activeItem, setActiveItem] = useState("home");
+  const pathname = usePathname();
 
   return (
     <aside
@@ -52,13 +54,12 @@ export default function Menu() {
       <nav className="flex flex-col items-start space-y-2 w-full">
         {menuItems.map((item) => {
           const Icon = item.icon;
-          const isActive = activeItem === item.id;
+          const isActive = pathname === item.href;
 
           return (
-            <a
+            <Link
               key={item.id}
               href={item.href}
-              onClick={() => setActiveItem(item.id)}
               className={`
                 group flex flex-col items-center justify-center w-full py-3 px-2 rounded-lg
                 transition-all duration-200 cursor-pointer
@@ -89,7 +90,7 @@ export default function Menu() {
               >
                 {item.label}
               </span>
-            </a>
+            </Link>
           );
         })}
       </nav>

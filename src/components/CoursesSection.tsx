@@ -310,9 +310,9 @@ function CourseCard({ course, onComingSoon }: { course: Course; onComingSoon?: (
         </div>
         {course.featured && (
           <div className="absolute top-3 right-3">
-            <Badge variant="featured" size="sm">
-              ⭐
-            </Badge>
+            <div className="w-[26px] px-[6px] py-[6px] bg-[#0000004d] rounded-lg flex items-center justify-center">
+              <span className="text-white text-sm">⭐</span>
+            </div>
           </div>
         )}
       </div>
