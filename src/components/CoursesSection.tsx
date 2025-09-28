@@ -315,7 +315,7 @@ function CourseCard({ course }: { course: Course }) {
         {/* Price and Level */}
         <div className="flex items-center justify-between flex-shrink-0">
           <div className="flex items-center space-x-2">
-            <span className={`font-bold text-sm ${course.isPro ? 'text-primary' : 'text-green-600'}`}>
+            <span className={`font-[600] text-sm ${course.isPro ? 'text-primary' : 'text-green-600'}`}>
               {course.price}
             </span>
             {course.isPro && (
