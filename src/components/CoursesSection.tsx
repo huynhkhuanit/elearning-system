@@ -195,7 +195,7 @@ export default function CoursesSection() {
         >
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-2">
+              <h2 className="text-3xl font-[900] text-gray-900 mb-2">
                 Khóa học Pro
                 <Badge variant="primary" size="md" className="ml-3">
                   Mới
@@ -212,7 +212,7 @@ export default function CoursesSection() {
             </a>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {proCourses.map((course, index) => (
               <motion.div
                 key={course.id}
@@ -234,7 +234,7 @@ export default function CoursesSection() {
         >
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-2">Khóa học miễn phí</h2>
+              <h2 className="text-3xl font-[900] text-gray-900 mb-2">Khóa học miễn phí</h2>
               <p className="text-gray-600">Học miễn phí với các khóa học chất lượng</p>
             </div>
             <a
@@ -246,7 +246,7 @@ export default function CoursesSection() {
             </a>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {freeCourses.map((course, index) => (
               <motion.div
                 key={course.id}
