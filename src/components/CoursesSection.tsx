@@ -1,14 +1,17 @@
 "use client";
 
-import { Star, Users, Clock, ArrowRight, Play } from "lucide-react";
+import { Star, Users, Clock, ArrowRight, Play, Calendar, BookOpen, Award } from "lucide-react";
 import Badge from "@/components/Badge";
-import { motion } from "framer-motion";
+import Modal from "@/components/Modal";
+import { motion, AnimatePresence } from "framer-motion";
+import { useState } from "react";
 
 interface Course {
   id: number;
   title: string;
   subtitle: string;
   price: string;
+  originalPrice?: string;
   rating: number;
   students: number;
   duration: string;
@@ -16,176 +19,94 @@ interface Course {
   isPro: boolean;
   gradient: string;
   featured?: boolean;
+  isComingSoon?: boolean;
 }
 
-// Dữ liệu khóa học Pro (chỉ JavaScript)
+// Dữ liệu khóa học Pro (chỉ JavaScript nâng cao)
 const proCourses: Course[] = [
   {
     id: 1,
-    title: "JavaScript Pro",
-    subtitle: "Cho người mới bắt đầu",
+    title: "Lập trình JavaScript Nâng Cao",
+    subtitle: "JavaScript Advanced Programming",
     price: "1.399.000đ",
-    rating: 4.8,
-    students: 590,
-    duration: "116h50p",
-    level: "Cơ bản",
+    originalPrice: "1.799.000đ",
+    rating: 4.9,
+    students: 1250,
+    duration: "45h30p",
+    level: "Nâng cao",
     isPro: true,
-    gradient: "from-blue-500 to-purple-600",
-  },
-  {
-    id: 2,
-    title: "Ngôn ngữ Sass",
-    subtitle: "Cho Frontend Developer",
-    price: "299.000đ",
-    rating: 4.8,
-    students: 27,
-    duration: "6h51p",
-    level: "Cơ bản",
-    isPro: true,
-    gradient: "from-pink-500 to-rose-500",
-  },
-  {
-    id: 3,
-    title: "HTML CSS Pro",
-    subtitle: "Cho người mới bắt đầu",
-    price: "1.299.000đ",
-    rating: 4.8,
-    students: 590,
-    duration: "116h50p",
-    level: "Cơ bản",
-    isPro: true,
-    gradient: "from-blue-600 to-indigo-600",
+    gradient: "from-indigo-500 to-purple-600",
+    featured: true,
   },
 ];
 
 // Dữ liệu khóa học miễn phí
 const freeCourses: Course[] = [
   {
-    id: 4,
-    title: "Kiến Thức Nền Tảng",
-    subtitle: "Kiến thức nhập môn IT",
+    id: 2,
+    title: "Lập trình C++ Cơ Bản Đến Nâng Cao",
+    subtitle: "C++ Programming Fundamentals to Advanced",
     price: "Miễn phí",
     rating: 4.8,
-    students: 13619,
-    duration: "3h12p",
+    students: 25890,
+    duration: "32h45p",
     level: "Cơ bản",
     isPro: false,
-    gradient: "from-purple-500 to-pink-500",
+    gradient: "from-emerald-500 to-teal-600",
+    isComingSoon: true,
+  },
+  {
+    id: 3,
+    title: "HTML CSS Cơ Bản Đến Nâng Cao",
+    subtitle: "HTML CSS Complete Course",
+    price: "Miễn phí",
+    rating: 4.9,
+    students: 45230,
+    duration: "28h20p",
+    level: "Cơ bản",
+    isPro: false,
+    gradient: "from-blue-500 to-indigo-600",
+    isComingSoon: true,
+  },
+  {
+    id: 4,
+    title: "Cấu Trúc Dữ Liệu Và Giải Thuật",
+    subtitle: "Data Structures and Algorithms",
+    price: "Miễn phí",
+    rating: 4.7,
+    students: 18950,
+    duration: "35h15p",
+    level: "Nâng cao",
+    isPro: false,
+    gradient: "from-purple-500 to-pink-600",
+    isComingSoon: true,
   },
   {
     id: 5,
-    title: "Lập trình C++ cơ bản nâng cao",
-    subtitle: "Miễn phí",
-    price: "Miễn phí",
-    rating: 4.8,
-    students: 37079,
-    duration: "10h18p",
-    level: "Nâng cao",
-    isPro: false,
-    gradient: "from-teal-500 to-green-500",
-  },
-  {
-    id: 6,
-    title: "HTML CSS từ Zero đến Hero",
-    subtitle: "Miễn phí",
-    price: "Miễn phí",
-    rating: 4.8,
-    students: 214903,
-    duration: "29h5p",
-    level: "Cơ bản",
-    isPro: false,
-    gradient: "from-blue-500 to-cyan-500",
-  },
-  {
-    id: 7,
-    title: "Responsive Với Grid System",
-    subtitle: "Miễn phí",
-    price: "Miễn phí",
-    rating: 4.8,
-    students: 47399,
-    duration: "6h51p",
-    level: "Cơ bản",
-    isPro: false,
-    gradient: "from-purple-500 to-indigo-500",
-  },
-  {
-    id: 8,
     title: "Lập trình JavaScript Cơ Bản",
-    subtitle: "Miễn phí",
+    subtitle: "JavaScript Fundamentals",
     price: "Miễn phí",
     rating: 4.8,
-    students: 151322,
-    duration: "24h15p",
+    students: 32180,
+    duration: "18h30p",
     level: "Cơ bản",
     isPro: false,
-    gradient: "from-yellow-400 to-orange-500",
-  },
-  {
-    id: 9,
-    title: "Lập trình JavaScript Nâng Cao",
-    subtitle: "Miễn phí",
-    price: "Miễn phí",
-    rating: 4.8,
-    students: 41586,
-    duration: "8h41p",
-    level: "Nâng cao",
-    isPro: false,
-    gradient: "from-orange-500 to-red-500",
-  },
-  {
-    id: 10,
-    title: "Làm việc với Terminal & Ubuntu",
-    subtitle: "Windows Terminal",
-    price: "Miễn phí",
-    rating: 4.8,
-    students: 21266,
-    duration: "4h5p",
-    level: "Cơ bản",
-    isPro: false,
-    gradient: "from-red-500 to-pink-500",
-  },
-  {
-    id: 11,
-    title: "Xây Dựng Website Với ReactJS",
-    subtitle: "Learn once, write anywhere",
-    price: "Miễn phí",
-    rating: 4.8,
-    students: 73353,
-    duration: "27h32p",
-    level: "Cơ bản",
-    isPro: false,
-    gradient: "from-cyan-500 to-blue-500",
-  },
-  {
-    id: 12,
-    title: "Node & ExpressJS",
-    subtitle: "Miễn phí",
-    price: "Miễn phí",
-    rating: 4.8,
-    students: 45418,
-    duration: "12h8p",
-    level: "Cơ bản",
-    isPro: false,
-    gradient: "from-green-500 to-teal-500",
-  },
-  {
-    id: 13,
-    title: "App Đừng Chạm Tay Lên Mặt",
-    subtitle: "Miễn phí",
-    price: "Miễn phí",
-    rating: 4.8,
-    students: 11156,
-    duration: "1h34p",
-    level: "Cơ bản",
-    isPro: false,
-    gradient: "from-indigo-500 to-purple-500",
+    gradient: "from-yellow-500 to-orange-600",
+    isComingSoon: true,
   },
 ];
 
 export default function CoursesSection() {
+  const [showComingSoon, setShowComingSoon] = useState(false);
+
   return (
     <section className="py-16 bg-gradient-to-br from-gray-50 to-white">
       <div className="max-w-7xl mx-auto px-6">
+        <AnimatePresence>
+          {showComingSoon && (
+            <ComingSoonModal onClose={() => setShowComingSoon(false)} />
+          )}
+        </AnimatePresence>
         {/* Pro Courses Section */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -198,10 +119,10 @@ export default function CoursesSection() {
               <h2 className="text-3xl font-[900] text-gray-900 mb-2">
                 Khóa học Pro
                 <Badge variant="primary" size="md" className="ml-3">
-                  Mới
+                  Nâng cao
                 </Badge>
               </h2>
-              <p className="text-gray-600">Các khóa học chuyên sâu cho developer</p>
+              <p className="text-gray-600">Khóa học JavaScript chuyên sâu cho developer</p>
             </div>
             <a
               href="/courses"
@@ -220,7 +141,7 @@ export default function CoursesSection() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: index * 0.1 }}
               >
-                <CourseCard course={course} />
+                <CourseCard course={course} onComingSoon={() => setShowComingSoon(true)} />
               </motion.div>
             ))}
           </div>
@@ -254,7 +175,7 @@ export default function CoursesSection() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: index * 0.05 }}
               >
-                <CourseCard course={course} />
+                <CourseCard course={course} onComingSoon={() => setShowComingSoon(true)} />
               </motion.div>
             ))}
           </div>
@@ -264,11 +185,156 @@ export default function CoursesSection() {
   );
 }
 
-function CourseCard({ course }: { course: Course }) {
+// Coming Soon Modal using the new Modal component with enhanced features
+function ComingSoonModal({ onClose }: { onClose: () => void }) {
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleNotifyClick = async () => {
+    setIsLoading(true);
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    setIsLoading(false);
+    // Show success message or redirect
+    alert('Cảm ơn bạn đã đăng ký! Chúng tôi sẽ thông báo khi khóa học sẵn sàng.');
+    onClose();
+  };
+
+  const headerIcon = (
+    <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+      <BookOpen className="w-6 h-6 text-white" />
+    </div>
+  );
+
+  const footer = (
+    <div className="flex space-x-3">
+      <button
+        onClick={onClose}
+        disabled={isLoading}
+        className="flex-1 px-4 py-2 bg-gray-100 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed text-gray-700 rounded-lg font-medium transition-all duration-200"
+      >
+        Để sau
+      </button>
+      <button
+        onClick={handleNotifyClick}
+        disabled={isLoading}
+        className="flex-1 px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg font-medium transition-all duration-200 flex items-center justify-center space-x-2"
+      >
+        {isLoading && <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />}
+        <span>{isLoading ? 'Đang xử lý...' : 'Đăng ký nhận thông báo'}</span>
+      </button>
+    </div>
+  );
+
+  return (
+    <Modal
+      isOpen={true}
+      onClose={onClose}
+      title="Coming Soon"
+      subtitle="Khóa học đang được phát triển"
+      variant="info"
+      animation="bounce"
+      size="md"
+      headerIcon={headerIcon}
+      footer={footer}
+      loading={isLoading}
+      backdropClassName="bg-gradient-to-br from-indigo-500/20 via-purple-500/20 to-pink-500/20"
+      className="border-2 border-indigo-200/50"
+    >
+      <div className="space-y-6">
+        {/* Status indicators */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="flex items-center space-x-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
+            <Calendar className="w-5 h-5 text-blue-600" />
+            <div>
+              <div className="font-medium text-blue-900 text-sm">Đang phát triển</div>
+              <div className="text-xs text-blue-700">Dự kiến Q1 2025</div>
+            </div>
+          </div>
+          <div className="flex items-center space-x-3 p-3 bg-green-50 rounded-lg border border-green-200">
+            <Award className="w-5 h-5 text-green-600" />
+            <div>
+              <div className="font-medium text-green-900 text-sm">Nội dung chất lượng</div>
+              <div className="text-xs text-green-700">Được giảng viên hàng đầu tạo</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Features preview */}
+        <div className="bg-gradient-to-r from-indigo-50 via-purple-50 to-pink-50 rounded-xl p-6 border border-indigo-200/50">
+          <h4 className="font-bold text-gray-900 mb-4 text-center">🎯 Tính năng sắp có:</h4>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="flex items-center space-x-2 text-sm">
+              <div className="w-2 h-2 bg-indigo-500 rounded-full"></div>
+              <span className="text-gray-700">Video lectures 4K</span>
+            </div>
+            <div className="flex items-center space-x-2 text-sm">
+              <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+              <span className="text-gray-700">Bài tập interactive</span>
+            </div>
+            <div className="flex items-center space-x-2 text-sm">
+              <div className="w-2 h-2 bg-pink-500 rounded-full"></div>
+              <span className="text-gray-700">Hỗ trợ 24/7</span>
+            </div>
+            <div className="flex items-center space-x-2 text-sm">
+              <div className="w-2 h-2 bg-indigo-500 rounded-full"></div>
+              <span className="text-gray-700">Cộng đồng học tập</span>
+            </div>
+            <div className="flex items-center space-x-2 text-sm">
+              <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+              <span className="text-gray-700">Certificate</span>
+            </div>
+            <div className="flex items-center space-x-2 text-sm">
+              <div className="w-2 h-2 bg-pink-500 rounded-full"></div>
+              <span className="text-gray-700">Mobile app</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Progress indicator */}
+        <div className="space-y-2">
+          <div className="flex justify-between text-sm text-gray-600">
+            <span>Tiến độ phát triển</span>
+            <span>75%</span>
+          </div>
+          <div className="w-full bg-gray-200 rounded-full h-2">
+            <div className="bg-gradient-to-r from-indigo-500 to-purple-600 h-2 rounded-full transition-all duration-1000" style={{ width: '75%' }}></div>
+          </div>
+        </div>
+
+        {/* Early access note */}
+        <div className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg p-4 border border-amber-200">
+          <div className="flex items-start space-x-3">
+            <div className="w-6 h-6 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+              <span className="text-amber-600 text-xs font-bold">!</span>
+            </div>
+            <div>
+              <h5 className="font-semibold text-amber-900 mb-1">Early Access</h5>
+              <p className="text-sm text-amber-800">
+                Đăng ký ngay để nhận early access và ưu đãi đặc biệt khi khóa học ra mắt!
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Modal>
+  );
+}
+
+function CourseCard({ course, onComingSoon }: { course: Course; onComingSoon?: () => void }) {
+  const handleClick = () => {
+    if (course.isComingSoon && onComingSoon) {
+      onComingSoon();
+    }
+    // For actual courses, navigation logic would go here
+  };
+
   return (
     <motion.div
       whileHover={{ y: -4 }}
-      className="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden cursor-pointer border border-gray-100 h-full flex flex-col"
+      className={`group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 h-full flex flex-col ${
+        course.isComingSoon ? 'cursor-pointer opacity-90' : 'cursor-pointer'
+      }`}
+      onClick={handleClick}
     >
       {/* Thumbnail */}
       <div className={`relative h-32 bg-gradient-to-br ${course.gradient} flex items-center justify-center flex-shrink-0`}>
@@ -315,9 +381,16 @@ function CourseCard({ course }: { course: Course }) {
         {/* Price and Level */}
         <div className="flex items-center justify-between flex-shrink-0">
           <div className="flex items-center space-x-2">
-            <span className={`font-[600] text-sm ${course.isPro ? 'text-primary' : 'text-green-600'}`}>
-              {course.price}
-            </span>
+            <div className="flex flex-col">
+              <span className={`font-[600] text-sm ${course.isPro ? 'text-primary' : 'text-green-600'}`}>
+                {course.price}
+              </span>
+              {course.originalPrice && (
+                <span className="text-xs text-gray-500 line-through">
+                  {course.originalPrice}
+                </span>
+              )}
+            </div>
             {course.isPro && (
               <Badge variant="primary" size="sm">
                 Pro
