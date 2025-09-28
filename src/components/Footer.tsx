@@ -43,8 +43,8 @@ export default function Footer() {
                 <span className="text-white font-bold text-xl">DHV</span>
               </div>
               <div>
-                <h3 className="text-xl font-bold">DHV LearnX</h3>
-                <p className="text-gray-400 text-sm">Học lập trình để đi làm</p>
+                <h3 className="text-xl font-[900]">LearnX</h3>
+                <p className="text-gray-400 text-sm">Nền tảng học lập trình trực tuyến</p>
               </div>
             </div>
             
