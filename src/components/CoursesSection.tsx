@@ -268,10 +268,10 @@ function CourseCard({ course }: { course: Course }) {
   return (
     <motion.div
       whileHover={{ y: -4 }}
-      className="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden cursor-pointer border border-gray-100"
+      className="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden cursor-pointer border border-gray-100 h-full flex flex-col"
     >
       {/* Thumbnail */}
-      <div className={`relative h-32 bg-gradient-to-br ${course.gradient} flex items-center justify-center`}>
+      <div className={`relative h-32 bg-gradient-to-br ${course.gradient} flex items-center justify-center flex-shrink-0`}>
         <div className="text-white text-center">
           <Play className="w-8 h-8 mx-auto mb-2 opacity-80 group-hover:opacity-100 transition-opacity duration-200" />
           <div className="text-xs font-semibold opacity-90">Preview</div>
@@ -286,16 +286,16 @@ function CourseCard({ course }: { course: Course }) {
       </div>
 
       {/* Content */}
-      <div className="p-4">
-        <div className="mb-3">
-          <h3 className="font-bold text-gray-900 text-sm mb-1 line-clamp-2 group-hover:text-primary transition-colors duration-200">
+      <div className="p-4 flex-1 flex flex-col">
+        <div className="mb-3 flex-1">
+          <h3 className="font-bold text-gray-900 text-sm mb-1 line-clamp-2 group-hover:text-primary transition-colors duration-200 min-h-[2.5rem] flex items-start">
             {course.title}
           </h3>
           <p className="text-xs text-gray-600 line-clamp-1">{course.subtitle}</p>
         </div>
 
         {/* Stats */}
-        <div className="flex items-center justify-between text-xs text-gray-500 mb-3">
+        <div className="flex items-center justify-between text-xs text-gray-500 mb-3 flex-shrink-0">
           <div className="flex items-center space-x-3">
             <div className="flex items-center space-x-1">
               <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
@@ -313,7 +313,7 @@ function CourseCard({ course }: { course: Course }) {
         </div>
 
         {/* Price and Level */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between flex-shrink-0">
           <div className="flex items-center space-x-2">
             <span className={`font-bold text-sm ${course.isPro ? 'text-primary' : 'text-green-600'}`}>
               {course.price}
