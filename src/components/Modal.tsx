@@ -1,187 +1,56 @@
 "use client";
 
 import { ReactNode, useEffect } from "react";
-import { X, CheckCircle, AlertTriangle, Info, XCircle, Loader2 } from "lucide-react";
+import { X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
-export type ModalSize = "xs" | "sm" | "md" | "lg" | "xl" | "2xl" | "full" | "auto";
-export type ModalVariant = "default" | "success" | "error" | "warning" | "info" | "destructive";
-export type ModalAnimation = "fade" | "scale" | "slide" | "bounce" | "none";
+export type ModalSize = "sm" | "md" | "lg" | "xl";
+export type ButtonSize = "sm" | "md" | "lg";
 
 interface ModalProps {
-  // Basic props
   isOpen: boolean;
   onClose: () => void;
-
-  // Content props
   title?: string;
-  subtitle?: string;
   children: ReactNode;
-
-  // Layout props
   size?: ModalSize;
-  variant?: ModalVariant;
-  animation?: ModalAnimation;
-
-  // Interaction props
   showCloseButton?: boolean;
   closeOnBackdropClick?: boolean;
-  closeOnEscape?: boolean;
-  preventBodyScroll?: boolean;
-
-  // Styling props
   className?: string;
-  backdropClassName?: string;
-  headerClassName?: string;
-  bodyClassName?: string;
-  footerClassName?: string;
-
-  // Advanced props
   headerIcon?: ReactNode;
-  footer?: ReactNode;
-  loading?: boolean;
-
-  // Callback props
-  onAfterOpen?: () => void;
-  onAfterClose?: () => void;
-  onBackdropClick?: () => void;
-
-  // Accessibility props
-  role?: string;
-  ariaLabel?: string;
-  ariaDescribedBy?: string;
+  buttonSize?: ButtonSize;
 }
 
 const sizeClasses = {
-  xs: "max-w-xs",
   sm: "max-w-sm",
   md: "max-w-md",
   lg: "max-w-lg",
   xl: "max-w-xl",
-  "2xl": "max-w-2xl",
-  full: "max-w-full mx-4",
-  auto: "max-w-auto",
 };
 
-const variantClasses = {
-  default: {
-    header: "border-gray-100",
-    icon: "text-gray-600",
-    title: "text-gray-900",
-  },
-  success: {
-    header: "border-green-100",
-    icon: "text-green-600",
-    title: "text-green-900",
-  },
-  error: {
-    header: "border-red-100",
-    icon: "text-red-600",
-    title: "text-red-900",
-  },
-  warning: {
-    header: "border-yellow-100",
-    icon: "text-yellow-600",
-    title: "text-yellow-900",
-  },
-  info: {
-    header: "border-blue-100",
-    icon: "text-blue-600",
-    title: "text-blue-900",
-  },
-  destructive: {
-    header: "border-red-100",
-    icon: "text-red-600",
-    title: "text-red-900",
-  },
-};
-
-const variantIcons = {
-  default: null,
-  success: CheckCircle,
-  error: XCircle,
-  warning: AlertTriangle,
-  info: Info,
-  destructive: XCircle,
-};
-
-const animationVariants = {
-  fade: {
-    backdrop: { initial: { opacity: 0 }, animate: { opacity: 1 }, exit: { opacity: 0 } },
-    modal: { initial: { opacity: 0 }, animate: { opacity: 1 }, exit: { opacity: 0 } },
-  },
-  scale: {
-    backdrop: { initial: { opacity: 0 }, animate: { opacity: 1 }, exit: { opacity: 0 } },
-    modal: {
-      initial: { scale: 0.95, opacity: 0 },
-      animate: { scale: 1, opacity: 1 },
-      exit: { scale: 0.95, opacity: 0 }
-    },
-  },
-  slide: {
-    backdrop: { initial: { opacity: 0 }, animate: { opacity: 1 }, exit: { opacity: 0 } },
-    modal: {
-      initial: { y: 20, opacity: 0 },
-      animate: { y: 0, opacity: 1 },
-      exit: { y: 20, opacity: 0 }
-    },
-  },
-  bounce: {
-    backdrop: { initial: { opacity: 0 }, animate: { opacity: 1 }, exit: { opacity: 0 } },
-    modal: {
-      initial: { scale: 0.3, opacity: 0 },
-      animate: { scale: 1, opacity: 1 },
-      exit: { scale: 0.3, opacity: 0 },
-      transition: { type: "spring", duration: 0.6, bounce: 0.4 }
-    },
-  },
-  none: {
-    backdrop: { initial: {}, animate: {}, exit: {} },
-    modal: { initial: {}, animate: {}, exit: {} },
-  },
+const buttonSizeClasses = {
+  sm: "px-3 py-2 text-sm",
+  md: "px-4 py-3 text-sm",
+  lg: "px-6 py-4 text-base",
 };
 
 export default function Modal({
   isOpen,
   onClose,
   title,
-  subtitle,
   children,
   size = "md",
-  variant = "default",
-  animation = "scale",
   showCloseButton = true,
   closeOnBackdropClick = true,
-  closeOnEscape = true,
-  preventBodyScroll = true,
   className = "",
-  backdropClassName = "",
-  headerClassName = "",
-  bodyClassName = "",
-  footerClassName = "",
   headerIcon,
-  footer,
-  loading = false,
-  onAfterOpen,
-  onAfterClose,
-  onBackdropClick,
-  role = "dialog",
-  ariaLabel,
-  ariaDescribedBy,
+  buttonSize = "md",
 }: ModalProps) {
-  // Get current variant styles
-  const currentVariant = variantClasses[variant];
-  const animationConfig = animationVariants[animation];
-  const VariantIcon = variantIcons[variant];
-
-  // Auto icon based on variant
-  const defaultIcon = VariantIcon ? (
-    <VariantIcon className={`w-6 h-6 ${currentVariant.icon}`} />
-  ) : headerIcon;
+  // Helper function to get button classes
+  const getButtonClasses = () => buttonSizeClasses[buttonSize];
 
   // Handle escape key
   useEffect(() => {
-    if (!closeOnEscape || !isOpen) return;
+    if (!isOpen) return;
 
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -190,40 +59,17 @@ export default function Modal({
     };
 
     document.addEventListener("keydown", handleEscape);
-
-    return () => {
-      document.removeEventListener("keydown", handleEscape);
-    };
-  }, [isOpen, closeOnEscape, onClose]);
-
-  // Handle body scroll
-  useEffect(() => {
-    if (!preventBodyScroll || !isOpen) return;
-
-    const originalStyle = window.getComputedStyle(document.body).overflow;
     document.body.style.overflow = "hidden";
 
     return () => {
-      document.body.style.overflow = originalStyle;
+      document.removeEventListener("keydown", handleEscape);
+      document.body.style.overflow = "unset";
     };
-  }, [isOpen, preventBodyScroll]);
-
-  // Handle modal lifecycle
-  useEffect(() => {
-    if (isOpen) {
-      onAfterOpen?.();
-    } else {
-      onAfterClose?.();
-    }
-  }, [isOpen, onAfterOpen, onAfterClose]);
+  }, [isOpen, onClose]);
 
   const handleBackdropClick = (e: React.MouseEvent) => {
-    if (e.target === e.currentTarget) {
-      if (closeOnBackdropClick) {
-        onClose();
-      } else {
-        onBackdropClick?.();
-      }
+    if (e.target === e.currentTarget && closeOnBackdropClick) {
+      onClose();
     }
   };
 
@@ -232,59 +78,37 @@ export default function Modal({
   return (
     <AnimatePresence>
       <motion.div
-        {...animationConfig.backdrop}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
         transition={{ duration: 0.2 }}
-        className={`fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 ${backdropClassName}`}
+        className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
         onClick={handleBackdropClick}
-        role={role}
+        role="dialog"
         aria-modal="true"
-        aria-label={ariaLabel}
         aria-labelledby={title ? "modal-title" : undefined}
-        aria-describedby={ariaDescribedBy || (subtitle ? "modal-subtitle" : undefined)}
       >
         <motion.div
-          {...animationConfig.modal}
-          className={`
-            bg-white rounded-2xl shadow-2xl w-full ${sizeClasses[size]} ${className}
-            max-h-[90vh] overflow-hidden flex flex-col
-          `}
+          initial={{ scale: 0.95, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          exit={{ scale: 0.95, opacity: 0 }}
+          transition={{ type: "spring", duration: 0.5, bounce: 0.3 }}
+          className={`bg-white rounded-2xl shadow-2xl w-full ${sizeClasses[size]} ${className} max-h-[90vh] overflow-hidden flex flex-col`}
           onClick={(e) => e.stopPropagation()}
         >
-          {/* Loading Overlay */}
-          {loading && (
-            <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center z-10">
-              <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
-            </div>
-          )}
-
           {/* Header */}
-          {(title || defaultIcon || showCloseButton) && (
-            <div className={`flex items-center justify-between p-6 border-b ${currentVariant.header} ${headerClassName}`}>
+          {(title || headerIcon || showCloseButton) && (
+            <div className="flex items-center justify-between p-6 border-b border-gray-100">
               <div className="flex items-center space-x-4">
-                {defaultIcon && (
+                {headerIcon && (
                   <div className="flex-shrink-0">
-                    {defaultIcon}
+                    {headerIcon}
                   </div>
                 )}
-                {(title || subtitle) && (
-                  <div>
-                    {title && (
-                      <h2
-                        id="modal-title"
-                        className={`text-xl font-bold leading-tight ${currentVariant.title}`}
-                      >
-                        {title}
-                      </h2>
-                    )}
-                    {subtitle && (
-                      <p
-                        id="modal-subtitle"
-                        className="text-sm text-gray-600 mt-1"
-                      >
-                        {subtitle}
-                      </p>
-                    )}
-                  </div>
+                {title && (
+                  <h2 id="modal-title" className="text-xl font-bold text-gray-900 leading-tight">
+                    {title}
+                  </h2>
                 )}
               </div>
               {showCloseButton && (
@@ -292,7 +116,6 @@ export default function Modal({
                   onClick={onClose}
                   className="flex-shrink-0 w-8 h-8 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                   aria-label="Đóng modal"
-                  disabled={loading}
                 >
                   <X className="w-4 h-4 text-gray-600" />
                 </button>
@@ -301,18 +124,57 @@ export default function Modal({
           )}
 
           {/* Content */}
-          <div className={`flex-1 overflow-y-auto p-6 ${bodyClassName}`}>
+          <div className="flex-1 overflow-y-auto p-6">
             {children}
           </div>
-
-          {/* Footer */}
-          {footer && (
-            <div className={`border-t ${currentVariant.header} p-6 bg-gray-50/50 ${footerClassName}`}>
-              {footer}
-            </div>
-          )}
         </motion.div>
       </motion.div>
     </AnimatePresence>
+  );
+}
+
+// ModalButton component for consistent button styling within modals
+export function ModalButton({
+  children,
+  variant = "primary",
+  size = "md",
+  disabled = false,
+  loading = false,
+  onClick,
+  className = "",
+  ...props
+}: {
+  children: ReactNode;
+  variant?: "primary" | "secondary" | "danger";
+  size?: ButtonSize;
+  disabled?: boolean;
+  loading?: boolean;
+  onClick?: () => void;
+  className?: string;
+} & React.ButtonHTMLAttributes<HTMLButtonElement>) {
+  const baseClasses = "inline-flex items-center justify-center font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed";
+
+  const variantClasses = {
+    primary: "bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white focus:ring-indigo-500",
+    secondary: "bg-gray-100 hover:bg-gray-200 text-gray-700 focus:ring-gray-500",
+    danger: "bg-red-500 hover:bg-red-600 text-white focus:ring-red-500",
+  };
+
+  const sizeClasses = {
+    sm: "px-3 py-2 text-sm",
+    md: "px-4 py-3 text-sm",
+    lg: "px-6 py-4 text-base",
+  };
+
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled || loading}
+      className={`${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${className}`}
+      {...props}
+    >
+      {loading && <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin mr-2" />}
+      {children}
+    </button>
   );
 }
