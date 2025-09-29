@@ -69,7 +69,7 @@ export default function RoadmapPage() {
           transition={{ duration: 0.6 }}
           className="text-center mb-16"
         >
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+          <h1 className="text-4xl md:text-5xl font-[900] text-gray-900 mb-4">
             Lộ trình <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">học tập</span>
           </h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">

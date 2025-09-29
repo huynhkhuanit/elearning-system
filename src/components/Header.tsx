@@ -4,6 +4,7 @@ import { Search, X, Sun, Moon } from "lucide-react";
 import { useState } from "react";
 import { useTheme } from "next-themes";
 import { motion } from "framer-motion";
+import Link from "next/link";
 
 export default function Header() {
   const [searchValue, setSearchValue] = useState("");
@@ -31,13 +32,13 @@ export default function Header() {
       <div className="mx-auto px-[28px] h-[66px] flex items-center justify-between" style={{ backgroundColor: '#ffffff' }}>
         {/* Logo Section */}
         <div className="flex items-center gap-3">
-          <a href="/" className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg transition-all duration-200 cursor-pointer">
+          <Link href="/" className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg transition-all duration-200 cursor-pointer hover:scale-105">
             <span className="text-white font-bold text-xl">DHV</span>
-          </a>
+          </Link>
           <div className="hidden sm:block">
-            <a href="/" className="text-2xl font-[900] text-foreground transition-colors duration-200 hover:text-primary">
+            <Link href="/" className="text-2xl font-[900] text-foreground transition-colors duration-200 hover:text-primary">
               LearnX
-            </a>
+            </Link>
             <p className="text-xs text-muted-foreground">Nền tảng học lập trình trực tuyến</p>
           </div>
         </div>
@@ -72,9 +73,9 @@ export default function Header() {
         {/* Action Buttons */}
         <div className="flex items-center gap-3">
           {/* Mobile search button */}
-          <a href="/" className="lg:hidden p-2 rounded-xl text-muted-foreground hover:bg-muted transition-all duration-200 cursor-pointer">
+          <Link href="/search" className="lg:hidden p-2 rounded-xl text-muted-foreground hover:bg-muted transition-all duration-200 cursor-pointer">
             <Search className="h-5 w-5" />
-          </a>
+          </Link>
 
           {/* Theme Toggle - Vô hiệu hóa vì chỉ dùng light mode */}
           <motion.button
@@ -97,13 +98,13 @@ export default function Header() {
 
           {/* Auth Buttons */}
           <div className="hidden sm:flex items-center gap-2">
-            <a href="/" className="px-6 py-2.5 text-sm font-medium text-muted-foreground hover:text-primary transition-all duration-200 rounded-full cursor-pointer">
+            <Link href="/auth/register" className="px-6 py-2.5 text-sm font-medium text-muted-foreground hover:text-primary transition-all duration-200 rounded-full cursor-pointer">
               Đăng ký
-            </a>
+            </Link>
 
-            <a href="/" className="px-6 py-2.5 text-sm font-medium bg-primary text-primary-foreground rounded-full hover:bg-primary/90 transition-all duration-200 shadow-lg cursor-pointer">
+            <Link href="/auth/login" className="px-6 py-2.5 text-sm font-medium bg-primary text-primary-foreground rounded-full hover:bg-primary/90 transition-all duration-200 shadow-lg cursor-pointer">
               Đăng nhập
-            </a>
+            </Link>
           </div>
         </div>
       </div>

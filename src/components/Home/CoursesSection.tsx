@@ -125,7 +125,7 @@ export default function CoursesSection() {
               <p className="text-gray-600">Khóa học JavaScript chuyên sâu cho developer</p>
             </div>
             <a
-              href="/courses"
+              href="/roadmap"
               className="hidden md:flex items-center text-primary font-semibold hover:text-primary/80 transition-colors duration-200"
             >
               Xem lộ trình
@@ -159,7 +159,7 @@ export default function CoursesSection() {
               <p className="text-gray-600">Học miễn phí với các khóa học chất lượng</p>
             </div>
             <a
-              href="/courses"
+              href="/roadmap"
               className="hidden md:flex items-center text-primary font-semibold hover:text-primary/80 transition-colors duration-200"
             >
               Xem lộ trình
