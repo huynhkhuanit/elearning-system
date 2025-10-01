@@ -224,11 +224,11 @@ export default function RoadmapPage() {
               
               {/* Content */}
               <div className="p-6">
-                <h3 className="text-lg font-bold text-gray-900 mb-1 group-hover:text-indigo-600 transition-colors">
+                <h3 className="main-roadmap-card-title text-gray-900 mb-1 group-hover:text-indigo-600 transition-colors">
                   {item.title}
                 </h3>
                 
-                <p className="text-gray-600 mb-4 leading-relaxed text-sm line-clamp-3">
+                <p className="main-roadmap-card-desc text-gray-600 mb-4 leading-relaxed line-clamp-3">
                   {item.description}
                 </p>
 
@@ -266,9 +266,9 @@ export default function RoadmapPage() {
                     </button>
                   </Link>
                   <Link href={`/roadmap/${item.id}/flow`}>
-                    <button className="px-4 py-2.5 bg-purple-500 hover:bg-purple-600 text-white font-semibold rounded-full transition-all duration-200 text-sm flex items-center space-x-1">
+                    <button className="px-4 py-2.5 bg-purple-500 hover:bg-purple-600 text-white font-semibold rounded-full transition-all duration-200 text-sm flex items-center justify-center space-x-1">
                       <Zap className="w-4 h-4" />
-                      <span>Sơ đồ</span>
+                      <span className="hidden sm:inline">Sơ đồ</span>
                     </button>
                   </Link>
                 </div>
@@ -359,11 +359,11 @@ export default function RoadmapPage() {
                     )}
 
                     {/* Content */}
-                    <div className="text-center h-full flex flex-col justify-center">
+                    <div className="text-center h-full flex flex-col justify-center items-center px-2">
                       <motion.div 
                         whileHover={{ scale: 1.1, rotate: 5 }}
                         transition={{ type: "spring", stiffness: 400, damping: 10 }}
-                        className={`w-12 h-12 mx-auto mb-3 rounded-xl flex items-center justify-center ${
+                        className={`w-12 h-12 mb-3 rounded-xl flex items-center justify-center flex-shrink-0 ${
                           roadmap.category === 'development' ? 'bg-gradient-to-br from-blue-500 to-blue-600' :
                           roadmap.category === 'data' ? 'bg-gradient-to-br from-purple-500 to-purple-600' :
                           roadmap.category === 'design' ? 'bg-gradient-to-br from-pink-500 to-pink-600' :
@@ -375,14 +375,14 @@ export default function RoadmapPage() {
                         <IconComponent className="w-6 h-6 text-white" />
                       </motion.div>
                       
-                      <h3 className={`font-bold text-xs mb-1 group-hover:font-extrabold transition-all duration-200 leading-tight ${
+                      <h3 className={`roadmap-card-title w-full px-1 ${
                         roadmap.category === 'development' ? 'text-blue-900' :
                         roadmap.category === 'data' ? 'text-purple-900' :
                         roadmap.category === 'design' ? 'text-pink-900' :
                         roadmap.category === 'mobile' ? 'text-green-900' :
                         roadmap.category === 'security' ? 'text-red-900' :
                         'text-orange-900'
-                      }`}>
+                      }`} title={roadmap.title}>
                         {roadmap.title}
                       </h3>
                     </div>

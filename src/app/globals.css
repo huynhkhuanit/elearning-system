@@ -158,11 +158,11 @@ html {
 }
 
 /* Responsive Heading Styles */
-/* H1 - Hero titles */
+/* H1 - Hero titles - Always font-[900] */
 h1, .h1 {
-  font-size: 1.75rem; /* 28px on mobile */
+  font-size: 2rem; /* 32px on mobile */
   line-height: 1.2;
-  font-weight: 700;
+  font-weight: 900;
 }
 
 @media (min-width: 640px) {
@@ -173,26 +173,38 @@ h1, .h1 {
 
 @media (min-width: 1024px) {
   h1, .h1 {
-    font-size: 3rem; /* 48px on desktop */
+    font-size: 2.5rem; /* 40px on desktop */
+  }
+}
+
+@media (min-width: 1280px) {
+  h1, .h1 {
+    font-size: 3rem; /* 48px on large desktop */
   }
 }
 
 /* H2 - Section titles - Always font-[900] */
 h2, .h2 {
-  font-size: 1.5rem; /* 24px on mobile */
+  font-size: 1.375rem; /* 22px on mobile */
   line-height: 1.3;
   font-weight: 900;
 }
 
 @media (min-width: 640px) {
   h2, .h2 {
-    font-size: 1.875rem; /* 30px on tablet */
+    font-size: 1.5rem; /* 24px on tablet */
   }
 }
 
 @media (min-width: 1024px) {
   h2, .h2 {
-    font-size: 2.25rem; /* 36px on desktop */
+    font-size: 1.75rem; /* 28px on desktop */
+  }
+}
+
+@media (min-width: 1280px) {
+  h2, .h2 {
+    font-size: 2rem; /* 32px on large desktop */
   }
 }
 
@@ -220,6 +232,29 @@ h3, .h3 {
   font-size: 1rem !important; /* 16px - not responsive */
   line-height: 1.4;
   font-weight: 600;
+}
+
+/* Roadmap card title - Fixed 16px, single line */
+.roadmap-card-title {
+  font-size: 1rem !important; /* 16px - not responsive */
+  line-height: 1.3;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Main roadmap card title - Fixed 18px, bold */
+.main-roadmap-card-title {
+  font-size: 1.125rem !important; /* 18px - not responsive */
+  line-height: 1.4;
+  font-weight: 900;
+}
+
+/* Main roadmap card description - Fixed 14px */
+.main-roadmap-card-desc {
+  font-size: 0.875rem !important; /* 14px - not responsive */
+  line-height: 1.6;
 }
 
 /* H4 - Sub titles */
