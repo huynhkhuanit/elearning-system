@@ -123,10 +123,10 @@ export default function ArticlesPage() {
           transition={{ duration: 0.6 }}
           className="text-center mb-12"
         >
-          <h1 className="text-4xl md:text-5xl font-[900] text-gray-900 mb-4">
+          <h1 className="font-[900] text-gray-900 mb-4">
             Bài viết <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">lập trình</span>
           </h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
+          <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto mb-8">
             Chia sẻ kiến thức và kinh nghiệm lập trình từ cộng đồng developer
           </p>
 
@@ -164,7 +164,7 @@ export default function ArticlesPage() {
         {/* Featured Articles */}
         {featuredArticles.length > 0 && (
           <div className="mb-16">
-            <h2 className="text-2xl font-bold text-gray-900 mb-8">Bài viết nổi bật</h2>
+            <h2 className="font-[900] text-gray-900 mb-8">Bài viết nổi bật</h2>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {featuredArticles.map((article, index) => (
                 <motion.div
@@ -184,13 +184,13 @@ export default function ArticlesPage() {
                       <Badge variant="secondary" size="sm">{article.category}</Badge>
                     </div>
                     
-                    <h3 className="text-xl font-bold text-gray-900 mb-3 line-clamp-2 group-hover:text-indigo-600 transition-colors">
+                    <h3 className="font-bold text-gray-900 mb-3 line-clamp-2 group-hover:text-indigo-600 transition-colors">
                       {article.title}
                     </h3>
                     
                     <p className="text-gray-600 mb-4 line-clamp-3">{article.excerpt}</p>
                     
-                    <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
+                    <div className="flex items-center justify-between text-small text-gray-500 mb-4">
                       <div className="flex items-center space-x-4">
                         <div className="flex items-center space-x-1">
                           <User className="w-4 h-4" />
@@ -231,7 +231,7 @@ export default function ArticlesPage() {
         {/* Regular Articles */}
         {regularArticles.length > 0 && (
           <div className="mb-12">
-            <h2 className="text-2xl font-bold text-gray-900 mb-8">
+            <h2 className="font-[900] text-gray-900 mb-8">
               {featuredArticles.length > 0 ? "Bài viết khác" : "Tất cả bài viết"}
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
@@ -252,13 +252,13 @@ export default function ArticlesPage() {
                       <Badge variant="secondary" size="sm">{article.category}</Badge>
                     </div>
                     
-                    <h3 className="font-bold text-gray-900 mb-2 line-clamp-2 text-sm group-hover:text-indigo-600 transition-colors">
+                    <h3 className="font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-indigo-600 transition-colors">
                       {article.title}
                     </h3>
                     
-                    <p className="text-gray-600 text-sm mb-3 line-clamp-2">{article.excerpt}</p>
+                    <p className="text-gray-600 mb-3 line-clamp-2 text-small">{article.excerpt}</p>
                     
-                    <div className="flex items-center justify-between text-xs text-gray-500 mb-3">
+                    <div className="flex items-center justify-between text-small text-gray-500 mb-3">
                       <div className="flex items-center space-x-2">
                         <span>{article.author}</span>
                         <span>•</span>

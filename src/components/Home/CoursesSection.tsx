@@ -117,7 +117,7 @@ export default function CoursesSection() {
         >
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h2 className="text-3xl font-[900] text-gray-900 mb-2">
+              <h2 className="font-[900] text-gray-900 mb-2">
                 Khóa học Pro
                 <Badge variant="primary" size="md" className="ml-3">
                   Nâng cao
@@ -156,7 +156,7 @@ export default function CoursesSection() {
         >
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h2 className="text-3xl font-[900] text-gray-900 mb-2">Khóa học miễn phí</h2>
+              <h2 className="font-[900] text-gray-900 mb-2">Khóa học miễn phí</h2>
               <p className="text-gray-600">Học miễn phí với các khóa học chất lượng</p>
             </div>
             <a
@@ -221,41 +221,41 @@ function ComingSoonModal({ onClose }: { onClose: () => void }) {
           <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg p-4 mb-6">
             <h4 className="font-semibold text-gray-900 mb-4 text-left">Tính năng sắp có:</h4>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div className="flex items-center space-x-3 text-sm">
+              <div className="flex items-center space-x-3">
                 <div className="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center flex-shrink-0">
                   <Video className="w-4 h-4 text-indigo-600" />
                 </div>
-                <span className="text-gray-700 leading-tight">Video lectures 4K</span>
+                <span className="text-gray-700 leading-tight text-small">Video lectures 4K</span>
               </div>
-              <div className="flex items-center space-x-3 text-sm">
+              <div className="flex items-center space-x-3">
                 <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
                   <Code className="w-4 h-4 text-purple-600" />
                 </div>
-                <span className="text-gray-700 leading-tight">Bài tập interactive</span>
+                <span className="text-gray-700 leading-tight text-small">Bài tập interactive</span>
               </div>
-              <div className="flex items-center space-x-3 text-sm">
+              <div className="flex items-center space-x-3">
                 <div className="w-8 h-8 bg-pink-100 rounded-lg flex items-center justify-center flex-shrink-0">
                   <HeadphonesIcon className="w-4 h-4 text-pink-600" />
                 </div>
-                <span className="text-gray-700 leading-tight">Hỗ trợ 24/7</span>
+                <span className="text-gray-700 leading-tight text-small">Hỗ trợ 24/7</span>
               </div>
-              <div className="flex items-center space-x-3 text-sm">
+              <div className="flex items-center space-x-3">
                 <div className="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center flex-shrink-0">
                   <Users className="w-4 h-4 text-indigo-600" />
                 </div>
-                <span className="text-gray-700 leading-tight">Cộng đồng học tập</span>
+                <span className="text-gray-700 leading-tight text-small">Cộng đồng học tập</span>
               </div>
-              <div className="flex items-center space-x-3 text-sm">
+              <div className="flex items-center space-x-3">
                 <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
                   <Trophy className="w-4 h-4 text-purple-600" />
                 </div>
-                <span className="text-gray-700 leading-tight">Certificate</span>
+                <span className="text-gray-700 leading-tight text-small">Certificate</span>
               </div>
-              <div className="flex items-center space-x-3 text-sm">
+              <div className="flex items-center space-x-3">
                 <div className="w-8 h-8 bg-pink-100 rounded-lg flex items-center justify-center flex-shrink-0">
                   <Smartphone className="w-4 h-4 text-pink-600" />
                 </div>
-                <span className="text-gray-700 leading-tight">Mobile app</span>
+                <span className="text-gray-700 leading-tight text-small">Mobile app</span>
               </div>
             </div>
           </div>
@@ -322,14 +322,14 @@ function CourseCard({ course, onComingSoon }: { course: Course; onComingSoon?: (
       {/* Content */}
       <div className="p-4 flex-1 flex flex-col">
         <div className="mb-3 flex-1">
-          <h3 className="font-bold text-gray-900 text-sm mb-1 line-clamp-2 group-hover:text-primary transition-colors duration-200 min-h-[2.5rem] flex items-start">
+          <h3 className="font-bold text-gray-900 mb-1 line-clamp-2 group-hover:text-primary transition-colors duration-200 min-h-[2.5rem] flex items-start">
             {course.title}
           </h3>
-          <p className="text-xs text-gray-600 line-clamp-1">{course.subtitle}</p>
+          <p className="text-small text-gray-600 line-clamp-1">{course.subtitle}</p>
         </div>
 
         {/* Stats */}
-        <div className="flex items-center justify-between text-xs text-gray-500 mb-3 flex-shrink-0">
+        <div className="flex items-center justify-between text-small text-gray-500 mb-3 flex-shrink-0">
           <div className="flex items-center space-x-3">
             <div className="flex items-center space-x-1">
               <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
@@ -350,11 +350,11 @@ function CourseCard({ course, onComingSoon }: { course: Course; onComingSoon?: (
         <div className="flex items-center justify-between flex-shrink-0">
           <div className="flex items-center space-x-2">
             <div className="flex flex-col">
-              <span className={`font-[600] text-sm ${course.isPro ? 'text-primary' : 'text-green-600'}`}>
+              <span className={`font-[600] ${course.isPro ? 'text-primary' : 'text-green-600'}`}>
                 {course.price}
               </span>
               {course.originalPrice && (
-                <span className="text-xs text-gray-500 line-through">
+                <span className="text-small text-gray-500 line-through">
                   {course.originalPrice}
                 </span>
               )}

@@ -187,7 +187,7 @@ export default function RoadmapPage() {
           transition={{ duration: 0.6 }}
           className="mb-12"
         >
-          <h1 className="text-3xl font-[900] text-gray-900 mb-4">
+          <h1 className="font-[900] text-gray-900 mb-4">
             Lộ trình học
           </h1>
           <p className="text-gray-600 leading-relaxed max-w-4xl">
@@ -285,7 +285,7 @@ export default function RoadmapPage() {
           className="mt-20"
         >
           <div className="text-center mb-12">
-            <h2 className=" text-3xl font-[900] text-gray-900 mb-4">
+            <h2 className="font-[900] text-gray-900 mb-4">
               Role Based <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">Roadmaps</span>
             </h2>
             <p className="text-gray-600 max-w-3xl mx-auto">
@@ -438,7 +438,7 @@ export default function RoadmapPage() {
               <Users className="w-10 h-10 text-white" />
             </motion.div>
             
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+            <h2 className="font-bold text-gray-900 mb-4">
               Bạn chưa chắc chắn về lộ trình?
             </h2>
             <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto leading-relaxed">

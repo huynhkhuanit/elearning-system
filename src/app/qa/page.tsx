@@ -148,10 +148,10 @@ export default function QAPage() {
           transition={{ duration: 0.6 }}
           className="text-center mb-12"
         >
-          <h1 className="text-4xl md:text-5xl font-[900] text-gray-900 mb-4">
+          <h1 className="font-[900] text-gray-900 mb-4">
             Hỏi đáp <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">lập trình</span>
           </h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
+          <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto mb-8">
             Đặt câu hỏi và nhận được câu trả lời từ cộng đồng developer
           </p>
           
@@ -231,7 +231,7 @@ export default function QAPage() {
                       </div>
                     </div>
                     
-                    <h3 className="text-xl font-bold text-gray-900 mb-3 hover:text-indigo-600 transition-colors group-hover:text-indigo-600">
+                    <h3 className="font-bold text-gray-900 mb-3 hover:text-indigo-600 transition-colors group-hover:text-indigo-600">
                       {question.title}
                     </h3>
                     
@@ -239,7 +239,7 @@ export default function QAPage() {
                       {question.content}
                     </p>
                     
-                    <div className="flex items-center space-x-6 text-sm text-gray-500">
+                    <div className="flex items-center space-x-6 text-small text-gray-500">
                       <div className="flex items-center space-x-1">
                         <User className="w-4 h-4" />
                         <span className="font-medium">{question.author}</span>

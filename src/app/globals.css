@@ -129,3 +129,160 @@ a, button {
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
 }
+
+/* Responsive Typography System */
+/* Base font size - Mobile first approach */
+html {
+  font-size: 14px; /* Mobile base */
+}
+
+/* Tablet */
+@media (min-width: 640px) {
+  html {
+    font-size: 15px;
+  }
+}
+
+/* Desktop */
+@media (min-width: 1024px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+/* Large Desktop */
+@media (min-width: 1280px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+/* Responsive Heading Styles */
+/* H1 - Hero titles */
+h1, .h1 {
+  font-size: 1.75rem; /* 28px on mobile */
+  line-height: 1.2;
+  font-weight: 700;
+}
+
+@media (min-width: 640px) {
+  h1, .h1 {
+    font-size: 2.25rem; /* 36px on tablet */
+  }
+}
+
+@media (min-width: 1024px) {
+  h1, .h1 {
+    font-size: 3rem; /* 48px on desktop */
+  }
+}
+
+/* H2 - Section titles - Always font-[900] */
+h2, .h2 {
+  font-size: 1.5rem; /* 24px on mobile */
+  line-height: 1.3;
+  font-weight: 900;
+}
+
+@media (min-width: 640px) {
+  h2, .h2 {
+    font-size: 1.875rem; /* 30px on tablet */
+  }
+}
+
+@media (min-width: 1024px) {
+  h2, .h2 {
+    font-size: 2.25rem; /* 36px on desktop */
+  }
+}
+
+/* H3 - Card titles */
+h3, .h3 {
+  font-size: 1.125rem; /* 18px on mobile */
+  line-height: 1.4;
+  font-weight: 600;
+}
+
+@media (min-width: 640px) {
+  h3, .h3 {
+    font-size: 1.25rem; /* 20px on tablet */
+  }
+}
+
+@media (min-width: 1024px) {
+  h3, .h3 {
+    font-size: 1.5rem; /* 24px on desktop */
+  }
+}
+
+/* H4 - Sub titles */
+h4, .h4 {
+  font-size: 1rem; /* 16px on mobile */
+  line-height: 1.5;
+  font-weight: 600;
+}
+
+@media (min-width: 640px) {
+  h4, .h4 {
+    font-size: 1.125rem; /* 18px on tablet */
+  }
+}
+
+@media (min-width: 1024px) {
+  h4, .h4 {
+    font-size: 1.25rem; /* 20px on desktop */
+  }
+}
+
+/* Body text - Paragraphs */
+p, .body-text {
+  font-size: 0.875rem; /* 14px on mobile */
+  line-height: 1.6;
+}
+
+@media (min-width: 640px) {
+  p, .body-text {
+    font-size: 0.9375rem; /* 15px on tablet */
+  }
+}
+
+@media (min-width: 1024px) {
+  p, .body-text {
+    font-size: 1rem; /* 16px on desktop */
+  }
+}
+
+/* Small text */
+.text-small {
+  font-size: 0.75rem; /* 12px on mobile */
+  line-height: 1.5;
+}
+
+@media (min-width: 640px) {
+  .text-small {
+    font-size: 0.8125rem; /* 13px on tablet */
+  }
+}
+
+@media (min-width: 1024px) {
+  .text-small {
+    font-size: 0.875rem; /* 14px on desktop */
+  }
+}
+
+/* Button text */
+button, .button-text {
+  font-size: 0.875rem; /* 14px on mobile */
+}
+
+@media (min-width: 640px) {
+  button, .button-text {
+    font-size: 0.9375rem; /* 15px on tablet */
+  }
+}
+
+@media (min-width: 1024px) {
+  button, .button-text {
+    font-size: 1rem; /* 16px on desktop */
+  }
+}

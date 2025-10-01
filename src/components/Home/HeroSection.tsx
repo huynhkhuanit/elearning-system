@@ -119,10 +119,10 @@ export default function HeroSection() {
           transition={{ duration: 0.6 }}
           className="text-center mb-12"
         >
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+          <h1 className="font-bold text-gray-900 mb-4">
             Khám phá <span className="bg-gradient-to-r font-[900] from-indigo-600 to-purple-600 bg-clip-text text-transparent">khóa học</span> hàng đầu
-          </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+          </h1>
+          <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto">
             Nâng cao kỹ năng lập trình với lộ trình học tập bài bản từ cơ bản đến chuyên sâu
           </p>
         </motion.div>
@@ -212,18 +212,18 @@ function CourseCard({ course, featured }: { course: Course; featured?: boolean }
             </Badge>
           )}
 
-          <h3 className="text-lg md:text-xl font-bold text-gray-900 mb-2 line-clamp-2">
+          <h3 className="font-bold text-gray-900 mb-2 line-clamp-2">
             {course.title}
           </h3>
 
-          <p className="text-gray-600 text-sm mb-3">
+          <p className="text-gray-600 mb-3">
             GV: <span className="font-semibold text-indigo-600">{course.instructor}</span>
           </p>
 
           <div className="flex items-center space-x-3 mb-3">
             <div className="flex items-center space-x-1">
               <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-              <span className="font-semibold text-gray-900 text-sm">{course.rating}</span>
+              <span className="font-semibold text-gray-900">{course.rating}</span>
             </div>
             <Badge variant="primary" size="sm">
               {course.level}
@@ -233,13 +233,13 @@ function CourseCard({ course, featured }: { course: Course; featured?: boolean }
 
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <div className="text-xl font-bold text-gray-900">{course.price}</div>
+            <div className="text-lg sm:text-xl font-bold text-gray-900">{course.price}</div>
             {course.originalPrice && (
-              <div className="text-sm text-gray-500 line-through">{course.originalPrice}</div>
+              <div className="text-gray-500 line-through">{course.originalPrice}</div>
             )}
           </div>
-          <button className="relative inline-block text-white text-sm font-semibold rounded-lg p-[2px] bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-600 hover:to-purple-600 transition-all duration-200">
-            <span className="block px-4 py-2 rounded-lg bg-gradient-to-r from-indigo-600 to-purple-600 hover:bg-transparent">
+          <button className="relative inline-block text-white font-semibold rounded-lg p-[2px] bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-600 hover:to-purple-600 transition-all duration-200">
+            <span className="block px-3 sm:px-4 py-2 rounded-lg bg-gradient-to-r from-indigo-600 to-purple-600 hover:bg-transparent">
                 Đăng ký
             </span>
         </button>
