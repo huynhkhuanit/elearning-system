@@ -135,7 +135,7 @@ export default function Footer() {
         {/* Bottom Section */}
         <div className="border-t border-gray-800 mt-8 pt-6 flex flex-col md:flex-row items-center justify-between">
           <div className="text-gray-400 text-xs mb-3 md:mb-0">
-            © 2024 DHV LearnX. All rights reserved.
+            © 2025 DHV LearnX. All rights reserved.
           </div>
           
           <div className="flex space-x-4 text-xs">
