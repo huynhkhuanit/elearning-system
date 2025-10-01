@@ -1,26 +1,11 @@
 "use client";
 
-import { ArrowLeft, CheckCircle, Clock, Users, Star, Play, BookOpen, Trophy } from "lucide-react";
+import { ArrowLeft, CheckCircle, Clock, Users, Star, Play, BookOpen, Trophy, Award, Zap } from "lucide-react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import Badge from "@/components/Badge";
-import RoadmapTree from "@/components/RoadmapTree";
-
-interface Course {
-  id: string;
-  title: string;
-  description: string;
-  duration: string;
-  level: "Cơ bbản" | "Trung cấp" | "Nâng cao";
-  isCompleted?: boolean;
-  isCurrent?: boolean;
-  lessons: number;
-  students: number;
-  rating: number;
-  isComingSoon?: boolean;
-  technologies: string[];
-}
+import { use } from "react";
 
 interface RoadmapDetail {
   id: string;
@@ -33,7 +18,6 @@ interface RoadmapDetail {
   difficulty: "Cơ bản" | "Trung cấp" | "Nâng cao";
   prerequisites: string[];
   whatYouWillLearn: string[];
-  courses: Course[];
   careerPaths: string[];
   salary: string;
   roadmapTree?: any;
@@ -181,101 +165,7 @@ const roadmapDetails: Record<string, RoadmapDetail> = {
           ]
         }
       ]
-    },
-    courses: [
-      {
-        id: "html-css",
-        title: "HTML CSS từ Zero đến Hero",
-        description: "Học HTML CSS từ cơ bản, từng bước một cách chi tiết và dễ hiểu nhất.",
-        duration: "30h",
-        level: "Cơ bản",
-        isCompleted: true,
-        lessons: 156,
-        students: 50000,
-        rating: 4.9,
-        technologies: ["HTML", "CSS", "Responsive"]
-      },
-      {
-        id: "javascript",
-        title: "JavaScript cơ bản",
-        description: "Học JavaScript từ cơ bản, hiểu rõ các khái niệm và cách sử dụng trong thực tế.",
-        duration: "42h",
-        level: "Cơ bản",
-        isCurrent: true,
-        lessons: 120,
-        students: 35000,
-        rating: 4.8,
-        technologies: ["JavaScript", "ES6", "DOM"]
-      },
-      {
-        id: "javascript-advanced", 
-        title: "JavaScript nâng cao",
-        description: "Nâng cao kỹ năng JavaScript với ES6+, Async/Await, Modules và Design Patterns.",
-        duration: "38h",
-        level: "Nâng cao",
-        lessons: 95,
-        students: 25000,
-        rating: 4.7,
-        technologies: ["ES6+", "Async", "Modules", "OOP"]
-      },
-      {
-        id: "react-js",
-        title: "ReactJS từ cơ bản đến nâng cao",
-        description: "Học ReactJS từ cơ bản, tạo các ứng dụng web hiện đại và tương tác.",
-        duration: "45h",
-        level: "Trung cấp",
-        lessons: 180,
-        students: 40000,
-        rating: 4.9,
-        technologies: ["React", "JSX", "Hooks", "Context"]
-      },
-      {
-        id: "nodejs-api",
-        title: "Node.js & ExpressJS",
-        description: "Xây dựng API RESTful với Node.js và Express framework.",
-        duration: "35h",
-        level: "Trung cấp",
-        lessons: 85,
-        students: 20000,
-        rating: 4.6,
-        technologies: ["Node.js", "Express", "MongoDB", "JWT"]
-      },
-      {
-        id: "responsive-design",
-        title: "Responsive Web Design",
-        description: "Thiết kế web responsive, tối ưu cho mọi thiết bị di động.",
-        duration: "20h",
-        level: "Cơ bản",
-        lessons: 45,
-        students: 30000,
-        rating: 4.8,
-        technologies: ["CSS Grid", "Flexbox", "Bootstrap", "Media Queries"]
-      },
-      {
-        id: "sass-scss",
-        title: "Sass/SCSS Advanced",
-        description: "Viết CSS hiệu quả hơn với Sass/SCSS và các tính năng nâng cao.",
-        duration: "15h",
-        level: "Trung cấp",
-        isComingSoon: true,
-        lessons: 30,
-        students: 0,
-        rating: 0,
-        technologies: ["Sass", "SCSS", "Mixins", "Variables"]
-      },
-      {
-        id: "webpack-tools",
-        title: "Webpack & Build Tools",
-        description: "Tối ưu và build ứng dụng với Webpack, Vite và các công cụ hiện đại.",
-        duration: "25h",
-        level: "Nâng cao",
-        isComingSoon: true,
-        lessons: 50,
-        students: 0,
-        rating: 0,
-        technologies: ["Webpack", "Vite", "Babel", "NPM"]
-      }
-    ]
+    }
   },
   backend: {
     id: "backend",
@@ -390,96 +280,389 @@ const roadmapDetails: Record<string, RoadmapDetail> = {
           ]
         }
       ]
-    },
-    courses: [
-      {
-        id: "nodejs-basic",
-        title: "Node.js cơ bản",
-        description: "Học Node.js từ cơ bản, xây dựng server và API đầu tiên.",
-        duration: "40h",
-        level: "Cơ bản",
-        isCompleted: true,
-        lessons: 120,
-        students: 28000,
-        rating: 4.8,
-        technologies: ["Node.js", "npm", "CommonJS", "File System"]
-      },
-      {
-        id: "express-api",
-        title: "Express.js & RESTful API",
-        description: "Xây dựng API hoàn chỉnh với Express.js framework.",
-        duration: "45h",
-        level: "Trung cấp",
-        isCurrent: true,
-        lessons: 135,
-        students: 22000,
-        rating: 4.7,
-        technologies: ["Express.js", "REST API", "Middleware", "Routing"]
-      },
-      {
-        id: "database-mysql",
-        title: "MySQL Database",
-        description: "Quản lý dữ liệu với MySQL, từ cơ bản đến tối ưu hiệu suất.",
-        duration: "35h",
-        level: "Cơ bản",
-        lessons: 90,
-        students: 25000,
-        rating: 4.6,
-        technologies: ["MySQL", "SQL", "Database Design", "Optimization"]
-      },
-      {
-        id: "mongodb",
-        title: "MongoDB & NoSQL",
-        description: "Làm việc với MongoDB và các khái niệm NoSQL database.",
-        duration: "30h", 
-        level: "Trung cấp",
-        lessons: 75,
-        students: 18000,
-        rating: 4.5,
-        technologies: ["MongoDB", "NoSQL", "Aggregation", "Indexing"]
-      },
-      {
-        id: "authentication",
-        title: "Authentication & Security",
-        description: "Bảo mật ứng dụng với JWT, OAuth và các phương pháp authentication.",
-        duration: "25h",
-        level: "Trung cấp",
-        lessons: 60,
-        students: 15000,
-        rating: 4.8,
-        technologies: ["JWT", "OAuth", "Passport.js", "Security"]
-      },
-      {
-        id: "microservices",
-        title: "Microservices Architecture",
-        description: "Thiết kế và phát triển ứng dụng theo mô hình microservices.",
-        duration: "40h",
-        level: "Nâng cao",
-        isComingSoon: true,
-        lessons: 100,
-        students: 0,
-        rating: 0,
-        technologies: ["Microservices", "Docker", "API Gateway", "Message Queue"]
-      }
-    ]
+    }
+  },
+  fullstack: {
+    id: "fullstack",
+    title: "Lộ trình Full-stack Developer",
+    subtitle: "Trở thành chuyên gia phát triển web hoàn chỉnh",
+    description: "Lộ trình học Full-stack kết hợp cả Front-end và Back-end, từ xây dựng giao diện người dùng đến phát triển server và database. Bạn sẽ học cách tạo ra các ứng dụng web hoàn chỉnh.",
+    totalDuration: "12-18 tháng",
+    totalCourses: 15,
+    totalStudents: 28000,
+    difficulty: "Trung cấp",
+    prerequisites: [
+      "Kiến thức cơ bản về lập trình",
+      "Hiểu biết về HTML/CSS",
+      "Mong muốn học cả frontend và backend"
+    ],
+    whatYouWillLearn: [
+      "Xây dựng giao diện với React/Vue",
+      "Phát triển API với Node.js/Express",
+      "Quản lý database SQL/NoSQL",
+      "Authentication và bảo mật",
+      "Triển khai ứng dụng lên cloud",
+      "DevOps và CI/CD cơ bản",
+      "Testing và debugging"
+    ],
+    careerPaths: [
+      "Full-stack Developer",
+      "Web Developer",
+      "Software Engineer",
+      "Tech Lead",
+      "Freelance Developer"
+    ],
+    salary: "20-40 triệu VNĐ",
+    roadmapTree: {
+      id: "fullstack-root",
+      title: "Full-stack",
+      description: "Complete Web Development",
+      type: "core",
+      status: "available",
+      children: [
+        {
+          id: "frontend-basics",
+          title: "Front-end Basics",
+          type: "core",
+          status: "available",
+          duration: "6 weeks",
+          children: [
+            {
+              id: "html-css",
+              title: "HTML & CSS",
+              type: "core",
+              status: "available",
+              duration: "3 weeks"
+            },
+            {
+              id: "javascript-fundamentals",
+              title: "JavaScript Fundamentals",
+              type: "core",
+              status: "available",
+              duration: "3 weeks"
+            }
+          ]
+        },
+        {
+          id: "frontend-advanced",
+          title: "Advanced Front-end",
+          type: "core",
+          status: "available",
+          children: [
+            {
+              id: "react-framework",
+              title: "React Framework",
+              type: "core",
+              status: "available",
+              duration: "6 weeks"
+            },
+            {
+              id: "build-tools",
+              title: "Build Tools",
+              type: "optional",
+              status: "available",
+              duration: "2 weeks"
+            }
+          ]
+        },
+        {
+          id: "backend-development",
+          title: "Back-end Development",
+          type: "core",
+          status: "available",
+          children: [
+            {
+              id: "nodejs-backend",
+              title: "Node.js Backend",
+              type: "core",
+              status: "available",
+              duration: "4 weeks"
+            },
+            {
+              id: "database-integration",
+              title: "Database Integration",
+              type: "core",
+              status: "available",
+              duration: "3 weeks"
+            }
+          ]
+        },
+        {
+          id: "deployment-devops",
+          title: "Deployment & DevOps",
+          type: "optional",
+          status: "available",
+          children: [
+            {
+              id: "cloud-deployment",
+              title: "Cloud Deployment",
+              type: "optional",
+              status: "available",
+              duration: "2 weeks"
+            },
+            {
+              id: "ci-cd",
+              title: "CI/CD",
+              type: "optional",
+              status: "available",
+              duration: "2 weeks"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  mobile: {
+    id: "mobile",
+    title: "Lộ trình Mobile Developer",
+    subtitle: "Trở thành chuyên gia phát triển ứng dụng di động",
+    description: "Lộ trình học Mobile Development tập trung vào việc phát triển ứng dụng di động đa nền tảng. Bạn sẽ học React Native để tạo app chạy trên cả iOS và Android.",
+    totalDuration: "8-12 tháng",
+    totalCourses: 12,
+    totalStudents: 22000,
+    difficulty: "Cơ bản",
+    prerequisites: [
+      "Kiến thức JavaScript cơ bản",
+      "Hiểu biết về React",
+      "Đam mê ứng dụng di động"
+    ],
+    whatYouWillLearn: [
+      "React Native fundamentals",
+      "Navigation và routing",
+      "State management",
+      "API integration",
+      "Device features (camera, GPS)",
+      "Push notifications",
+      "App store deployment",
+      "Performance optimization"
+    ],
+    careerPaths: [
+      "Mobile Developer",
+      "React Native Developer",
+      "Cross-platform Developer",
+      "iOS/Android Developer",
+      "App Developer"
+    ],
+    salary: "18-35 triệu VNĐ",
+    roadmapTree: {
+      id: "mobile-root",
+      title: "Mobile Development",
+      description: "Cross-platform Mobile Apps",
+      type: "core",
+      status: "available",
+      children: [
+        {
+          id: "programming-basics",
+          title: "Programming Basics",
+          type: "core",
+          status: "available",
+          duration: "4 weeks",
+          children: [
+            {
+              id: "javascript-mobile",
+              title: "JavaScript for Mobile",
+              type: "core",
+              status: "available",
+              duration: "2 weeks"
+            },
+            {
+              id: "react-basics",
+              title: "React Basics",
+              type: "core",
+              status: "available",
+              duration: "2 weeks"
+            }
+          ]
+        },
+        {
+          id: "react-native",
+          title: "React Native",
+          type: "core",
+          status: "available",
+          children: [
+            {
+              id: "rn-fundamentals",
+              title: "React Native Fundamentals",
+              type: "core",
+              status: "available",
+              duration: "4 weeks"
+            },
+            {
+              id: "navigation",
+              title: "Navigation",
+              type: "core",
+              status: "available",
+              duration: "2 weeks"
+            }
+          ]
+        },
+        {
+          id: "mobile-features",
+          title: "Mobile Features",
+          type: "optional",
+          status: "available",
+          children: [
+            {
+              id: "device-features",
+              title: "Device Features",
+              type: "optional",
+              status: "available",
+              duration: "3 weeks"
+            },
+            {
+              id: "api-integration",
+              title: "API Integration",
+              type: "optional",
+              status: "available",
+              duration: "2 weeks"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  devops: {
+    id: "devops",
+    title: "Lộ trình DevOps Engineer",
+    subtitle: "Trở thành chuyên gia DevOps và triển khai hệ thống",
+    description: "Lộ trình học DevOps tập trung vào việc tự động hóa quy trình phát triển phần mềm, triển khai và vận hành hệ thống. Bạn sẽ học Linux, cloud computing, và các công cụ DevOps hiện đại.",
+    totalDuration: "10-15 tháng",
+    totalCourses: 14,
+    totalStudents: 18000,
+    difficulty: "Nâng cao",
+    prerequisites: [
+      "Kiến thức lập trình cơ bản",
+      "Hiểu biết về hệ điều hành",
+      "Mong muốn làm việc với infrastructure"
+    ],
+    whatYouWillLearn: [
+      "Linux system administration",
+      "Version control với Git",
+      "Cloud platforms (AWS/Azure)",
+      "Containerization với Docker",
+      "CI/CD pipelines",
+      "Infrastructure as Code",
+      "Monitoring và logging",
+      "Security best practices"
+    ],
+    careerPaths: [
+      "DevOps Engineer",
+      "Site Reliability Engineer",
+      "Cloud Engineer",
+      "Infrastructure Engineer",
+      "Platform Engineer"
+    ],
+    salary: "25-45 triệu VNĐ",
+    roadmapTree: {
+      id: "devops-root",
+      title: "DevOps Engineering",
+      description: "Infrastructure and Deployment",
+      type: "core",
+      status: "available",
+      children: [
+        {
+          id: "linux-basics",
+          title: "Linux Basics",
+          type: "core",
+          status: "available",
+          duration: "3 weeks",
+          children: [
+            {
+              id: "command-line",
+              title: "Command Line",
+              type: "core",
+              status: "available",
+              duration: "1 week"
+            },
+            {
+              id: "system-admin",
+              title: "System Administration",
+              type: "core",
+              status: "available",
+              duration: "2 weeks"
+            }
+          ]
+        },
+        {
+          id: "version-control",
+          title: "Version Control",
+          type: "core",
+          status: "available",
+          children: [
+            {
+              id: "git-advanced",
+              title: "Advanced Git",
+              type: "core",
+              status: "available",
+              duration: "2 weeks"
+            }
+          ]
+        },
+        {
+          id: "cloud-platforms",
+          title: "Cloud Platforms",
+          type: "core",
+          status: "available",
+          children: [
+            {
+              id: "aws-services",
+              title: "AWS Services",
+              type: "core",
+              status: "available",
+              duration: "4 weeks"
+            },
+            {
+              id: "docker-containers",
+              title: "Docker & Containers",
+              type: "core",
+              status: "available",
+              duration: "3 weeks"
+            }
+          ]
+        },
+        {
+          id: "ci-cd-pipelines",
+          title: "CI/CD Pipelines",
+          type: "core",
+          status: "available",
+          children: [
+            {
+              id: "jenkins-github",
+              title: "Jenkins & GitHub Actions",
+              type: "core",
+              status: "available",
+              duration: "3 weeks"
+            },
+            {
+              id: "monitoring",
+              title: "Monitoring & Logging",
+              type: "optional",
+              status: "available",
+              duration: "2 weeks"
+            }
+          ]
+        }
+      ]
+    }
   }
 };
 
-export default function RoadmapDetailPage({ params }: { params: { slug: string } }) {
-  const roadmap = roadmapDetails[params.slug];
+export default function RoadmapDetailPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = use(params);
+  const roadmap = roadmapDetails[slug];
   
   if (!roadmap) {
     notFound();
   }
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="max-w-6xl mx-auto px-6 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50">
+      <div className="max-w-4xl mx-auto px-6 py-12">
         {/* Breadcrumb */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
-          className="mb-6"
+          className="mb-8"
         >
           <Link href="/roadmap" className="inline-flex items-center text-indigo-600 hover:text-indigo-700 font-medium">
             <ArrowLeft className="w-4 h-4 mr-2" />
@@ -491,238 +674,109 @@ export default function RoadmapDetailPage({ params }: { params: { slug: string }
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-10"
+          className="text-center mb-12"
         >
-          <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
-            <div className="flex-1">
-              <h1 className="text-3xl font-bold text-gray-900 mb-3">
-                {roadmap.title}
-              </h1>
-              <p className="text-xl text-indigo-600 font-medium mb-4">
-                {roadmap.subtitle}
-              </p>
-              <p className="text-gray-600 leading-relaxed mb-6">
-                {roadmap.description}
-              </p>
-              
-              {/* Stats */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                <div className="text-center p-3 bg-gray-50 rounded-lg">
-                  <div className="text-2xl font-bold text-indigo-600">{roadmap.totalCourses}</div>
-                  <div className="text-sm text-gray-500">Khóa học</div>
-                </div>
-                <div className="text-center p-3 bg-gray-50 rounded-lg">
-                  <div className="text-2xl font-bold text-green-600">{roadmap.totalDuration}</div>
-                  <div className="text-sm text-gray-500">Thời gian</div>
-                </div>
-                <div className="text-center p-3 bg-gray-50 rounded-lg">
-                  <div className="text-2xl font-bold text-purple-600">{roadmap.totalStudents.toLocaleString()}</div>
-                  <div className="text-sm text-gray-500">Học viên</div>
-                </div>
-                <div className="text-center p-3 bg-gray-50 rounded-lg">
-                  <div className="text-2xl font-bold text-orange-600">{roadmap.salary}</div>
-                  <div className="text-sm text-gray-500">Lương khởi điểm</div>
-                </div>
-              </div>
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">
+            {roadmap.title}
+          </h1>
+          <p className="text-xl text-indigo-600 font-medium mb-6">
+            {roadmap.subtitle}
+          </p>
+          <p className="text-gray-600 leading-relaxed mb-8 max-w-2xl mx-auto">
+            {roadmap.description}
+          </p>
+
+          {/* Key Stats */}
+          <div className="flex justify-center gap-6 mb-8">
+            <div className="text-center">
+              <div className="text-2xl font-bold text-indigo-600">{roadmap.totalDuration}</div>
+              <div className="text-sm text-gray-500">Thời gian</div>
             </div>
-
-            {/* Side Panel */}
-            <div className="lg:w-80">
-              <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-2xl p-6 border border-indigo-100">
-                <h3 className="font-semibold text-gray-900 mb-4">Bạn sẽ học được gì?</h3>
-                <ul className="space-y-2 mb-6">
-                  {roadmap.whatYouWillLearn.slice(0, 5).map((item, index) => (
-                    <li key={index} className="flex items-start space-x-2">
-                      <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
-                      <span className="text-sm text-gray-700">{item}</span>
-                    </li>
-                  ))}
-                </ul>
-                <button className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200">
-                  Bắt đầu học ngay
-                </button>
-              </div>
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Roadmap Tree Visualization */}
-        {roadmap.roadmapTree && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6 }}
-            className="mb-16"
-          >
-            <RoadmapTree
-              title="Sơ đồ lộ trình học chi tiết"
-              subtitle="Visualize your learning path step by step"
-              description="Theo dõi tiến độ học tập của bạn qua từng bước cụ thể và có hệ thống"
-              tree={roadmap.roadmapTree}
-            />
-          </motion.div>
-        )}
-
-        {/* Course List */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-        >
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Các khóa học trong lộ trình</h2>
-          
-          <div className="space-y-4">
-            {roadmap.courses.map((course, index) => (
-              <motion.div
-                key={course.id}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: index * 0.1 }}
-                className={`bg-white border rounded-xl p-6 hover:shadow-lg transition-all duration-200 ${
-                  course.isCurrent ? 'border-indigo-500 ring-2 ring-indigo-100' : 
-                  course.isCompleted ? 'border-green-200' : 
-                  course.isComingSoon ? 'border-gray-200 opacity-60' : 'border-gray-200'
-                }`}
+            <div className="text-center">
+              <Badge 
+                variant={roadmap.difficulty === 'Cơ bản' ? 'success' : roadmap.difficulty === 'Trung cấp' ? 'warning' : 'danger'}
+                size="sm"
               >
-                <div className="flex items-start justify-between">
-                  <div className="flex items-start space-x-4 flex-1">
-                    {/* Status Icon */}
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
-                      course.isCompleted ? 'bg-green-100' :
-                      course.isCurrent ? 'bg-indigo-100' :
-                      course.isComingSoon ? 'bg-gray-100' : 'bg-gray-50'
-                    }`}>
-                      {course.isCompleted ? (
-                        <CheckCircle className="w-5 h-5 text-green-600" />
-                      ) : course.isCurrent ? (
-                        <Play className="w-5 h-5 text-indigo-600" />
-                      ) : course.isComingSoon ? (
-                        <Clock className="w-5 h-5 text-gray-400" />
-                      ) : (
-                        <BookOpen className="w-5 h-5 text-gray-500" />
-                      )}
-                    </div>
-
-                    {/* Course Info */}
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-3 mb-2">
-                        <h3 className="text-lg font-semibold text-gray-900">
-                          {course.title}
-                        </h3>
-                        <Badge 
-                          variant={course.level === 'Cơ bản' ? 'success' : course.level === 'Trung cấp' ? 'warning' : 'danger'}
-                          size="sm"
-                        >
-                          {course.level}
-                        </Badge>
-                        {course.isComingSoon && (
-                          <Badge variant="secondary" size="sm">
-                            Sắp ra mắt
-                          </Badge>
-                        )}
-                      </div>
-                      
-                      <p className="text-gray-600 text-sm mb-3">
-                        {course.description}
-                      </p>
-
-                      {/* Technologies */}
-                      <div className="flex flex-wrap gap-2 mb-3">
-                        {course.technologies.map((tech, idx) => (
-                          <span key={idx} className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">
-                            {tech}
-                          </span>
-                        ))}
-                      </div>
-
-                      {/* Course Stats */}
-                      <div className="flex items-center space-x-6 text-sm text-gray-500">
-                        <div className="flex items-center space-x-1">
-                          <Clock className="w-4 h-4" />
-                          <span>{course.duration}</span>
-                        </div>
-                        <div className="flex items-center space-x-1">
-                          <BookOpen className="w-4 h-4" />
-                          <span>{course.lessons} bài học</span>
-                        </div>
-                        {!course.isComingSoon && (
-                          <>
-                            <div className="flex items-center space-x-1">
-                              <Users className="w-4 h-4" />
-                              <span>{course.students.toLocaleString()} học viên</span>
-                            </div>
-                            <div className="flex items-center space-x-1">
-                              <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                              <span>{course.rating}</span>
-                            </div>
-                          </>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Action Button */}
-                  <div className="flex-shrink-0">
-                    {course.isComingSoon ? (
-                      <button disabled className="px-4 py-2 text-gray-400 border border-gray-200 rounded-lg cursor-not-allowed">
-                        Sắp ra mắt
-                      </button>
-                    ) : course.isCompleted ? (
-                      <button className="px-4 py-2 text-green-600 border border-green-200 hover:bg-green-50 rounded-lg transition-colors">
-                        Xem lại
-                      </button>
-                    ) : course.isCurrent ? (
-                      <button className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors">
-                        Tiếp tục học
-                      </button>
-                    ) : (
-                      <button className="px-4 py-2 text-indigo-600 border border-indigo-200 hover:bg-indigo-50 rounded-lg transition-colors">
-                        Bắt đầu
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </motion.div>
-            ))}
+                {roadmap.difficulty}
+              </Badge>
+              <div className="text-sm text-gray-500 mt-1">Độ khó</div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-green-600">{roadmap.salary}</div>
+              <div className="text-sm text-gray-500">Lương khởi điểm</div>
+            </div>
           </div>
+
+          {/* Main Action Button */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.3 }}
+          >
+            <Link href={`/roadmap/${slug}/flow`}>
+              <button className="px-8 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold rounded-xl transition-all duration-300 flex items-center space-x-3 shadow-lg hover:shadow-xl mx-auto">
+                <Zap className="w-6 h-6" />
+                <span className="text-lg">Xem sơ đồ lộ trình</span>
+              </button>
+            </Link>
+          </motion.div>
         </motion.div>
 
-        {/* Career Paths */}
+        {/* Quick Overview */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
-          className="mt-12"
+          className="grid md:grid-cols-2 gap-8 mb-12"
         >
-          <div className="bg-gradient-to-br from-purple-50 to-indigo-50 rounded-2xl p-8 border border-purple-100">
-            <div className="grid md:grid-cols-2 gap-8">
-              <div>
-                <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
-                  <Trophy className="w-5 h-5 text-purple-600 mr-2" />
-                  Con đường sự nghiệp
-                </h3>
-                <ul className="space-y-2">
-                  {roadmap.careerPaths.map((path, index) => (
-                    <li key={index} className="flex items-center space-x-2">
-                      <div className="w-2 h-2 bg-purple-600 rounded-full"></div>
-                      <span className="text-gray-700">{path}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              
-              <div>
-                <h3 className="text-xl font-bold text-gray-900 mb-4">Yêu cầu tuyển dụng</h3>
-                <ul className="space-y-2">
-                  {roadmap.prerequisites.map((req, index) => (
-                    <li key={index} className="flex items-start space-x-2">
-                      <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                      <span className="text-gray-700 text-sm">{req}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
+          <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm">
+            <h3 className="font-semibold text-gray-900 mb-4 flex items-center">
+              <BookOpen className="w-5 h-5 text-indigo-600 mr-2" />
+              Bạn sẽ học được
+            </h3>
+            <ul className="space-y-2">
+              {roadmap.whatYouWillLearn.slice(0, 4).map((item, index) => (
+                <li key={index} className="flex items-start space-x-2">
+                  <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
+                  <span className="text-sm text-gray-700">{item}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm">
+            <h3 className="font-semibold text-gray-900 mb-4 flex items-center">
+              <Trophy className="w-5 h-5 text-purple-600 mr-2" />
+              Con đường sự nghiệp
+            </h3>
+            <ul className="space-y-2">
+              {roadmap.careerPaths.slice(0, 4).map((path, index) => (
+                <li key={index} className="flex items-center space-x-2">
+                  <div className="w-2 h-2 bg-purple-600 rounded-full"></div>
+                  <span className="text-sm text-gray-700">{path}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </motion.div>
+
+        {/* Call to Action */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+          className="text-center"
+        >
+          <div className="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-2xl p-8 text-white">
+            <h3 className="text-2xl font-bold mb-4">Sẵn sàng bắt đầu hành trình?</h3>
+            <p className="mb-6 opacity-90">
+              Khám phá sơ đồ lộ trình chi tiết với các node kỹ năng và đường dẫn học tập rõ ràng.
+            </p>
+            <Link href={`/roadmap/${slug}/flow`}>
+              <button className="px-8 py-3 bg-white text-indigo-600 font-semibold rounded-lg hover:bg-gray-100 transition-colors duration-200">
+                Khám phá sơ đồ lộ trình
+              </button>
+            </Link>
           </div>
         </motion.div>
       </div>
