@@ -292,7 +292,7 @@ export default function RoadmapFlow({ roadmapId, roadmapTitle, roadmapData }: Ro
                   <ArrowLeft className="w-5 h-5" />
                   <span className="font-medium">Quay lại</span>
                 </Link>
-                <div className="h-6 w-px bg-gray-200"></div>
+                <div className="self-stretch w-px bg-gray-200"></div>
                 <div>
                   <h2 className="text-lg font-semibold text-gray-900">{roadmapTitle}</h2>
                   <p className="text-sm text-gray-500">
