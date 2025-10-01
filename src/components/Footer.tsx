@@ -39,9 +39,16 @@ export default function Footer() {
           {/* Company Info */}
           <div className="space-y-4">
             <div className="flex items-center space-x-2">
-              <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
-                <span className="text-white font-bold text-lg">DHV</span>
-              </div>
+              <Link href="/" className="flex items-center justify-center transition-all duration-200 cursor-pointer">
+                <img
+                  src="/assets/img/logo.png" 
+                  alt="DHV LearnX Logo" 
+                  width={38}
+                  height={38}
+                  style={{ objectFit: 'contain' }}
+                  className="w-[38px] h-[38px] rounded-lg"
+                />
+              </Link>
               <div>
                 <h3 className="text-lg font-[900]">LearnX</h3>
                 <p className="text-gray-400 text-xs">Học lập trình online</p>

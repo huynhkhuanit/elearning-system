@@ -32,8 +32,15 @@ export default function Header() {
       <div className="mx-auto px-[28px] h-[66px] flex items-center justify-between" style={{ backgroundColor: '#ffffff' }}>
         {/* Logo Section */}
         <div className="flex items-center gap-3">
-          <Link href="/" className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg transition-all duration-200 cursor-pointer hover:scale-105">
-            <span className="text-white font-bold text-xl">DHV</span>
+          <Link href="/" className="flex items-center justify-center transition-all duration-200 cursor-pointer">
+            <img 
+              src="/assets/img/logo.png" 
+              alt="DHV LearnX Logo" 
+              width={38}
+              height={38}
+              style={{ objectFit: 'contain' }}
+              className="w-[38px] h-[38px] rounded-lg"
+            />
           </Link>
           <div className="hidden sm:block">
             <Link href="/" className="text-2xl font-[900] text-foreground transition-colors duration-200 hover:text-primary">
