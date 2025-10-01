@@ -28,7 +28,7 @@ export default function RootLayout({
         >
           <div style={{ backgroundColor: '#ffffff', minHeight: '100vh' }} className="flex">
             <Menu />
-            <div className="flex-1">
+            <div className="flex-1 ml-[96px]">
               <Header />
               <main style={{ backgroundColor: '#ffffff' }}>
                 {children}
