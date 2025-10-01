@@ -33,37 +33,36 @@ const socialLinks = [
 
 export default function Footer() {
   return (
-    <footer className="bg-gray-900 text-white">
-      <div className="max-w-7xl mx-auto px-6 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+    <footer className="bg-gray-900 text-white relative z-50">
+      <div className="max-w-7xl mx-auto px-6 py-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {/* Company Info */}
-          <div className="space-y-6">
-            <div className="flex items-center space-x-3">
-              <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
-                <span className="text-white font-bold text-xl">DHV</span>
+          <div className="space-y-4">
+            <div className="flex items-center space-x-2">
+              <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+                <span className="text-white font-bold text-lg">DHV</span>
               </div>
               <div>
-                <h3 className="text-xl font-[900]">LearnX</h3>
-                <p className="text-gray-400 text-sm">Nền tảng học lập trình trực tuyến</p>
+                <h3 className="text-lg font-bold">LearnX</h3>
+                <p className="text-gray-400 text-xs">Học lập trình online</p>
               </div>
             </div>
             
-            <p className="text-gray-400 leading-relaxed">
-              Nền tảng học lập trình trực tuyến hàng đầu Việt Nam, 
-              giúp bạn trở thành developer chuyên nghiệp.
+            <p className="text-gray-400 text-sm leading-relaxed">
+              Nền tảng học lập trình hàng đầu Việt Nam.
             </p>
             
-            <div className="space-y-3">
-              <div className="flex items-center space-x-3 text-gray-400">
-                <Mail className="w-4 h-4" />
+            <div className="space-y-2">
+              <div className="flex items-center space-x-2 text-gray-400 text-sm">
+                <Mail className="w-3.5 h-3.5" />
                 <span>contact@dhvlearnx.com</span>
               </div>
-              <div className="flex items-center space-x-3 text-gray-400">
-                <Phone className="w-4 h-4" />
+              <div className="flex items-center space-x-2 text-gray-400 text-sm">
+                <Phone className="w-3.5 h-3.5" />
                 <span>1900-xxxx</span>
               </div>
-              <div className="flex items-center space-x-3 text-gray-400">
-                <MapPin className="w-4 h-4" />
+              <div className="flex items-center space-x-2 text-gray-400 text-sm">
+                <MapPin className="w-3.5 h-3.5" />
                 <span>Hà Nội, Việt Nam</span>
               </div>
             </div>
@@ -71,8 +70,8 @@ export default function Footer() {
 
           {/* Courses */}
           <div>
-            <h4 className="font-semibold text-lg mb-6">Lộ trình học</h4>
-            <ul className="space-y-3">
+            <h4 className="font-semibold text-base mb-4">Lộ trình học</h4>
+            <ul className="space-y-2">
               {footerLinks.courses.map((link, index) => (
                 <li key={index}>
                   <Link href={link.href} className="text-gray-400 hover:text-white transition-colors duration-200">
@@ -85,11 +84,11 @@ export default function Footer() {
 
           {/* Resources */}
           <div>
-            <h4 className="font-semibold text-lg mb-6">Tài nguyên</h4>
-            <ul className="space-y-3">
+            <h4 className="font-semibold text-base mb-4">Tài nguyên</h4>
+            <ul className="space-y-2">
               {footerLinks.resources.map((link, index) => (
                 <li key={index}>
-                  <Link href={link.href} className="text-gray-400 hover:text-white transition-colors duration-200">
+                  <Link href={link.href} className="text-gray-400 text-sm hover:text-white transition-colors duration-200">
                     {link.name}
                   </Link>
                 </li>
@@ -99,11 +98,11 @@ export default function Footer() {
 
           {/* Community */}
           <div>
-            <h4 className="font-semibold text-lg mb-6">Cộng đồng</h4>
-            <ul className="space-y-3 mb-6">
+            <h4 className="font-semibold text-base mb-4">Cộng đồng</h4>
+            <ul className="space-y-2 mb-4">
               {footerLinks.community.map((link, index) => (
                 <li key={index}>
-                  <Link href={link.href} className="text-gray-400 hover:text-white transition-colors duration-200">
+                  <Link href={link.href} className="text-gray-400 text-sm hover:text-white transition-colors duration-200">
                     {link.name}
                   </Link>
                 </li>
@@ -111,15 +110,15 @@ export default function Footer() {
             </ul>
             
             {/* Social Links */}
-            <div className="flex space-x-4">
+            <div className="flex space-x-3">
               {socialLinks.map((social, index) => (
                 <a
                   key={index}
                   href={social.href}
                   aria-label={social.label}
-                  className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center text-gray-400 hover:text-white hover:bg-gray-700 transition-all duration-200"
+                  className="w-8 h-8 bg-gray-800 rounded-lg flex items-center justify-center text-gray-400 hover:text-white hover:bg-gray-700 transition-all duration-200"
                 >
-                  <social.icon className="w-5 h-5" />
+                  <social.icon className="w-4 h-4" />
                 </a>
               ))}
             </div>
@@ -127,12 +126,12 @@ export default function Footer() {
         </div>
 
         {/* Bottom Section */}
-        <div className="border-t border-gray-800 mt-12 pt-8 flex flex-col md:flex-row items-center justify-between">
-          <div className="text-gray-400 text-sm mb-4 md:mb-0">
+        <div className="border-t border-gray-800 mt-8 pt-6 flex flex-col md:flex-row items-center justify-between">
+          <div className="text-gray-400 text-xs mb-3 md:mb-0">
             © 2024 DHV LearnX. All rights reserved.
           </div>
           
-          <div className="flex space-x-6 text-sm">
+          <div className="flex space-x-4 text-xs">
             <Link href="#" className="text-gray-400 hover:text-white transition-colors duration-200">
               Điều khoản sử dụng
             </Link>

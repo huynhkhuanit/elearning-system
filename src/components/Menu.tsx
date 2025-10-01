@@ -44,7 +44,7 @@ export default function Menu() {
 
   return (
     <aside
-      className="fixed left-0 top-0 h-full flex flex-col items-start justify-start pt-20 px-2"
+      className="fixed left-0 top-0 h-screen flex flex-col items-start justify-start pt-20 px-2"
       style={{
         backgroundColor: '#ffffff',
         width: '96px',
