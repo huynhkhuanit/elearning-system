@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState, useEffect } from 'react';
 import {
   ReactFlow,
   MiniMap,
@@ -61,7 +61,34 @@ export default function RoadmapFlow({ roadmapId, roadmapTitle, roadmapData }: Ro
   const [layoutMode, setLayoutMode] = useState<'vertical' | 'horizontal'>('vertical');
   const [selectedNode, setSelectedNode] = useState<RoadmapNode | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [completedNodes, setCompletedNodes] = useState<Set<string>>(new Set());
+  
+  // Store original status for each node
+  const [originalStatus] = useState<Map<string, string>>(() => {
+    const statusMap = new Map<string, string>();
+    const collectStatus = (node: RoadmapNode) => {
+      statusMap.set(node.id, node.status);
+      if (node.children) {
+        node.children.forEach(collectStatus);
+      }
+    };
+    collectStatus(roadmapData);
+    return statusMap;
+  });
+  
+  const [completedNodes, setCompletedNodes] = useState<Set<string>>(() => {
+    // Initialize with nodes that are already completed in the data
+    const initialCompleted = new Set<string>();
+    const collectCompleted = (node: RoadmapNode) => {
+      if (node.status === 'completed') {
+        initialCompleted.add(node.id);
+      }
+      if (node.children) {
+        node.children.forEach(collectCompleted);
+      }
+    };
+    collectCompleted(roadmapData);
+    return initialCompleted;
+  });
 
   // Handle node click
   const handleNodeClick = useCallback((nodeId: string) => {
@@ -111,6 +138,15 @@ export default function RoadmapFlow({ roadmapId, roadmapTitle, roadmapData }: Ro
     function processNode(node: RoadmapNode, x: number, y: number, parentId?: string, level: number = 0): string {
       const currentId = node.id || `node-${nodeId++}`;
 
+      // Determine the actual status based on completedNodes state
+      let actualStatus = node.status;
+      if (completedNodes.has(currentId)) {
+        actualStatus = 'completed';
+      } else if (node.status === 'completed') {
+        // If node was originally completed but removed from completedNodes, set to available
+        actualStatus = 'available';
+      }
+
       nodes.push({
         id: currentId,
         type: 'roadmapNode',
@@ -121,7 +157,7 @@ export default function RoadmapFlow({ roadmapId, roadmapTitle, roadmapData }: Ro
           title: node.title,
           description: node.description,
           type: node.type,
-          status: completedNodes.has(currentId) ? 'completed' : node.status,
+          status: actualStatus,
           duration: node.duration,
           technologies: node.technologies,
           onClick: handleNodeClick,
@@ -139,7 +175,7 @@ export default function RoadmapFlow({ roadmapId, roadmapTitle, roadmapData }: Ro
             stroke: '#d1d5db',
             strokeWidth: 2,
           },
-          animated: node.status === 'current',
+          animated: actualStatus === 'current',
         });
       }
 
@@ -197,6 +233,42 @@ export default function RoadmapFlow({ roadmapId, roadmapTitle, roadmapData }: Ro
 
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+
+  // Update nodes when completedNodes changes
+  const updateNodesStatus = useCallback(() => {
+    setNodes((nds) =>
+      nds.map((node) => {
+        const nodeOriginalStatus = originalStatus.get(node.id) || 'available';
+        let actualStatus = nodeOriginalStatus;
+        
+        if (completedNodes.has(node.id)) {
+          actualStatus = 'completed';
+        } else if (nodeOriginalStatus !== 'completed' && nodeOriginalStatus !== 'current' && nodeOriginalStatus !== 'locked') {
+          // Keep original status if it's not completed
+          actualStatus = nodeOriginalStatus;
+        } else if (nodeOriginalStatus === 'completed') {
+          // If originally completed but removed from completedNodes, set to available
+          actualStatus = 'available';
+        } else {
+          // Keep current or locked status
+          actualStatus = nodeOriginalStatus;
+        }
+        
+        return {
+          ...node,
+          data: {
+            ...node.data,
+            status: actualStatus,
+          },
+        };
+      })
+    );
+  }, [completedNodes, setNodes, originalStatus]);
+
+  // Trigger update when completedNodes changes
+  useEffect(() => {
+    updateNodesStatus();
+  }, [completedNodes, updateNodesStatus]);
 
   const onConnect = useCallback(
     (params: Connection) => setEdges((eds) => addEdge(params, eds)),

@@ -141,7 +141,7 @@ const RoadmapDetailModal: React.FC<RoadmapDetailModalProps> = ({
                     >
                       <div className="flex items-start gap-3">
                         {isCompleted ? (
-                          <div className="flex-shrink-0 w-5 h-5 mt-0.5 rounded-full bg-emerald-500 flex items-center justify-center">
+                          <div className="flex-shrink-0 w-5 h-5 mt-0.5 rounded-full border-2 border-emerald-500 bg-emerald-500 flex items-center justify-center">
                             <Check className="w-3 h-3 text-white" strokeWidth={3} />
                           </div>
                         ) : (
@@ -173,17 +173,17 @@ const RoadmapDetailModal: React.FC<RoadmapDetailModalProps> = ({
               {nodeData.status === 'locked' ? (
                 <button
                   disabled
-                  className="w-full py-3 text-sm font-medium text-gray-400 bg-gray-100 rounded-lg cursor-not-allowed"
+                  className="w-full py-3 text-sm font-medium text-gray-400 bg-gray-100 rounded-lg cursor-not-allowed border-0 outline-none"
                 >
                   Đã khóa
                 </button>
               ) : (
                 <button
                   onClick={() => onToggleComplete && onToggleComplete(nodeData.id)}
-                  className={`w-full py-3 text-sm font-medium rounded-lg transition-colors flex items-center justify-center gap-2 ${
+                  className={`w-full py-3 text-sm font-medium rounded-lg transition-colors flex items-center justify-center gap-2 border-0 outline-none focus:outline-none focus:ring-2 focus:ring-offset-2 ${
                     isCompleted
-                      ? 'text-gray-700 bg-gray-100 hover:bg-gray-200'
-                      : 'text-white bg-[#6366f1] hover:bg-[#5558e3]'
+                      ? 'text-gray-700 bg-gray-100 hover:bg-gray-200 focus:ring-gray-300'
+                      : 'text-white bg-[#6366f1] hover:bg-[#5558e3] focus:ring-[#6366f1]'
                   }`}
                 >
                   {isCompleted ? (
