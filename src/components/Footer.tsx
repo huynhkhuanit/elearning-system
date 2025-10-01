@@ -51,7 +51,7 @@ export default function Footer() {
               </Link>
               <div>
                 <h3 className="text-lg font-[900]">LearnX</h3>
-                <p className="text-gray-400 text-xs">Học lập trình online</p>
+                <p className="text-gray-400 text-xs">Nền tảng học lập trình trực tuyến</p>
               </div>
             </div>
             
@@ -62,7 +62,7 @@ export default function Footer() {
             <div className="space-y-2">
               <div className="flex items-center space-x-2 text-gray-400 text-sm">
                 <Mail className="w-3.5 h-3.5" />
-                <span>contact@dhvlearnx.com</span>
+                <span>huynhkhuanit@gmail.com</span>
               </div>
               <div className="flex items-center space-x-2 text-gray-400 text-sm">
                 <Phone className="w-3.5 h-3.5" />
@@ -70,7 +70,7 @@ export default function Footer() {
               </div>
               <div className="flex items-center space-x-2 text-gray-400 text-sm">
                 <MapPin className="w-3.5 h-3.5" />
-                <span>Hà Nội, Việt Nam</span>
+                <span>Hồ Chí Minh, Việt Nam</span>
               </div>
             </div>
           </div>
