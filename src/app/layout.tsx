@@ -26,15 +26,13 @@ export default function RootLayout({
           enableSystem={false}
           enableColorScheme={false}
         >
-          <div style={{ backgroundColor: '#ffffff', minHeight: '100vh' }} className="flex">
+          <div style={{ backgroundColor: '#ffffff', minHeight: '100vh' }}>
             <Menu />
-            <div className="flex-1 ml-[96px]">
-              <Header />
-              <main style={{ backgroundColor: '#ffffff' }}>
-                {children}
-              </main>
-              <Footer />
-            </div>
+            <Header />
+            <main style={{ backgroundColor: '#ffffff', marginLeft: '96px' }}>
+              {children}
+            </main>
+            <Footer />
           </div>
         </ThemeProvider>
       </body>
