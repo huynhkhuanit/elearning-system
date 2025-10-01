@@ -3,6 +3,7 @@
 import { Star, Users, Clock, ArrowRight, Play, Calendar, BookOpen, Award, Video, Code, HeadphonesIcon, Trophy, Smartphone } from "lucide-react";
 import Badge from "@/components/Badge";
 import Modal, { ModalButton } from "@/components/Modal";
+import PageContainer from "@/components/PageContainer";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 
@@ -101,7 +102,7 @@ export default function CoursesSection() {
 
   return (
     <section className="py-16 bg-gradient-to-br from-gray-50 to-white">
-      <div className="max-w-7xl mx-auto px-6">
+      <PageContainer size="lg">
         <AnimatePresence>
           {showComingSoon && (
             <ComingSoonModal onClose={() => setShowComingSoon(false)} />
@@ -180,7 +181,7 @@ export default function CoursesSection() {
             ))}
           </div>
         </motion.div>
-      </div>
+      </PageContainer>
     </section>
   );
 }

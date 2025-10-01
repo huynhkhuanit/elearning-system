@@ -2,6 +2,7 @@
 
 import { ChevronLeft, ChevronRight, Star, Award, Users, Clock, ArrowRight } from "lucide-react";
 import Badge from "@/components/Badge";
+import PageContainer from "@/components/PageContainer";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -110,7 +111,7 @@ export default function HeroSection() {
     <section className="relative w-full bg-gradient-to-br from-indigo-50 via-white to-purple-50 py-16 overflow-hidden">
       <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
 
-      <div className="relative mx-auto px-6 max-w-7xl w-full">
+      <PageContainer size="lg" className="relative py-0">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -194,7 +195,7 @@ export default function HeroSection() {
           ))}
         </div>
 
-      </div>
+      </PageContainer>
     </section>
   );
 }

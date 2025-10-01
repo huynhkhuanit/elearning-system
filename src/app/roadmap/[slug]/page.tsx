@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import Badge from "@/components/Badge";
+import PageContainer from "@/components/PageContainer";
 import { use } from "react";
 
 interface RoadmapDetail {
@@ -657,7 +658,7 @@ export default function RoadmapDetailPage({ params }: { params: Promise<{ slug: 
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50">
-      <div className="max-w-4xl mx-auto px-6 py-12">
+      <PageContainer size="md" className="py-12">
         {/* Breadcrumb */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
@@ -779,7 +780,7 @@ export default function RoadmapDetailPage({ params }: { params: Promise<{ slug: 
             </Link>
           </div>
         </motion.div>
-      </div>
+      </PageContainer>
     </div>
   );
 }

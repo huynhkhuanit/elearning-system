@@ -3,6 +3,7 @@
 import { MessageCircle, User, Calendar, ThumbsUp, Eye, Search, Plus, Filter, Tag } from "lucide-react";
 import { motion } from "framer-motion";
 import Badge from "@/components/Badge";
+import PageContainer from "@/components/PageContainer";
 import { useState } from "react";
 
 interface Question {
@@ -139,7 +140,7 @@ export default function QAPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
-      <div className="max-w-7xl mx-auto px-6 py-12">
+      <PageContainer size="lg" className="py-12">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -317,7 +318,7 @@ export default function QAPage() {
             </button>
           </div>
         )}
-      </div>
+      </PageContainer>
     </div>
   );
 }

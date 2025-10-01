@@ -6,6 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
 import Modal from "@/components/Modal";
+import PageContainer from "@/components/PageContainer";
 
 interface Technology {
   name: string;
@@ -178,7 +179,7 @@ export default function RoadmapPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      <div className="max-w-6xl mx-auto px-6 py-12">
+      <PageContainer size="lg" className="py-12">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -473,7 +474,7 @@ export default function RoadmapPage() {
             </div>
           </div>
         </motion.div>
-      </div>
+      </PageContainer>
 
       {/* Modal for Coming Soon Roadmaps */}
       <Modal
