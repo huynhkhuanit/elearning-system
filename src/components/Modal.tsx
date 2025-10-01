@@ -28,9 +28,9 @@ const sizeClasses = {
 };
 
 const buttonSizeClasses = {
-  sm: "px-3 py-2 text-sm",
-  md: "px-4 py-3 text-sm",
-  lg: "px-6 py-4 text-base",
+  sm: "px-3 py-2 modal-button-text",
+  md: "px-4 py-3 modal-button-text",
+  lg: "px-6 py-4 modal-button-text",
 };
 
 export default function Modal({
@@ -106,9 +106,9 @@ export default function Modal({
                   </div>
                 )}
                 {title && (
-                  <h2 id="modal-title" className="text-xl font-bold text-gray-900 leading-tight">
+                  <div id="modal-title" className="modal-title text-gray-900 leading-tight">
                     {title}
-                  </h2>
+                  </div>
                 )}
               </div>
               {showCloseButton && (
@@ -161,9 +161,9 @@ export function ModalButton({
   };
 
   const sizeClasses = {
-    sm: "px-3 py-2 text-sm",
-    md: "px-4 py-3 text-sm",
-    lg: "px-6 py-4 text-base",
+    sm: "px-3 py-2 modal-button-text",
+    md: "px-4 py-3 modal-button-text",
+    lg: "px-6 py-4 modal-button-text",
   };
 
   return (

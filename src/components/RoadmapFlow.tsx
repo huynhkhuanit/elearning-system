@@ -294,7 +294,7 @@ export default function RoadmapFlow({ roadmapId, roadmapTitle, roadmapData }: Ro
                 </Link>
                 <div className="h-6 w-px bg-gray-200"></div>
                 <div>
-                  <h1 className="text-lg font-semibold text-gray-900">{roadmapTitle}</h1>
+                  <h2 className="text-lg font-semibold text-gray-900">{roadmapTitle}</h2>
                   <p className="text-sm text-gray-500">
                     {nodes.length} kỹ năng • Bố cục {layoutMode === 'vertical' ? 'Dọc' : 'Ngang'}
                   </p>
