@@ -59,7 +59,7 @@ const RoadmapDetailModal: React.FC<RoadmapDetailModalProps> = ({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/20 z-40"
+            className="fixed inset-0 bg-black/20 z-[60]"
           />
 
           {/* Modal */}
@@ -68,7 +68,7 @@ const RoadmapDetailModal: React.FC<RoadmapDetailModalProps> = ({
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-            className="fixed right-0 top-0 h-full w-full max-w-md bg-white shadow-xl z-50 overflow-y-auto"
+            className="fixed right-0 top-0 h-full w-full max-w-md bg-white shadow-xl z-[70] overflow-y-auto"
           >
             {/* Header - Clean & Simple */}
             <div className="sticky top-0 z-10 bg-white border-b border-gray-100">
