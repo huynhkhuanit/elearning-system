@@ -102,9 +102,9 @@ const RoadmapNode = ({ data, selected }: NodeProps<RoadmapNodeData>) => {
         {/* Type badge - minimal */}
         <div className="mt-3 pt-2 border-t border-gray-100">
           <span className="text-[10px] font-medium text-gray-600 uppercase tracking-wider">
-            {data.type === 'core' ? 'Core' :
-             data.type === 'optional' ? 'Optional' :
-             data.type === 'beginner' ? 'Basic' : 'Alternative'}
+            {data.type === 'core' ? 'Cốt lõi' :
+             data.type === 'optional' ? 'Tùy chọn' :
+             data.type === 'beginner' ? 'Cơ bản' : 'Thay thế'}
           </span>
         </div>
       </div>

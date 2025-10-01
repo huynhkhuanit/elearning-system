@@ -26,23 +26,25 @@ interface RoadmapDetailModalProps {
     technologies?: string[];
     learningContents?: LearningContent[];
   } | null;
-  onMarkComplete?: (nodeId: string) => void;
+  isCompleted?: boolean;
+  onToggleComplete?: (nodeId: string) => void;
 }
 
 const RoadmapDetailModal: React.FC<RoadmapDetailModalProps> = ({
   isOpen,
   onClose,
   nodeData,
-  onMarkComplete
+  isCompleted = false,
+  onToggleComplete
 }) => {
   if (!nodeData) return null;
 
   // Sample learning contents if not provided
   const defaultLearningContents: LearningContent[] = [
-    { id: '1', title: 'Introduction to ' + nodeData.title, type: 'video', duration: '15 min' },
-    { id: '2', title: 'Core Concepts', type: 'article', duration: '20 min' },
-    { id: '3', title: 'Hands-on Practice', type: 'practice', duration: '30 min' },
-    { id: '4', title: 'Quick Assessment', type: 'quiz', duration: '10 min' },
+    { id: '1', title: 'Giới thiệu về ' + nodeData.title, type: 'video', duration: '15 phút' },
+    { id: '2', title: 'Các khái niệm cốt lõi', type: 'article', duration: '20 phút' },
+    { id: '3', title: 'Thực hành', type: 'practice', duration: '30 phút' },
+    { id: '4', title: 'Kiểm tra nhanh', type: 'quiz', duration: '10 phút' },
   ];
 
   const learningContents = nodeData.learningContents || defaultLearningContents;
@@ -80,9 +82,9 @@ const RoadmapDetailModal: React.FC<RoadmapDetailModalProps> = ({
 
                 <div className="pr-10">
                   <span className="inline-block px-2 py-1 text-xs font-medium text-gray-600 bg-gray-100 rounded mb-3">
-                    {nodeData.type === 'core' ? 'Core' :
-                     nodeData.type === 'optional' ? 'Optional' :
-                     nodeData.type === 'beginner' ? 'Basic' : 'Alternative'}
+                    {nodeData.type === 'core' ? 'Cốt lõi' :
+                     nodeData.type === 'optional' ? 'Tùy chọn' :
+                     nodeData.type === 'beginner' ? 'Cơ bản' : 'Thay thế'}
                   </span>
                   
                   <h2 className="text-xl font-semibold text-gray-900 mb-2">
@@ -111,7 +113,7 @@ const RoadmapDetailModal: React.FC<RoadmapDetailModalProps> = ({
               {nodeData.technologies && nodeData.technologies.length > 0 && (
                 <div>
                   <h3 className="text-sm font-medium text-gray-900 mb-3">
-                    Technologies
+                    Công nghệ
                   </h3>
                   <div className="flex flex-wrap gap-2">
                     {nodeData.technologies.map((tech, idx) => (
@@ -129,7 +131,7 @@ const RoadmapDetailModal: React.FC<RoadmapDetailModalProps> = ({
               {/* Learning Contents - Clean list */}
               <div>
                 <h3 className="text-sm font-medium text-gray-900 mb-4">
-                  What you'll learn
+                  Nội dung học
                 </h3>
                 <div className="space-y-3">
                   {learningContents.map((content) => (
@@ -163,19 +165,28 @@ const RoadmapDetailModal: React.FC<RoadmapDetailModalProps> = ({
                   disabled
                   className="w-full py-3 text-sm font-medium text-gray-400 bg-gray-100 rounded-lg cursor-not-allowed"
                 >
-                  Locked
+                  Đã khóa
                 </button>
-              ) : nodeData.status === 'completed' ? (
-                <div className="w-full py-3 text-sm font-medium text-emerald-700 bg-emerald-50 rounded-lg flex items-center justify-center gap-2">
-                  <Check className="w-4 h-4" />
-                  <span>Completed</span>
-                </div>
               ) : (
                 <button
-                  onClick={() => onMarkComplete && onMarkComplete(nodeData.id)}
-                  className="w-full py-3 text-sm font-medium text-white bg-gray-900 hover:bg-gray-800 rounded-lg transition-colors"
+                  onClick={() => onToggleComplete && onToggleComplete(nodeData.id)}
+                  className={`w-full py-3 text-sm font-medium rounded-lg transition-colors flex items-center justify-center gap-2 ${
+                    isCompleted
+                      ? 'text-gray-700 bg-gray-100 hover:bg-gray-200'
+                      : 'text-white bg-[#6366f1] hover:bg-[#5558e3]'
+                  }`}
                 >
-                  Mark as Complete
+                  {isCompleted ? (
+                    <>
+                      <Check className="w-4 h-4" />
+                      <span>Bỏ đánh dấu hoàn thành</span>
+                    </>
+                  ) : (
+                    <>
+                      <Check className="w-4 h-4" />
+                      <span>Đánh dấu hoàn thành</span>
+                    </>
+                  )}
                 </button>
               )}
             </div>

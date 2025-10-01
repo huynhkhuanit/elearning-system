@@ -61,6 +61,7 @@ export default function RoadmapFlow({ roadmapId, roadmapTitle, roadmapData }: Ro
   const [layoutMode, setLayoutMode] = useState<'vertical' | 'horizontal'>('vertical');
   const [selectedNode, setSelectedNode] = useState<RoadmapNode | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [completedNodes, setCompletedNodes] = useState<Set<string>>(new Set());
 
   // Handle node click
   const handleNodeClick = useCallback((nodeId: string) => {
@@ -82,11 +83,17 @@ export default function RoadmapFlow({ roadmapId, roadmapTitle, roadmapData }: Ro
     }
   }, [roadmapData]);
 
-  // Handle mark as complete
-  const handleMarkComplete = useCallback((nodeId: string) => {
-    console.log(`Marking node ${nodeId} as complete`);
-    // TODO: Implement actual state update logic
-    setIsModalOpen(false);
+  // Handle toggle completion
+  const handleToggleComplete = useCallback((nodeId: string) => {
+    setCompletedNodes(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(nodeId)) {
+        newSet.delete(nodeId);
+      } else {
+        newSet.add(nodeId);
+      }
+      return newSet;
+    });
   }, []);
 
   // Convert roadmap data to React Flow format with improved layout
@@ -114,7 +121,7 @@ export default function RoadmapFlow({ roadmapId, roadmapTitle, roadmapData }: Ro
           title: node.title,
           description: node.description,
           type: node.type,
-          status: node.status,
+          status: completedNodes.has(currentId) ? 'completed' : node.status,
           duration: node.duration,
           technologies: node.technologies,
           onClick: handleNodeClick,
@@ -186,7 +193,7 @@ export default function RoadmapFlow({ roadmapId, roadmapTitle, roadmapData }: Ro
     processNode(roadmapData, startX, startY);
 
     return { nodes, edges };
-  }, [roadmapData, layoutMode, handleNodeClick]);
+  }, [roadmapData, layoutMode, handleNodeClick, completedNodes]);
 
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
@@ -211,13 +218,13 @@ export default function RoadmapFlow({ roadmapId, roadmapTitle, roadmapData }: Ro
               <div className="flex items-center space-x-4">
                 <Link href="/roadmap" className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors">
                   <ArrowLeft className="w-5 h-5" />
-                  <span className="font-medium">Back</span>
+                  <span className="font-medium">Quay lại</span>
                 </Link>
                 <div className="h-6 w-px bg-gray-200"></div>
                 <div>
                   <h1 className="text-lg font-semibold text-gray-900">{roadmapTitle}</h1>
                   <p className="text-sm text-gray-500">
-                    {nodes.length} skills • {layoutMode === 'vertical' ? 'Vertical' : 'Horizontal'} layout
+                    {nodes.length} kỹ năng • Bố cục {layoutMode === 'vertical' ? 'Dọc' : 'Ngang'}
                   </p>
                 </div>
               </div>
@@ -228,13 +235,13 @@ export default function RoadmapFlow({ roadmapId, roadmapTitle, roadmapData }: Ro
                   className="px-3 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors flex items-center gap-2"
                 >
                   {layoutMode === 'vertical' ? <Grid3X3 className="w-4 h-4" /> : <List className="w-4 h-4" />}
-                  <span>Switch Layout</span>
+                  <span>Đổi bố cục</span>
                 </button>
 
                 <Link href={`/roadmap/${roadmapId}`}>
-                  <button className="px-4 py-2 text-sm font-medium text-white bg-gray-900 hover:bg-gray-800 rounded-lg transition-colors flex items-center gap-2">
+                  <button className="px-4 py-2 text-sm font-medium text-white bg-[#6366f1] hover:bg-[#5558e3] rounded-lg transition-colors flex items-center gap-2">
                     <BookOpen className="w-4 h-4" />
-                    <span>View Courses</span>
+                    <span>Xem khóa học</span>
                   </button>
                 </Link>
               </div>
@@ -300,42 +307,42 @@ export default function RoadmapFlow({ roadmapId, roadmapTitle, roadmapData }: Ro
             {/* Legend Panel */}
             <Panel position="top-right" className="bg-white border border-gray-100 rounded-lg p-4 shadow-sm max-w-xs">
               <h3 className="font-medium text-gray-900 mb-3 text-sm">
-                Legend
+                Chú giải
               </h3>
 
               <div className="space-y-3">
                 <div>
-                  <h4 className="text-xs font-medium text-gray-700 mb-2">Node Types</h4>
+                  <h4 className="text-xs font-medium text-gray-700 mb-2">Loại nội dung</h4>
                   <div className="space-y-1.5 text-xs">
                     <div className="flex items-center gap-2">
                       <div className="w-3 h-3 border-2 border-indigo-200 rounded"></div>
-                      <span className="text-gray-600">Core</span>
+                      <span className="text-gray-600">Cốt lõi</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <div className="w-3 h-3 border-2 border-slate-200 rounded"></div>
-                      <span className="text-gray-600">Optional</span>
+                      <span className="text-gray-600">Tùy chọn</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <div className="w-3 h-3 border-2 border-emerald-200 rounded"></div>
-                      <span className="text-gray-600">Basic</span>
+                      <span className="text-gray-600">Cơ bản</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <div className="w-3 h-3 border-2 border-amber-200 rounded"></div>
-                      <span className="text-gray-600">Alternative</span>
+                      <span className="text-gray-600">Thay thế</span>
                     </div>
                   </div>
                 </div>
 
                 <div className="pt-2 border-t border-gray-100">
-                  <h4 className="text-xs font-medium text-gray-700 mb-2">Status</h4>
+                  <h4 className="text-xs font-medium text-gray-700 mb-2">Trạng thái</h4>
                   <div className="space-y-1.5 text-xs">
                     <div className="flex items-center gap-2">
                       <div className="w-3 h-3 bg-emerald-500 rounded-full"></div>
-                      <span className="text-gray-600">Completed</span>
+                      <span className="text-gray-600">Đã hoàn thành</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <div className="w-3 h-3 bg-indigo-100 border-2 border-indigo-200 rounded"></div>
-                      <span className="text-gray-600">Current</span>
+                      <span className="text-gray-600">Đang học</span>
                     </div>
                   </div>
                 </div>
@@ -350,7 +357,8 @@ export default function RoadmapFlow({ roadmapId, roadmapTitle, roadmapData }: Ro
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         nodeData={selectedNode}
-        onMarkComplete={handleMarkComplete}
+        isCompleted={selectedNode ? completedNodes.has(selectedNode.id) : false}
+        onToggleComplete={handleToggleComplete}
       />
     </div>
   );
