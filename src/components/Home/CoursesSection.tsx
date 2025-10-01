@@ -297,9 +297,10 @@ function CourseCard({ course, onComingSoon }: { course: Course; onComingSoon?: (
   return (
     <motion.div
       whileHover={{ y: -4 }}
-      className={`group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 h-full flex flex-col ${
+      className={`group rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 h-full flex flex-col hover:bg-[#f7f7f7] ${
         course.isComingSoon ? 'cursor-pointer opacity-90' : 'cursor-pointer'
       }`}
+      style={{ backgroundColor: '#f7f7f7' }}
       onClick={handleClick}
     >
       {/* Thumbnail */}
