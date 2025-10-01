@@ -215,6 +215,13 @@ h3, .h3 {
   }
 }
 
+/* Card course title - Fixed 16px */
+.course-card-title {
+  font-size: 1rem !important; /* 16px - not responsive */
+  line-height: 1.4;
+  font-weight: 600;
+}
+
 /* H4 - Sub titles */
 h4, .h4 {
   font-size: 1rem; /* 16px on mobile */

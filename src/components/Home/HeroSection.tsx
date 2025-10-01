@@ -108,7 +108,7 @@ export default function HeroSection() {
   };
 
   return (
-    <section className="relative w-full bg-gradient-to-br from-indigo-50 via-white to-purple-50 py-16 overflow-hidden">
+    <section className="relative w-full bg-gradient-to-br from-indigo-50 via-white to-purple-50 py-8 sm:py-12 md:py-16 overflow-hidden">
       <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
 
       <PageContainer size="lg" className="relative py-0">
@@ -117,20 +117,20 @@ export default function HeroSection() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="text-center mb-12"
+          className="text-center mb-8 sm:mb-10 md:mb-12"
         >
-          <h1 className="font-bold text-gray-900 mb-4">
+          <h1 className="font-bold text-gray-900 mb-3 sm:mb-4 px-4">
             Khám phá <span className="bg-gradient-to-r font-[900] from-indigo-600 to-purple-600 bg-clip-text text-transparent">khóa học</span> hàng đầu
           </h1>
-          <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto">
+          <p className="text-base sm:text-lg md:text-xl text-gray-600 max-w-3xl mx-auto px-4">
             Nâng cao kỹ năng lập trình với lộ trình học tập bài bản từ cơ bản đến chuyên sâu
           </p>
         </motion.div>
 
         {/* Main Carousel */}
-        <div className="relative w-full">
-          <div className="overflow-hidden rounded-2xl shadow-2xl bg-white">
-            <div className="relative h-[270px]">
+        <div className="relative w-full px-4 sm:px-0">
+          <div className="overflow-hidden rounded-xl sm:rounded-2xl shadow-xl sm:shadow-2xl bg-white">
+            <div className="relative h-[220px] sm:h-[250px] md:h-[270px]">
               <AnimatePresence initial={false} custom={direction}>
                 <motion.div
                   key={currentIndex}
@@ -165,20 +165,20 @@ export default function HeroSection() {
           {/* Navigation Arrows - positioned outside carousel */}
           <button
             onClick={() => paginate(-1)}
-            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 w-8 h-8 bg-white/90 hover:bg-white shadow-lg rounded-full flex items-center justify-center text-gray-700 hover:text-indigo-600 transition-all duration-200 z-20"
+            className="absolute left-0 sm:left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 w-7 h-7 sm:w-8 sm:h-8 bg-white/90 hover:bg-white shadow-lg rounded-full flex items-center justify-center text-gray-700 hover:text-indigo-600 transition-all duration-200 z-20"
           >
-            <ChevronLeft className="w-4 h-4" />
+            <ChevronLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
           </button>
           <button
             onClick={() => paginate(1)}
-            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 w-8 h-8 bg-white/90 hover:bg-white shadow-lg rounded-full flex items-center justify-center text-gray-700 hover:text-indigo-600 transition-all duration-200 z-20"
+            className="absolute right-0 sm:right-0 top-1/2 -translate-y-1/2 translate-x-1/2 w-7 h-7 sm:w-8 sm:h-8 bg-white/90 hover:bg-white shadow-lg rounded-full flex items-center justify-center text-gray-700 hover:text-indigo-600 transition-all duration-200 z-20"
           >
-            <ChevronRight className="w-4 h-4" />
+            <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
           </button>
         </div>
 
         {/* Dots Indicator */}
-        <div className="flex justify-center space-x-2 mt-6">
+        <div className="flex justify-center space-x-2 mt-4 sm:mt-5 md:mt-6">
           {courses.map((_, index) => (
             <button
               key={index}
@@ -186,10 +186,10 @@ export default function HeroSection() {
                 setDirection(index > currentIndex ? 1 : -1);
                 setCurrentIndex(index);
               }}
-              className={`w-3 h-3 rounded-full transition-all duration-200 ${
+              className={`h-2 sm:h-3 rounded-full transition-all duration-200 ${
                 index === currentIndex
-                  ? "bg-indigo-600 w-8"
-                  : "bg-gray-300 hover:bg-gray-400"
+                  ? "bg-indigo-600 w-6 sm:w-8"
+                  : "bg-gray-300 hover:bg-gray-400 w-2 sm:w-3"
               }`}
             />
           ))}
@@ -202,9 +202,9 @@ export default function HeroSection() {
 
 function CourseCard({ course, featured }: { course: Course; featured?: boolean }) {
   return (
-    <div className="h-full bg-gradient-to-br from-white to-gray-50 flex flex-row">
+    <div className="h-full bg-gradient-to-br from-white to-gray-50 flex flex-col sm:flex-row">
       {/* Content Section */}
-      <div className="flex-1 p-4 md:p-6 flex flex-col justify-between">
+      <div className="flex-1 p-3 sm:p-4 md:p-6 flex flex-col justify-between">
         <div>
           {featured && (
             <Badge variant="featured" size="sm" className="mb-2">
@@ -212,18 +212,18 @@ function CourseCard({ course, featured }: { course: Course; featured?: boolean }
             </Badge>
           )}
 
-          <h3 className="font-bold text-gray-900 mb-2 line-clamp-2">
+          <h3 className="course-card-title font-bold text-gray-900 mb-2 line-clamp-2">
             {course.title}
           </h3>
 
-          <p className="text-gray-600 mb-3">
+          <p className="text-gray-600 mb-2 sm:mb-3 text-sm">
             GV: <span className="font-semibold text-indigo-600">{course.instructor}</span>
           </p>
 
-          <div className="flex items-center space-x-3 mb-3">
+          <div className="flex items-center space-x-2 sm:space-x-3 mb-2 sm:mb-3">
             <div className="flex items-center space-x-1">
-              <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-              <span className="font-semibold text-gray-900">{course.rating}</span>
+              <Star className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-yellow-400 text-yellow-400" />
+              <span className="font-semibold text-gray-900 text-sm sm:text-base">{course.rating}</span>
             </div>
             <Badge variant="primary" size="sm">
               {course.level}
@@ -233,13 +233,13 @@ function CourseCard({ course, featured }: { course: Course; featured?: boolean }
 
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <div className="text-lg sm:text-xl font-bold text-gray-900">{course.price}</div>
+            <div className="text-base sm:text-lg md:text-xl font-bold text-gray-900">{course.price}</div>
             {course.originalPrice && (
-              <div className="text-gray-500 line-through">{course.originalPrice}</div>
+              <div className="text-sm text-gray-500 line-through">{course.originalPrice}</div>
             )}
           </div>
           <button className="relative inline-block text-white font-semibold rounded-lg p-[2px] bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-600 hover:to-purple-600 transition-all duration-200">
-            <span className="block px-3 sm:px-4 py-2 rounded-lg bg-gradient-to-r from-indigo-600 to-purple-600 hover:bg-transparent">
+            <span className="block px-2.5 py-1.5 sm:px-3 sm:py-2 md:px-4 md:py-2 rounded-lg bg-gradient-to-r from-indigo-600 to-purple-600 hover:bg-transparent text-sm">
                 Đăng ký
             </span>
         </button>
@@ -248,10 +248,10 @@ function CourseCard({ course, featured }: { course: Course; featured?: boolean }
       </div>
 
       {/* Image Section */}
-      <div className="w-32 md:w-40 bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center p-3">
-        <div className="w-full h-20 bg-gradient-to-br from-indigo-200 to-purple-200 rounded-lg flex items-center justify-center text-indigo-600">
+      <div className="w-full h-24 sm:w-32 sm:h-auto md:w-40 bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center p-3">
+        <div className="w-full h-full sm:h-20 bg-gradient-to-br from-indigo-200 to-purple-200 rounded-lg flex items-center justify-center text-indigo-600">
           <div className="text-center">
-            <Award className="w-5 h-5 mx-auto mb-1" />
+            <Award className="w-4 h-4 sm:w-5 sm:h-5 mx-auto mb-1" />
             <div className="text-xs font-semibold">Preview</div>
           </div>
         </div>

@@ -322,7 +322,7 @@ function CourseCard({ course, onComingSoon }: { course: Course; onComingSoon?: (
       {/* Content */}
       <div className="p-4 flex-1 flex flex-col">
         <div className="mb-3 flex-1">
-          <h3 className="font-bold text-gray-900 mb-1 line-clamp-2 group-hover:text-primary transition-colors duration-200 min-h-[2.5rem] flex items-start">
+          <h3 className="course-card-title font-bold text-gray-900 mb-1 line-clamp-2 group-hover:text-primary transition-colors duration-200 min-h-[2.5rem] flex items-start">
             {course.title}
           </h3>
           <p className="text-small text-gray-600 line-clamp-1">{course.subtitle}</p>
