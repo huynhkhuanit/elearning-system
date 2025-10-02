@@ -243,7 +243,7 @@ export default function RegisterModal({ isOpen, onClose, onSwitchToLogin }: Regi
             </div>
           </div>
 
-          {/* Password Requirements */}
+          {/* Password Requirements
           <div className="bg-indigo-50 border border-indigo-200 rounded-xl p-3">
             <div className="flex items-start gap-2">
               <Shield className="w-4 h-4 text-indigo-600 mt-0.5 flex-shrink-0" />
@@ -256,17 +256,17 @@ export default function RegisterModal({ isOpen, onClose, onSwitchToLogin }: Regi
                 </ul>
               </div>
             </div>
-          </div>
+          </div> */}
 
           {/* Terms & Conditions */}
-          <div className="flex items-start gap-3 bg-gray-50 p-3 rounded-xl">
+          <div className="flex items-center gap-3 bg-gray-50 p-3 rounded-xl">
             <input
               type="checkbox"
               id="terms"
               required
-              className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-2 focus:ring-indigo-500/20 mt-0.5 flex-shrink-0"
+              className="w-4 h-4 text-indigo-600 bg-white border-2 border-gray-300 rounded transition-colors cursor-pointer mt-0.5 flex-shrink-0"
             />
-            <label htmlFor="terms" className="text-xs text-gray-700 leading-relaxed">
+            <label htmlFor="terms" className="text-xs text-gray-700 leading-relaxed cursor-pointer select-none">
               Tôi đồng ý với{" "}
               <button type="button" className="text-indigo-600 hover:text-indigo-700 font-semibold hover:underline">
                 Điều khoản dịch vụ
@@ -279,12 +279,10 @@ export default function RegisterModal({ isOpen, onClose, onSwitchToLogin }: Regi
           </div>
 
           {/* Submit Button */}
-          <motion.button
+          <button
             type="submit"
             disabled={isLoading || success}
-            whileHover={{ scale: isLoading || success ? 1 : 1.02 }}
-            whileTap={{ scale: isLoading || success ? 1 : 0.98 }}
-            className="w-full py-3.5 px-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold rounded-xl hover:shadow-lg hover:shadow-indigo-500/30 transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full py-3.5 px-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold rounded-xl active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
           >
             {isLoading ? (
               <>
@@ -302,7 +300,7 @@ export default function RegisterModal({ isOpen, onClose, onSwitchToLogin }: Regi
                 <ArrowRight className="w-5 h-5" />
               </>
             )}
-          </motion.button>
+          </button>
         </form>
 
         {/* Divider */}

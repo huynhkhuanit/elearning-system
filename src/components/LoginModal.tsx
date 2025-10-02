@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Mail, Lock, Eye, EyeOff, ArrowRight, Sparkles } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, ArrowRight, LogIn } from "lucide-react";
 import Modal from "./Modal";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/contexts/ToastContext";
@@ -70,7 +70,7 @@ export default function LoginModal({ isOpen, onClose, onSwitchToRegister }: Logi
             transition={{ type: "spring", duration: 0.5, bounce: 0.4 }}
             className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/30"
           >
-            <Sparkles className="w-8 h-8 text-white" />
+            <LogIn className="w-8 h-8 text-white" />
           </motion.div>
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Đăng nhập</h2>
           <p className="text-gray-600 text-sm">
@@ -140,20 +140,18 @@ export default function LoginModal({ isOpen, onClose, onSwitchToRegister }: Logi
             <input
               type="checkbox"
               id="remember"
-              className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-2 focus:ring-indigo-500/20"
+              className="w-4 h-4 text-indigo-600 bg-white border-2 border-gray-300 rounded transition-colors cursor-pointer"
             />
-            <label htmlFor="remember" className="ml-2 text-sm text-gray-700">
+            <label htmlFor="remember" className="ml-2 text-sm text-gray-700 cursor-pointer select-none">
               Ghi nhớ đăng nhập
             </label>
           </div>
 
           {/* Submit Button */}
-          <motion.button
+          <button
             type="submit"
             disabled={isLoading}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            className="w-full py-3.5 px-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold rounded-xl hover:shadow-lg hover:shadow-indigo-500/30 transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+            className="w-full py-3.5 px-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold rounded-xl active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
           >
             {isLoading ? (
               <>
@@ -166,7 +164,7 @@ export default function LoginModal({ isOpen, onClose, onSwitchToRegister }: Logi
                 <ArrowRight className="w-5 h-5" />
               </>
             )}
-          </motion.button>
+          </button>
         </form>
 
         {/* Divider */}
