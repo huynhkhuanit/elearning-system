@@ -58,7 +58,7 @@ export default function Header() {
             <Link href="/" className="text-2xl font-[900] text-foreground transition-colors duration-200 hover:text-primary">
               LearnX
             </Link>
-            <p className="text-xs text-muted-foreground">Nền tảng học lập trình trực tuyến</p>
+            <p className="text-small text-muted-foreground">Nền tảng học lập trình trực tuyến</p>
           </div>
         </div>
 

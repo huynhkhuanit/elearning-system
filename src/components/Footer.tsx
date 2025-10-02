@@ -50,8 +50,8 @@ export default function Footer() {
                 />
               </Link>
               <div>
-                <h3 className="text-lg font-[900]">LearnX</h3>
-                <p className="text-gray-400 text-xs">Nền tảng học lập trình trực tuyến</p>
+                <Link href="/" className="text-2xl font-[900]">LearnX</Link>
+                <p className="text-gray-400 text-small">Nền tảng học lập trình trực tuyến</p>
               </div>
             </div>
             
