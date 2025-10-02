@@ -4,8 +4,20 @@ import { Home, ArrowLeft, Search } from "lucide-react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import Image from "next/image";
+import { useEffect } from "react";
 
 export default function NotFound() {
+  // Reset scroll position khi vào trang 404
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    
+    // Clear any search params nếu có
+    if (window.history.replaceState) {
+      const cleanUrl = window.location.pathname;
+      window.history.replaceState({}, document.title, cleanUrl);
+    }
+  }, []);
+
   return (
     <div className="min-h-screen flex items-center justify-center py-12" style={{ backgroundColor: '#ffffff' }}>
       <div className="max-w-2xl mx-auto px-6 text-center">
@@ -57,7 +69,7 @@ export default function NotFound() {
               className="group inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium rounded-lg hover:shadow-lg transition-all duration-200 text-sm"
             >
               <Home className="w-4 h-4" />
-              Về Trang Chủ
+              Về trang chủ
             </Link>
 
             <Link
@@ -65,7 +77,7 @@ export default function NotFound() {
               className="group inline-flex items-center gap-2 px-6 py-2.5 bg-white text-gray-700 font-medium rounded-lg border border-gray-300 hover:border-indigo-600 hover:text-indigo-600 transition-all duration-200 text-sm"
             >
               <ArrowLeft className="w-4 h-4" />
-              Quay Lại
+              Quay lại
             </Link>
           </motion.div>
 
