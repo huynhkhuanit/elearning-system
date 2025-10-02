@@ -23,40 +23,28 @@ interface ToastProps {
 const toastConfig = {
   success: {
     icon: CheckCircle,
-    bgColor: 'bg-white',
-    borderColor: 'border-green-400',
-    iconBgColor: 'bg-green-500',
-    iconColor: 'text-white',
+    iconColor: 'text-green-600',
     titleColor: 'text-gray-900',
     messageColor: 'text-gray-600',
     progressColor: 'bg-green-500',
   },
   error: {
     icon: XCircle,
-    bgColor: 'bg-white',
-    borderColor: 'border-red-400',
-    iconBgColor: 'bg-red-500',
-    iconColor: 'text-white',
+    iconColor: 'text-red-600',
     titleColor: 'text-gray-900',
     messageColor: 'text-gray-600',
     progressColor: 'bg-red-500',
   },
   warning: {
     icon: AlertTriangle,
-    bgColor: 'bg-white',
-    borderColor: 'border-yellow-400',
-    iconBgColor: 'bg-yellow-500',
-    iconColor: 'text-white',
+    iconColor: 'text-yellow-600',
     titleColor: 'text-gray-900',
     messageColor: 'text-gray-600',
     progressColor: 'bg-yellow-500',
   },
   info: {
     icon: Info,
-    bgColor: 'bg-white',
-    borderColor: 'border-blue-400',
-    iconBgColor: 'bg-blue-500',
-    iconColor: 'text-white',
+    iconColor: 'text-blue-600',
     titleColor: 'text-gray-900',
     messageColor: 'text-gray-600',
     progressColor: 'bg-blue-500',
@@ -88,36 +76,31 @@ export default function Toast({
 
   return (
     <motion.div
-      initial={{ opacity: 0, x: 50, scale: 0.95 }}
-      animate={{ opacity: 1, x: 0, scale: 1 }}
-      exit={{ opacity: 0, x: 50, scale: 0.95 }}
-      transition={{ duration: 0.2, ease: "easeOut" }}
+      initial={{ opacity: 0, y: -10, scale: 0.98 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.95 }}
+      transition={{ duration: 0.15 }}
       className="pointer-events-auto"
     >
-      <div
-        className={`
-          relative w-[320px] rounded-lg shadow-lg border overflow-hidden
-          ${config.bgColor} ${config.borderColor}
-        `}
-      >
+      <div className="relative w-[340px] bg-white rounded-lg shadow-lg border border-gray-200/80 overflow-hidden backdrop-blur-sm">
         {/* Content */}
-        <div className="p-3 pr-8">
-          <div className="flex items-start gap-2.5">
-            {/* Icon with colored background */}
-            <div className={`flex-shrink-0 w-7 h-7 rounded-full ${config.iconBgColor} flex items-center justify-center`}>
-              <Icon className={`w-4 h-4 ${config.iconColor}`} />
-            </div>
+        <div className="px-3 py-2.5 pr-7">
+          <div className="flex items-center gap-2">
+            {/* Icon - Simple, no background */}
+            <Icon className={`w-4 h-4 flex-shrink-0 ${config.iconColor}`} strokeWidth={2.5} />
 
             {/* Text Content */}
-            <div className="flex-1 min-w-0 pt-0.5">
-              <h4 className={`font-medium text-sm ${config.titleColor}`}>
-                {title}
-              </h4>
-              {message && (
-                <p className={`text-xs mt-0.5 ${config.messageColor}`}>
-                  {message}
-                </p>
-              )}
+            <div className="flex-1 min-w-0">
+              <div className="flex items-baseline gap-1.5">
+                <span className={`font-medium text-[13px] leading-tight ${config.titleColor}`}>
+                  {title}
+                </span>
+                {message && (
+                  <span className={`text-[12px] leading-tight ${config.messageColor}`}>
+                    {message}
+                  </span>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -125,19 +108,20 @@ export default function Toast({
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-2.5 right-2.5 p-0.5 rounded hover:bg-gray-100 transition-colors text-gray-400 hover:text-gray-600"
-          aria-label="Close notification"
+          className="absolute top-2 right-2 p-0.5 rounded text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+          aria-label="Close"
         >
-          <X className="w-3.5 h-3.5" />
+          <X className="w-3 h-3" strokeWidth={2} />
         </button>
 
-        {/* Progress Bar */}
-        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gray-100">
+        {/* Progress Bar - Ultra thin */}
+        <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gray-100/50">
           <motion.div
-            className={`h-full ${config.progressColor}`}
+            className={config.progressColor}
+            style={{ height: '100%' }}
             initial={{ width: '100%' }}
-            animate={{ width: `${progress}%` }}
-            transition={{ duration: 0.1, ease: "linear" }}
+            animate={{ width: '0%' }}
+            transition={{ duration: duration / 1000, ease: "linear" }}
           />
         </div>
       </div>
