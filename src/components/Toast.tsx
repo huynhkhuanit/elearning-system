@@ -23,38 +23,42 @@ interface ToastProps {
 const toastConfig = {
   success: {
     icon: CheckCircle,
-    bgColor: 'bg-green-50',
-    borderColor: 'border-green-500',
-    iconColor: 'text-green-600',
-    titleColor: 'text-green-900',
-    messageColor: 'text-green-700',
+    bgColor: 'bg-white',
+    borderColor: 'border-green-400',
+    iconBgColor: 'bg-green-500',
+    iconColor: 'text-white',
+    titleColor: 'text-gray-900',
+    messageColor: 'text-gray-600',
     progressColor: 'bg-green-500',
   },
   error: {
     icon: XCircle,
-    bgColor: 'bg-red-50',
-    borderColor: 'border-red-500',
-    iconColor: 'text-red-600',
-    titleColor: 'text-red-900',
-    messageColor: 'text-red-700',
+    bgColor: 'bg-white',
+    borderColor: 'border-red-400',
+    iconBgColor: 'bg-red-500',
+    iconColor: 'text-white',
+    titleColor: 'text-gray-900',
+    messageColor: 'text-gray-600',
     progressColor: 'bg-red-500',
   },
   warning: {
     icon: AlertTriangle,
-    bgColor: 'bg-yellow-50',
-    borderColor: 'border-yellow-500',
-    iconColor: 'text-yellow-600',
-    titleColor: 'text-yellow-900',
-    messageColor: 'text-yellow-700',
+    bgColor: 'bg-white',
+    borderColor: 'border-yellow-400',
+    iconBgColor: 'bg-yellow-500',
+    iconColor: 'text-white',
+    titleColor: 'text-gray-900',
+    messageColor: 'text-gray-600',
     progressColor: 'bg-yellow-500',
   },
   info: {
     icon: Info,
-    bgColor: 'bg-blue-50',
-    borderColor: 'border-blue-500',
-    iconColor: 'text-blue-600',
-    titleColor: 'text-blue-900',
-    messageColor: 'text-blue-700',
+    bgColor: 'bg-white',
+    borderColor: 'border-blue-400',
+    iconBgColor: 'bg-blue-500',
+    iconColor: 'text-white',
+    titleColor: 'text-gray-900',
+    messageColor: 'text-gray-600',
     progressColor: 'bg-blue-500',
   },
 };
@@ -64,7 +68,7 @@ export default function Toast({
   type,
   title,
   message,
-  duration = 5000,
+  duration = 3000,
   onClose,
 }: ToastProps) {
   const [progress, setProgress] = useState(100);
@@ -84,33 +88,33 @@ export default function Toast({
 
   return (
     <motion.div
-      initial={{ opacity: 0, x: 100, scale: 0.8 }}
+      initial={{ opacity: 0, x: 50, scale: 0.95 }}
       animate={{ opacity: 1, x: 0, scale: 1 }}
-      exit={{ opacity: 0, x: 100, scale: 0.8 }}
-      transition={{ duration: 0.3, ease: "easeOut" }}
+      exit={{ opacity: 0, x: 50, scale: 0.95 }}
+      transition={{ duration: 0.2, ease: "easeOut" }}
       className="pointer-events-auto"
     >
       <div
         className={`
-          relative w-[380px] rounded-xl shadow-2xl border-l-4 overflow-hidden
+          relative w-[320px] rounded-lg shadow-lg border overflow-hidden
           ${config.bgColor} ${config.borderColor}
         `}
       >
         {/* Content */}
-        <div className="p-4 pr-10">
-          <div className="flex items-start gap-3">
-            {/* Icon */}
-            <div className="flex-shrink-0 mt-0.5">
-              <Icon className={`w-6 h-6 ${config.iconColor}`} />
+        <div className="p-3 pr-8">
+          <div className="flex items-start gap-2.5">
+            {/* Icon with colored background */}
+            <div className={`flex-shrink-0 w-7 h-7 rounded-full ${config.iconBgColor} flex items-center justify-center`}>
+              <Icon className={`w-4 h-4 ${config.iconColor}`} />
             </div>
 
             {/* Text Content */}
-            <div className="flex-1 min-w-0">
-              <h4 className={`font-semibold text-sm leading-tight ${config.titleColor}`}>
+            <div className="flex-1 min-w-0 pt-0.5">
+              <h4 className={`font-medium text-sm ${config.titleColor}`}>
                 {title}
               </h4>
               {message && (
-                <p className={`text-xs mt-1 leading-relaxed ${config.messageColor}`}>
+                <p className={`text-xs mt-0.5 ${config.messageColor}`}>
                   {message}
                 </p>
               )}
@@ -121,17 +125,14 @@ export default function Toast({
         {/* Close Button */}
         <button
           onClick={onClose}
-          className={`
-            absolute top-3 right-3 p-1 rounded-md transition-colors
-            ${config.iconColor} hover:bg-black/5
-          `}
+          className="absolute top-2.5 right-2.5 p-0.5 rounded hover:bg-gray-100 transition-colors text-gray-400 hover:text-gray-600"
           aria-label="Close notification"
         >
-          <X className="w-4 h-4" />
+          <X className="w-3.5 h-3.5" />
         </button>
 
         {/* Progress Bar */}
-        <div className="absolute bottom-0 left-0 right-0 h-1 bg-black/5">
+        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gray-100">
           <motion.div
             className={`h-full ${config.progressColor}`}
             initial={{ width: '100%' }}
