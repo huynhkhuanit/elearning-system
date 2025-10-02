@@ -5,6 +5,7 @@ import Menu from "@/components/Menu";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { ToastProvider } from "@/contexts/ToastContext";
 
 export const metadata: Metadata = {
   title: "DHV LearnX - Nền tảng học lập trình trực tuyến",
@@ -20,24 +21,26 @@ export default function RootLayout({
   return (
     <html lang="vi" suppressHydrationWarning>
       <body className="antialiased" style={{ backgroundColor: '#ffffff' }}>
-        <AuthProvider>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="light"
-            forcedTheme="light"
-            enableSystem={false}
-            enableColorScheme={false}
-          >
-            <div style={{ backgroundColor: '#ffffff', minHeight: '100vh' }}>
-              <Menu />
-              <Header />
-              <main style={{ backgroundColor: '#ffffff', marginLeft: '96px' }}>
-                {children}
-              </main>
-              <Footer />
-            </div>
-          </ThemeProvider>
-        </AuthProvider>
+        <ToastProvider>
+          <AuthProvider>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="light"
+              forcedTheme="light"
+              enableSystem={false}
+              enableColorScheme={false}
+            >
+              <div style={{ backgroundColor: '#ffffff', minHeight: '100vh' }}>
+                <Menu />
+                <Header />
+                <main style={{ backgroundColor: '#ffffff', marginLeft: '96px' }}>
+                  {children}
+                </main>
+                <Footer />
+              </div>
+            </ThemeProvider>
+          </AuthProvider>
+        </ToastProvider>
       </body>
     </html>
   );

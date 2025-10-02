@@ -6,11 +6,13 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { Mail, Lock, Eye, EyeOff, LogIn, AlertCircle } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/contexts/ToastContext";
 import PageContainer from "@/components/PageContainer";
 
 export default function LoginPage() {
   const router = useRouter();
   const { login, isLoading } = useAuth();
+  const toast = useToast();
   
   const [formData, setFormData] = useState({
     email: "",
@@ -26,10 +28,16 @@ export default function LoginPage() {
 
     try {
       await login(formData.email, formData.password);
+      toast.success(
+        "Đăng nhập thành công!",
+        "Chào mừng bạn quay trở lại với DHV LearnX"
+      );
       router.push("/"); // Redirect to home after successful login
       router.refresh();
     } catch (err: any) {
-      setError(err.message || "Đăng nhập thất bại");
+      const errorMessage = err.message || "Đăng nhập thất bại";
+      setError(errorMessage);
+      toast.error("Đăng nhập thất bại", errorMessage);
     }
   };
 

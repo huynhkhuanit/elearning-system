@@ -6,11 +6,13 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { Mail, Lock, User, UserCircle, Eye, EyeOff, UserPlus, AlertCircle, CheckCircle } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/contexts/ToastContext";
 import PageContainer from "@/components/PageContainer";
 
 export default function RegisterPage() {
   const router = useRouter();
   const { register, isLoading } = useAuth();
+  const toast = useToast();
   
   const [formData, setFormData] = useState({
     email: "",
@@ -32,18 +34,24 @@ export default function RegisterPage() {
 
     // Validate passwords match
     if (formData.password !== formData.confirmPassword) {
-      setError("Mật khẩu xác nhận không khớp");
+      const errorMsg = "Mật khẩu xác nhận không khớp";
+      setError(errorMsg);
+      toast.error("Lỗi xác thực", errorMsg);
       return;
     }
 
     // Validate password strength
     if (formData.password.length < 6) {
-      setError("Mật khẩu phải có ít nhất 6 ký tự");
+      const errorMsg = "Mật khẩu phải có ít nhất 6 ký tự";
+      setError(errorMsg);
+      toast.error("Lỗi xác thực", errorMsg);
       return;
     }
 
     if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(formData.password)) {
-      setError("Mật khẩu phải chứa chữ hoa, chữ thường và số");
+      const errorMsg = "Mật khẩu phải chứa chữ hoa, chữ thường và số";
+      setError(errorMsg);
+      toast.error("Lỗi xác thực", errorMsg);
       return;
     }
 
@@ -56,13 +64,19 @@ export default function RegisterPage() {
       });
       
       setSuccess(true);
+      toast.success(
+        "Đăng ký thành công!",
+        "Tài khoản của bạn đã được tạo. Đang chuyển đến trang đăng nhập..."
+      );
       
       // Redirect to login page after 2 seconds
       setTimeout(() => {
         router.push("/auth/login");
       }, 2000);
     } catch (err: any) {
-      setError(err.message || "Đăng ký thất bại");
+      const errorMessage = err.message || "Đăng ký thất bại";
+      setError(errorMessage);
+      toast.error("Đăng ký thất bại", errorMessage);
     }
   };
 

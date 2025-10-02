@@ -6,12 +6,14 @@ import { useTheme } from "next-themes";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/contexts/ToastContext";
 import { useRouter } from "next/navigation";
 
 export default function Header() {
   const [searchValue, setSearchValue] = useState("");
   const { theme, setTheme } = useTheme();
   const { user, isAuthenticated, logout } = useAuth();
+  const toast = useToast();
   const router = useRouter();
   const [showUserMenu, setShowUserMenu] = useState(false);
 
@@ -35,6 +37,7 @@ export default function Header() {
   const handleLogout = async () => {
     await logout();
     setShowUserMenu(false);
+    toast.success("Đăng xuất thành công", "Hẹn gặp lại bạn!");
     router.push('/');
     router.refresh();
   };
