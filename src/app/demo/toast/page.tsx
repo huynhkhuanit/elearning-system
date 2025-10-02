@@ -22,10 +22,7 @@ export default function ToastDemoPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Success Toast */}
           <button
-            onClick={() => toast.success(
-              "Thành công!",
-              "Thao tác của bạn đã được thực hiện thành công."
-            )}
+            onClick={() => toast.success("Thao tác của bạn đã được thực hiện thành công!")}
             className="group p-8 bg-green-50 border-2 border-green-200 rounded-2xl hover:border-green-500 hover:shadow-lg transition-all duration-200"
           >
             <div className="flex items-center gap-4 mb-3">
@@ -41,10 +38,7 @@ export default function ToastDemoPage() {
 
           {/* Error Toast */}
           <button
-            onClick={() => toast.error(
-              "Có lỗi xảy ra!",
-              "Không thể thực hiện thao tác. Vui lòng thử lại sau."
-            )}
+            onClick={() => toast.error("Không thể thực hiện thao tác. Vui lòng thử lại sau.")}
             className="group p-8 bg-red-50 border-2 border-red-200 rounded-2xl hover:border-red-500 hover:shadow-lg transition-all duration-200"
           >
             <div className="flex items-center gap-4 mb-3">
@@ -60,10 +54,7 @@ export default function ToastDemoPage() {
 
           {/* Warning Toast */}
           <button
-            onClick={() => toast.warning(
-              "Cảnh báo!",
-              "Hành động này có thể ảnh hưởng đến dữ liệu của bạn."
-            )}
+            onClick={() => toast.warning("Hành động này có thể ảnh hưởng đến dữ liệu của bạn.")}
             className="group p-8 bg-yellow-50 border-2 border-yellow-200 rounded-2xl hover:border-yellow-500 hover:shadow-lg transition-all duration-200"
           >
             <div className="flex items-center gap-4 mb-3">
@@ -79,10 +70,7 @@ export default function ToastDemoPage() {
 
           {/* Info Toast */}
           <button
-            onClick={() => toast.info(
-              "Thông tin",
-              "Đây là một thông báo mang tính thông tin cho bạn biết."
-            )}
+            onClick={() => toast.info("Đây là một thông báo mang tính thông tin cho bạn biết.")}
             className="group p-8 bg-blue-50 border-2 border-blue-200 rounded-2xl hover:border-blue-500 hover:shadow-lg transition-all duration-200"
           >
             <div className="flex items-center gap-4 mb-3">
@@ -105,22 +93,22 @@ export default function ToastDemoPage() {
           </p>
           <div className="flex flex-wrap gap-3">
             <button
-              onClick={() => toast.success("Quick!", "Toast 2 giây", 2000)}
+              onClick={() => toast.success("Toast 2 giây!", 2000)}
               className="px-6 py-3 bg-white border-2 border-indigo-200 rounded-lg hover:border-indigo-500 transition-all duration-200 text-sm font-medium text-indigo-900"
             >
               2 giây
             </button>
             <button
-              onClick={() => toast.info("Normal", "Toast 5 giây (default)", 5000)}
+              onClick={() => toast.info("Toast 3 giây (default)", 3000)}
+              className="px-6 py-3 bg-white border-2 border-indigo-200 rounded-lg hover:border-indigo-500 transition-all duration-200 text-sm font-medium text-indigo-900"
+            >
+              3 giây
+            </button>
+            <button
+              onClick={() => toast.warning("Toast 5 giây - Thời gian dài hơn", 5000)}
               className="px-6 py-3 bg-white border-2 border-indigo-200 rounded-lg hover:border-indigo-500 transition-all duration-200 text-sm font-medium text-indigo-900"
             >
               5 giây
-            </button>
-            <button
-              onClick={() => toast.warning("Long", "Toast 10 giây", 10000)}
-              className="px-6 py-3 bg-white border-2 border-indigo-200 rounded-lg hover:border-indigo-500 transition-all duration-200 text-sm font-medium text-indigo-900"
-            >
-              10 giây
             </button>
           </div>
         </div>
@@ -133,9 +121,9 @@ export default function ToastDemoPage() {
           </p>
           <button
             onClick={() => {
-              toast.success("Toast 1", "Đây là toast thứ nhất");
-              setTimeout(() => toast.info("Toast 2", "Đây là toast thứ hai"), 500);
-              setTimeout(() => toast.warning("Toast 3", "Đây là toast thứ ba"), 1000);
+              toast.success("Đây là toast thứ nhất");
+              setTimeout(() => toast.info("Đây là toast thứ hai"), 500);
+              setTimeout(() => toast.warning("Đây là toast thứ ba"), 1000);
             }}
             className="px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold rounded-lg hover:shadow-lg transition-all duration-200"
           >

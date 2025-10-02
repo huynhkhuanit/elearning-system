@@ -24,34 +24,26 @@ export default function RegisterPage() {
   
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
     setSuccess(false);
 
     // Validate passwords match
     if (formData.password !== formData.confirmPassword) {
-      const errorMsg = "Mật khẩu xác nhận không khớp";
-      setError(errorMsg);
-      toast.error("Lỗi xác thực", errorMsg);
+      toast.error("Mật khẩu xác nhận không khớp");
       return;
     }
 
     // Validate password strength
     if (formData.password.length < 6) {
-      const errorMsg = "Mật khẩu phải có ít nhất 6 ký tự";
-      setError(errorMsg);
-      toast.error("Lỗi xác thực", errorMsg);
+      toast.error("Mật khẩu phải có ít nhất 6 ký tự");
       return;
     }
 
     if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(formData.password)) {
-      const errorMsg = "Mật khẩu phải chứa chữ hoa, chữ thường và số";
-      setError(errorMsg);
-      toast.error("Lỗi xác thực", errorMsg);
+      toast.error("Mật khẩu phải chứa chữ hoa, chữ thường và số");
       return;
     }
 
@@ -64,19 +56,15 @@ export default function RegisterPage() {
       });
       
       setSuccess(true);
-      toast.success(
-        "Đăng ký thành công!",
-        "Tài khoản của bạn đã được tạo. Đang chuyển đến trang đăng nhập..."
-      );
+      toast.success("Đăng ký thành công! Đang chuyển đến trang đăng nhập...");
       
       // Redirect to login page after 2 seconds
       setTimeout(() => {
         router.push("/auth/login");
       }, 2000);
     } catch (err: any) {
-      const errorMessage = err.message || "Đăng ký thất bại";
-      setError(errorMessage);
-      toast.error("Đăng ký thất bại", errorMessage);
+      const errorMessage = err.message || "Đăng ký thất bại. Vui lòng thử lại.";
+      toast.error(errorMessage);
     }
   };
 
@@ -108,31 +96,6 @@ export default function RegisterPage() {
 
           {/* Form */}
           <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8">
-            {error && (
-              <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3"
-              >
-                <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
-                <p className="text-sm text-red-800">{error}</p>
-              </motion.div>
-            )}
-
-            {success && (
-              <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-start gap-3"
-              >
-                <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                <div>
-                  <p className="text-sm font-semibold text-green-800">Đăng ký thành công!</p>
-                  <p className="text-xs text-green-700 mt-1">Đang chuyển đến trang đăng nhập...</p>
-                </div>
-              </motion.div>
-            )}
-
             <form onSubmit={handleSubmit} className="space-y-5">
               {/* Full Name Field */}
               <div>

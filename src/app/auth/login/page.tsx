@@ -20,24 +20,18 @@ export default function LoginPage() {
   });
   
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
 
     try {
       await login(formData.email, formData.password);
-      toast.success(
-        "Đăng nhập thành công!",
-        "Chào mừng bạn quay trở lại với DHV LearnX"
-      );
+      toast.success("Đăng nhập thành công! Chào mừng bạn quay trở lại.");
       router.push("/"); // Redirect to home after successful login
       router.refresh();
     } catch (err: any) {
-      const errorMessage = err.message || "Đăng nhập thất bại";
-      setError(errorMessage);
-      toast.error("Đăng nhập thất bại", errorMessage);
+      const errorMessage = err.message || "Đăng nhập thất bại. Vui lòng thử lại.";
+      toast.error(errorMessage);
     }
   };
 
@@ -69,17 +63,6 @@ export default function LoginPage() {
 
           {/* Form */}
           <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8">
-            {error && (
-              <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3"
-              >
-                <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
-                <p className="text-sm text-red-800">{error}</p>
-              </motion.div>
-            )}
-
             <form onSubmit={handleSubmit} className="space-y-5">
               {/* Email Field */}
               <div>

@@ -15,7 +15,6 @@ export async function POST(request: NextRequest) {
         {
           success: false,
           message: 'Dữ liệu không hợp lệ',
-          errors: validation.error.flatten().fieldErrors,
         },
         { status: 400 }
       );
@@ -125,7 +124,6 @@ export async function POST(request: NextRequest) {
       {
         success: false,
         message: 'Đã xảy ra lỗi khi đăng nhập',
-        error: error instanceof Error ? error.message : 'Unknown error',
       },
       { status: 500 }
     );

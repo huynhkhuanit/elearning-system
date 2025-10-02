@@ -16,7 +16,6 @@ export async function POST(request: NextRequest) {
         {
           success: false,
           message: 'Dữ liệu không hợp lệ',
-          errors: validation.error.flatten().fieldErrors,
         },
         { status: 400 }
       );
@@ -83,7 +82,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         success: true,
-        message: 'Đăng ký thành công! Vui lòng đăng nhập.',
+        message: 'Đăng ký thành công!',
         data: {
           user: {
             id: user.id,
@@ -108,7 +107,6 @@ export async function POST(request: NextRequest) {
       {
         success: false,
         message: 'Đã xảy ra lỗi khi đăng ký',
-        error: error instanceof Error ? error.message : 'Unknown error',
       },
       { status: 500 }
     );

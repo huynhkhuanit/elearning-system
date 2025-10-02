@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
   CheckCircle, 
@@ -14,8 +14,8 @@ import { ToastType } from '@/contexts/ToastContext';
 interface ToastProps {
   id: string;
   type: ToastType;
-  title: string;
-  message?: string;
+  title?: string; // Now optional, we'll use message as main content
+  message: string;
   duration?: number;
   onClose: () => void;
 }
@@ -59,20 +59,17 @@ export default function Toast({
   duration = 3000,
   onClose,
 }: ToastProps) {
-  const [progress, setProgress] = useState(100);
   const config = toastConfig[type];
   const Icon = config.icon;
 
+  // Auto close after duration
   useEffect(() => {
-    const interval = setInterval(() => {
-      setProgress((prev) => {
-        const newProgress = prev - (100 / (duration / 100));
-        return newProgress <= 0 ? 0 : newProgress;
-      });
-    }, 100);
+    const timer = setTimeout(() => {
+      onClose();
+    }, duration);
 
-    return () => clearInterval(interval);
-  }, [duration]);
+    return () => clearTimeout(timer);
+  }, [duration, onClose]);
 
   return (
     <motion.div
@@ -82,39 +79,30 @@ export default function Toast({
       transition={{ duration: 0.15 }}
       className="pointer-events-auto"
     >
-      <div className="relative w-[340px] bg-white rounded-lg shadow-lg border border-gray-200/80 overflow-hidden backdrop-blur-sm">
+      <div className="relative w-[380px] bg-white rounded-lg shadow-lg border border-gray-200/80 overflow-hidden backdrop-blur-sm">
         {/* Content */}
-        <div className="px-3 py-2.5 pr-7">
-          <div className="flex items-center gap-2">
+        <div className="px-4 py-3 pr-9">
+          <div className="flex items-center gap-3">
             {/* Icon - Simple, no background */}
-            <Icon className={`w-4 h-4 flex-shrink-0 ${config.iconColor}`} strokeWidth={2.5} />
+            <Icon className={`w-5 h-5 flex-shrink-0 ${config.iconColor}`} strokeWidth={2.5} />
 
-            {/* Text Content */}
-            <div className="flex-1 min-w-0">
-              <div className="flex items-baseline gap-1.5">
-                <span className={`font-medium text-[13px] leading-tight ${config.titleColor}`}>
-                  {title}
-                </span>
-                {message && (
-                  <span className={`text-[12px] leading-tight ${config.messageColor}`}>
-                    {message}
-                  </span>
-                )}
-              </div>
-            </div>
+            {/* Message Content - Single text, larger and bolder */}
+            <p className={`flex-1 font-semibold text-[14px] leading-snug ${config.titleColor}`}>
+              {message}
+            </p>
           </div>
         </div>
 
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-2 right-2 p-0.5 rounded text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+          className="absolute top-2.5 right-2.5 p-0.5 rounded text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
           aria-label="Close"
         >
-          <X className="w-3 h-3" strokeWidth={2} />
+          <X className="w-3.5 h-3.5" strokeWidth={2} />
         </button>
 
-        {/* Progress Bar - Ultra thin */}
+        {/* Progress Bar */}
         <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gray-100/50">
           <motion.div
             className={config.progressColor}

@@ -37,7 +37,7 @@ export default function Header() {
   const handleLogout = async () => {
     await logout();
     setShowUserMenu(false);
-    toast.success("Đăng xuất thành công", "Hẹn gặp lại bạn!");
+    toast.success("Đăng xuất thành công! Hẹn gặp lại bạn.");
     router.push('/');
     router.refresh();
   };
