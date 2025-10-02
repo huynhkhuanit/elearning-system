@@ -264,7 +264,7 @@ export default function RegisterModal({ isOpen, onClose, onSwitchToLogin }: Regi
               type="checkbox"
               id="terms"
               required
-              className="w-4 h-4 text-indigo-600 bg-white border-2 border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-0 checked:bg-indigo-600 checked:border-indigo-600 transition-colors cursor-pointer mt-0.5 flex-shrink-0"
+              className="w-4 h-4 text-indigo-600 bg-white border-2 border-gray-300 rounded focus:outline-none transition-colors cursor-pointer mt-0.5 flex-shrink-0"
             />
             <label htmlFor="terms" className="text-xs text-gray-700 leading-relaxed cursor-pointer select-none">
               Tôi đồng ý với{" "}

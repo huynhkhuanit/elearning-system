@@ -140,7 +140,7 @@ export default function LoginModal({ isOpen, onClose, onSwitchToRegister }: Logi
             <input
               type="checkbox"
               id="remember"
-              className="w-4 h-4 text-indigo-600 bg-white border-2 border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-0 checked:bg-indigo-600 checked:border-indigo-600 transition-colors cursor-pointer"
+              className="w-4 h-4 text-indigo-600 bg-white border-2 border-gray-300 rounded focus:outline-none transition-colors cursor-pointer"
             />
             <label htmlFor="remember" className="ml-2 text-sm text-gray-700 cursor-pointer select-none">
               Ghi nhớ đăng nhập
