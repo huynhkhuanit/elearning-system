@@ -1,14 +1,19 @@
 "use client";
 
-import { Search, X, Sun, Moon } from "lucide-react";
+import { Search, X, Sun, Moon, User, LogOut } from "lucide-react";
 import { useState } from "react";
 import { useTheme } from "next-themes";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
+import { useAuth } from "@/contexts/AuthContext";
+import { useRouter } from "next/navigation";
 
 export default function Header() {
   const [searchValue, setSearchValue] = useState("");
   const { theme, setTheme } = useTheme();
+  const { user, isAuthenticated, logout } = useAuth();
+  const router = useRouter();
+  const [showUserMenu, setShowUserMenu] = useState(false);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchValue(e.target.value);
@@ -25,6 +30,13 @@ export default function Header() {
     } else if (e.key === 'Escape') {
       clearSearch();
     }
+  };
+
+  const handleLogout = async () => {
+    await logout();
+    setShowUserMenu(false);
+    router.push('/');
+    router.refresh();
   };
 
   return (
@@ -105,13 +117,74 @@ export default function Header() {
 
           {/* Auth Buttons */}
           <div className="hidden sm:flex items-center gap-2">
-            <Link href="/auth/register" className="px-6 py-2.5 text-sm font-medium text-muted-foreground hover:text-primary transition-all duration-200 rounded-full cursor-pointer">
-              Đăng ký
-            </Link>
+            {isAuthenticated && user ? (
+              <div className="relative">
+                <button
+                  onClick={() => setShowUserMenu(!showUserMenu)}
+                  className="flex items-center gap-2 px-4 py-2 rounded-full hover:bg-gray-100 transition-all duration-200"
+                >
+                  {user.avatar_url ? (
+                    <img
+                      src={user.avatar_url}
+                      alt={user.full_name}
+                      className="w-8 h-8 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 flex items-center justify-center text-white font-semibold">
+                      {user.full_name.charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                  <span className="text-sm font-medium text-gray-700">{user.username}</span>
+                </button>
 
-            <Link href="/auth/login" className="px-6 py-2.5 text-sm font-medium bg-primary text-primary-foreground rounded-full hover:bg-primary/90 transition-all duration-200 shadow-lg cursor-pointer">
-              Đăng nhập
-            </Link>
+                <AnimatePresence>
+                  {showUserMenu && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      transition={{ duration: 0.2 }}
+                      className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-50"
+                    >
+                      <div className="px-4 py-3 border-b border-gray-100">
+                        <p className="text-sm font-semibold text-gray-900">{user.full_name}</p>
+                        <p className="text-xs text-gray-500">{user.email}</p>
+                        {user.membership_type === 'PRO' && (
+                          <span className="inline-block mt-1 px-2 py-0.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-xs font-semibold rounded-full">
+                            PRO
+                          </span>
+                        )}
+                      </div>
+                      <Link
+                        href="/profile"
+                        className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                        onClick={() => setShowUserMenu(false)}
+                      >
+                        <User className="w-4 h-4" />
+                        Hồ sơ cá nhân
+                      </Link>
+                      <button
+                        onClick={handleLogout}
+                        className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                      >
+                        <LogOut className="w-4 h-4" />
+                        Đăng xuất
+                      </button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            ) : (
+              <>
+                <Link href="/auth/register" className="px-6 py-2.5 text-sm font-medium text-muted-foreground hover:text-primary transition-all duration-200 rounded-full cursor-pointer">
+                  Đăng ký
+                </Link>
+
+                <Link href="/auth/login" className="px-6 py-2.5 text-sm font-medium bg-primary text-primary-foreground rounded-full hover:bg-primary/90 transition-all duration-200 shadow-lg cursor-pointer">
+                  Đăng nhập
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </div>
