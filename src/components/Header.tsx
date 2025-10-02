@@ -8,6 +8,8 @@ import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/contexts/ToastContext";
 import { useRouter } from "next/navigation";
+import LoginModal from "./LoginModal";
+import RegisterModal from "./RegisterModal";
 
 export default function Header() {
   const [searchValue, setSearchValue] = useState("");
@@ -16,6 +18,8 @@ export default function Header() {
   const toast = useToast();
   const router = useRouter();
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [showRegisterModal, setShowRegisterModal] = useState(false);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchValue(e.target.value);
@@ -179,18 +183,44 @@ export default function Header() {
               </div>
             ) : (
               <>
-                <Link href="/auth/register" className="px-6 py-2.5 text-sm font-medium text-muted-foreground hover:text-primary transition-all duration-200 rounded-full cursor-pointer">
+                <button
+                  onClick={() => setShowRegisterModal(true)}
+                  className="px-6 py-2.5 text-sm font-medium text-muted-foreground hover:text-primary transition-all duration-200 rounded-full cursor-pointer"
+                >
                   Đăng ký
-                </Link>
+                </button>
 
-                <Link href="/auth/login" className="px-6 py-2.5 text-sm font-medium bg-primary text-primary-foreground rounded-full hover:bg-primary/90 transition-all duration-200 shadow-lg cursor-pointer">
+                <button
+                  onClick={() => setShowLoginModal(true)}
+                  className="px-6 py-2.5 text-sm font-medium bg-primary text-primary-foreground rounded-full hover:bg-primary/90 transition-all duration-200 shadow-lg cursor-pointer"
+                >
                   Đăng nhập
-                </Link>
+                </button>
               </>
             )}
           </div>
         </div>
       </div>
+
+      {/* Login Modal */}
+      <LoginModal
+        isOpen={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
+        onSwitchToRegister={() => {
+          setShowLoginModal(false);
+          setShowRegisterModal(true);
+        }}
+      />
+
+      {/* Register Modal */}
+      <RegisterModal
+        isOpen={showRegisterModal}
+        onClose={() => setShowRegisterModal(false)}
+        onSwitchToLogin={() => {
+          setShowRegisterModal(false);
+          setShowLoginModal(true);
+        }}
+      />
     </header>
   );
 }
