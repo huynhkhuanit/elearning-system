@@ -87,7 +87,7 @@ export default function Toast({
             <Icon className={`w-5 h-5 flex-shrink-0 ${config.iconColor}`} strokeWidth={2.5} />
 
             {/* Message Content - Single text, larger and bolder */}
-            <p className={`flex-1 font-semibold text-[14px] leading-snug ${config.titleColor}`}>
+            <p className={`flex-1 font-normal text-[14px] leading-snug ${config.titleColor}`}>
               {message}
             </p>
           </div>
