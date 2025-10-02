@@ -94,7 +94,7 @@ export default function LoginModal({ isOpen, onClose, onSwitchToRegister }: Logi
                 value={formData.email}
                 onChange={handleChange}
                 required
-                className="w-full pl-11 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition-all duration-200 text-gray-900 placeholder:text-gray-400"
+                className="w-full pl-11 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition-all duration-200 text-gray-900 placeholder:text-gray-400"
                 placeholder="name@example.com"
               />
             </div>
@@ -122,7 +122,7 @@ export default function LoginModal({ isOpen, onClose, onSwitchToRegister }: Logi
                 value={formData.password}
                 onChange={handleChange}
                 required
-                className="w-full pl-11 pr-12 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition-all duration-200 text-gray-900 placeholder:text-gray-400"
+                className="w-full pl-11 pr-12 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition-all duration-200 text-gray-900 placeholder:text-gray-400"
                 placeholder="Nhập mật khẩu"
               />
               <button
@@ -140,7 +140,7 @@ export default function LoginModal({ isOpen, onClose, onSwitchToRegister }: Logi
             <input
               type="checkbox"
               id="remember"
-              className="w-4 h-4 text-indigo-600 bg-white border-2 border-gray-300 rounded transition-colors cursor-pointer"
+              className="w-4 h-4 text-indigo-600 bg-white border-2 border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-0 checked:bg-indigo-600 checked:border-indigo-600 transition-colors cursor-pointer"
             />
             <label htmlFor="remember" className="ml-2 text-sm text-gray-700 cursor-pointer select-none">
               Ghi nhớ đăng nhập

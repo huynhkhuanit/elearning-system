@@ -139,7 +139,7 @@ export default function RegisterModal({ isOpen, onClose, onSwitchToLogin }: Regi
                   value={formData.full_name}
                   onChange={handleChange}
                   required
-                  className="w-full pl-11 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition-all duration-200 text-gray-900 placeholder:text-gray-400"
+                  className="w-full pl-11 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition-all duration-200 text-gray-900 placeholder:text-gray-400"
                   placeholder="Nguyễn Văn A"
                 />
               </div>
@@ -159,7 +159,7 @@ export default function RegisterModal({ isOpen, onClose, onSwitchToLogin }: Regi
                   value={formData.username}
                   onChange={handleChange}
                   required
-                  className="w-full pl-11 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition-all duration-200 text-gray-900 placeholder:text-gray-400"
+                  className="w-full pl-11 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition-all duration-200 text-gray-900 placeholder:text-gray-400"
                   placeholder="nguyen_van_a"
                 />
               </div>
@@ -180,7 +180,7 @@ export default function RegisterModal({ isOpen, onClose, onSwitchToLogin }: Regi
                 value={formData.email}
                 onChange={handleChange}
                 required
-                className="w-full pl-11 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition-all duration-200 text-gray-900 placeholder:text-gray-400"
+                className="w-full pl-11 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition-all duration-200 text-gray-900 placeholder:text-gray-400"
                 placeholder="name@example.com"
               />
             </div>
@@ -202,7 +202,7 @@ export default function RegisterModal({ isOpen, onClose, onSwitchToLogin }: Regi
                   value={formData.password}
                   onChange={handleChange}
                   required
-                  className="w-full pl-11 pr-12 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition-all duration-200 text-gray-900 placeholder:text-gray-400"
+                  className="w-full pl-11 pr-12 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition-all duration-200 text-gray-900 placeholder:text-gray-400"
                   placeholder="••••••••"
                 />
                 <button
@@ -229,7 +229,7 @@ export default function RegisterModal({ isOpen, onClose, onSwitchToLogin }: Regi
                   value={formData.confirmPassword}
                   onChange={handleChange}
                   required
-                  className="w-full pl-11 pr-12 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition-all duration-200 text-gray-900 placeholder:text-gray-400"
+                  className="w-full pl-11 pr-12 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition-all duration-200 text-gray-900 placeholder:text-gray-400"
                   placeholder="••••••••"
                 />
                 <button
@@ -264,7 +264,7 @@ export default function RegisterModal({ isOpen, onClose, onSwitchToLogin }: Regi
               type="checkbox"
               id="terms"
               required
-              className="w-4 h-4 text-indigo-600 bg-white border-2 border-gray-300 rounded transition-colors cursor-pointer mt-0.5 flex-shrink-0"
+              className="w-4 h-4 text-indigo-600 bg-white border-2 border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-0 checked:bg-indigo-600 checked:border-indigo-600 transition-colors cursor-pointer mt-0.5 flex-shrink-0"
             />
             <label htmlFor="terms" className="text-xs text-gray-700 leading-relaxed cursor-pointer select-none">
               Tôi đồng ý với{" "}
