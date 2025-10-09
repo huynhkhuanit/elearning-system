@@ -32,6 +32,12 @@ export interface PublicUser {
   total_study_time: number;
   is_verified: boolean;
   created_at: Date;
+  // Social media links
+  website?: string | null;
+  linkedin?: string | null;
+  github?: string | null;
+  twitter?: string | null;
+  facebook?: string | null;
 }
 
 // Auth payload for JWT

@@ -15,6 +15,13 @@ export interface UserProfile {
   is_verified: boolean;
   created_at: Date;
   
+  // Social media links
+  website?: string | null;
+  linkedin?: string | null;
+  github?: string | null;
+  twitter?: string | null;
+  facebook?: string | null;
+  
   // Stats
   total_courses_enrolled: number;
   total_courses_completed: number;

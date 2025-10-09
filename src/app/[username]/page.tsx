@@ -6,7 +6,7 @@ import { UserProfile, ActivityData, ProfileTab } from '@/types/profile';
 import ActivityHeatmap from '@/components/ActivityHeatmap';
 import ProfileStats from '@/components/ProfileStats';
 import PageContainer from '@/components/PageContainer';
-import { Calendar, Mail, Award, Clock, BookOpen, FileText } from 'lucide-react';
+import { Calendar, Mail, Award, Clock, BookOpen, FileText, Globe, Linkedin, Github, Twitter, Facebook } from 'lucide-react';
 
 export default function UserProfilePage() {
   const params = useParams();
@@ -58,19 +58,6 @@ export default function UserProfilePage() {
       fetchProfileData();
     }
   }, [username]);
-
-  if (loading) {
-    return (
-      <PageContainer>
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="text-center">
-            <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-            <p className="text-gray-600">Đang tải thông tin...</p>
-          </div>
-        </div>
-      </PageContainer>
-    );
-  }
 
   if (error || !profile) {
     return (
@@ -128,6 +115,67 @@ export default function UserProfilePage() {
                     <p className="text-gray-700 mb-4 max-w-2xl">{profile.bio}</p>
                   )}
 
+                  {/* Social Links */}
+                  {(profile.website || profile.linkedin || profile.github || profile.twitter || profile.facebook) && (
+                    <div className="flex flex-wrap gap-3 mb-4">
+                      {profile.website && (
+                        <a
+                          href={profile.website}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-2 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm text-gray-700 transition-colors"
+                        >
+                          <Globe className="w-4 h-4" />
+                          <span>Website</span>
+                        </a>
+                      )}
+                      {profile.linkedin && (
+                        <a
+                          href={profile.linkedin}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 rounded-lg text-sm text-blue-700 transition-colors"
+                        >
+                          <Linkedin className="w-4 h-4" />
+                          <span>LinkedIn</span>
+                        </a>
+                      )}
+                      {profile.github && (
+                        <a
+                          href={profile.github}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-2 px-3 py-1.5 bg-gray-900 hover:bg-gray-800 rounded-lg text-sm text-white transition-colors"
+                        >
+                          <Github className="w-4 h-4" />
+                          <span>GitHub</span>
+                        </a>
+                      )}
+                      {profile.twitter && (
+                        <a
+                          href={profile.twitter}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-2 px-3 py-1.5 bg-sky-50 hover:bg-sky-100 rounded-lg text-sm text-sky-700 transition-colors"
+                        >
+                          <Twitter className="w-4 h-4" />
+                          <span>Twitter</span>
+                        </a>
+                      )}
+                      {profile.facebook && (
+                        <a
+                          href={profile.facebook}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 rounded-lg text-sm text-blue-600 transition-colors"
+                        >
+                          <Facebook className="w-4 h-4" />
+                          <span>Facebook</span>
+                        </a>
+                      )}
+                    </div>
+                  )}
+
                   <div className="flex flex-wrap gap-4 text-sm text-gray-600">
                     <div className="flex items-center gap-2">
                       <Calendar className="w-4 h-4" />
@@ -150,16 +198,6 @@ export default function UserProfilePage() {
                       </div>
                     )}
                   </div>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex gap-2">
-                  <button className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium text-sm">
-                    Theo dõi
-                  </button>
-                  <button className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium text-sm">
-                    Nhắn tin
-                  </button>
                 </div>
               </div>
             </div>
