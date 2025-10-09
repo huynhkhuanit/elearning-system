@@ -68,30 +68,39 @@ export default function UserProfilePage() {
             <div className="flex flex-col md:flex-row gap-8">
               {/* Avatar Skeleton */}
               <div className="flex-shrink-0">
-                <div className="w-32 h-32 rounded-full bg-gray-200"></div>
+                <div className="relative">
+                  <div className="w-32 h-32 rounded-full bg-gray-200 border-4 border-gray-100"></div>
+                </div>
               </div>
 
-              {/* Profile Info Skeleton */}
-              <div className="flex-1 space-y-4">
-                {/* Name */}
-                <div className="h-8 bg-gray-200 rounded-lg w-64"></div>
-                {/* Username */}
-                <div className="h-6 bg-gray-100 rounded-lg w-40"></div>
-                {/* Bio */}
-                <div className="space-y-2">
-                  <div className="h-4 bg-gray-100 rounded-lg w-full"></div>
-                  <div className="h-4 bg-gray-100 rounded-lg w-3/4"></div>
-                </div>
-                {/* Social Links */}
-                <div className="flex gap-3">
-                  <div className="h-8 bg-gray-100 rounded-lg w-24"></div>
-                  <div className="h-8 bg-gray-100 rounded-lg w-24"></div>
-                  <div className="h-8 bg-gray-100 rounded-lg w-24"></div>
-                </div>
-                {/* Meta Info */}
-                <div className="flex gap-4">
-                  <div className="h-5 bg-gray-100 rounded-lg w-32"></div>
-                  <div className="h-5 bg-gray-100 rounded-lg w-32"></div>
+              {/* Profile Info Skeleton - Match exact spacing */}
+              <div className="flex-1">
+                <div className="flex items-start justify-between flex-col md:flex-row gap-4">
+                  <div className="flex-1">
+                    {/* Name - h1 text-3xl with mb-1 */}
+                    <div className="h-9 bg-gray-200 rounded-lg w-64 mb-1"></div>
+                    {/* Username - text-lg with mb-4 */}
+                    <div className="h-7 bg-gray-100 rounded-lg w-40 mb-4"></div>
+                    
+                    {/* Bio - 2 lines with mb-4 */}
+                    <div className="space-y-2 mb-4">
+                      <div className="h-5 bg-gray-100 rounded-lg w-full"></div>
+                      <div className="h-5 bg-gray-100 rounded-lg w-3/4"></div>
+                    </div>
+
+                    {/* Social Links - flex gap-3 mb-4 */}
+                    <div className="flex flex-wrap gap-3 mb-4">
+                      <div className="h-8 bg-gray-100 rounded-lg w-24"></div>
+                      <div className="h-8 bg-gray-100 rounded-lg w-24"></div>
+                      <div className="h-8 bg-gray-100 rounded-lg w-24"></div>
+                    </div>
+
+                    {/* Meta Info - flex gap-4 text-sm */}
+                    <div className="flex flex-wrap gap-4 text-sm">
+                      <div className="h-5 bg-gray-100 rounded-lg w-40"></div>
+                      <div className="h-5 bg-gray-100 rounded-lg w-32"></div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
