@@ -17,6 +17,7 @@ export default function SettingsPage() {
 
   const [activeTab, setActiveTab] = useState<SettingsTab>('profile');
   const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
   
   // Profile form state
   const [profileForm, setProfileForm] = useState({
@@ -47,21 +48,46 @@ export default function SettingsPage() {
       return;
     }
 
+    // Load full profile data including social links from API
+    const loadProfileData = async () => {
+      if (!user?.username) return;
+
+      try {
+        setInitialLoading(true);
+        
+        // Fetch full profile data from API
+        const response = await fetch(`/api/users/${user.username}`);
+        const data = await response.json();
+
+        if (data.success && data.data) {
+          const profile = data.data;
+          
+          setProfileForm({
+            full_name: profile.full_name || '',
+            username: profile.username || '',
+            bio: profile.bio || '',
+            avatar_url: profile.avatar_url || '',
+            website: profile.website || '',
+            linkedin: profile.linkedin || '',
+            github: profile.github || '',
+            twitter: profile.twitter || '',
+            facebook: profile.facebook || '',
+          });
+          
+          setAvatarPreview(profile.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${profile.username}`);
+        }
+      } catch (error) {
+        console.error('Error loading profile:', error);
+        toast.error('Không thể tải thông tin cá nhân');
+      } finally {
+        setInitialLoading(false);
+      }
+    };
+
     if (user) {
-      setProfileForm({
-        full_name: user.full_name || '',
-        username: user.username || '',
-        bio: user.bio || '',
-        avatar_url: user.avatar_url || '',
-        website: user.website || '',
-        linkedin: user.linkedin || '',
-        github: user.github || '',
-        twitter: user.twitter || '',
-        facebook: user.facebook || '',
-      });
-      setAvatarPreview(user.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username}`);
+      loadProfileData();
     }
-  }, [user, isAuthenticated, router]);
+  }, [user?.username, isAuthenticated, router]);
 
   const handleAvatarClick = () => {
     fileInputRef.current?.click();
@@ -229,7 +255,12 @@ export default function SettingsPage() {
                     Quản lý tên hiển thị, tên người dùng, bio và avatar của bạn.
                   </p>
 
-                  <form onSubmit={handleProfileSubmit} className="space-y-6">
+                  {initialLoading ? (
+                    <div className="flex items-center justify-center py-12">
+                      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+                    </div>
+                  ) : (
+                    <form onSubmit={handleProfileSubmit} className="space-y-6">
                     {/* Avatar Upload */}
                     <div>
                       <label className="block text-sm font-semibold text-gray-900 mb-3">
@@ -313,7 +344,7 @@ export default function SettingsPage() {
                         onChange={(e) => setProfileForm({ ...profileForm, bio: e.target.value })}
                         rows={4}
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
-                        placeholder="Mình là Khuân, hiện tại là sinh viên năm 3 và đang học tại trường Đại Học Hùng Vương TP. Hồ Chí Minh."
+                        placeholder="Hãy điền Bio giới thiệu về bản thân tại đây nhé..."
                       />
                       <p className="text-xs text-gray-500 mt-1">
                         Viết một vài dòng giới thiệu về bản thân
@@ -416,6 +447,7 @@ export default function SettingsPage() {
                       </button>
                     </div>
                   </form>
+                  )}
                 </div>
               )}
 

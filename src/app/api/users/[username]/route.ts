@@ -5,10 +5,10 @@ import { UserProfile } from '@/types/profile';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { username: string } }
+  { params }: { params: Promise<{ username: string }> }
 ) {
   try {
-    const { username } = params;
+    const { username } = await params;
 
     // Fetch user profile data
     const users = await query<RowDataPacket[]>(
@@ -38,26 +38,47 @@ export async function GET(
       );
     }
 
+    const user = users[0];
+
+    // Fetch metadata separately
+    const metadataResults = await query<RowDataPacket[]>(
+      `SELECT meta_key, meta_value FROM user_metadata WHERE user_id = ?`,
+      [user.id]
+    );
+
+    // Build metadata object
+    const metadata: any = {};
+    for (const row of metadataResults) {
+      metadata[row.meta_key] = row.meta_value;
+    }
+
     const userProfile: UserProfile = {
-      id: users[0].id,
-      email: users[0].email,
-      username: users[0].username,
-      full_name: users[0].full_name,
-      avatar_url: users[0].avatar_url,
-      bio: users[0].bio,
-      phone: users[0].phone,
-      membership_type: users[0].membership_type,
-      membership_expires_at: users[0].membership_expires_at,
-      learning_streak: users[0].learning_streak,
-      total_study_time: users[0].total_study_time,
-      is_verified: users[0].is_verified,
-      created_at: users[0].created_at,
-      total_courses_enrolled: users[0].total_courses_enrolled,
-      total_courses_completed: users[0].total_courses_completed,
-      total_articles_published: users[0].total_articles_published,
-      total_forum_posts: users[0].total_forum_posts,
-      followers_count: users[0].followers_count,
-      following_count: users[0].following_count,
+      id: user.id,
+      email: user.email,
+      username: user.username,
+      full_name: user.full_name,
+      avatar_url: user.avatar_url,
+      bio: user.bio,
+      phone: user.phone,
+      membership_type: user.membership_type,
+      membership_expires_at: user.membership_expires_at,
+      learning_streak: user.learning_streak,
+      total_study_time: user.total_study_time,
+      is_verified: user.is_verified,
+      created_at: user.created_at,
+      total_courses_enrolled: user.total_courses_enrolled,
+      total_courses_completed: user.total_courses_completed,
+      total_articles_published: user.total_articles_published,
+      total_forum_posts: user.total_forum_posts,
+      followers_count: user.followers_count,
+      following_count: user.following_count,
+      
+      // Social links from metadata
+      website: metadata.social_website || null,
+      linkedin: metadata.social_linkedin || null,
+      github: metadata.social_github || null,
+      twitter: metadata.social_twitter || null,
+      facebook: metadata.social_facebook || null,
     };
 
     return NextResponse.json(
