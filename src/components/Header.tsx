@@ -1,6 +1,6 @@
 "use client";
 
-import { Search, X, Sun, Moon, User, LogOut } from "lucide-react";
+import { Search, X, Sun, Moon, User, LogOut, FileText, Bookmark, Settings } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { useTheme } from "next-themes";
 import { motion, AnimatePresence } from "framer-motion";
@@ -171,30 +171,71 @@ export default function Header() {
                       transition={{ duration: 0.2 }}
                       className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-50"
                     >
+                      {/* User Info Header */}
                       <div className="px-4 py-3 border-b border-gray-100">
                         <p className="text-sm font-semibold text-gray-900">{user.full_name}</p>
                         <p className="text-xs text-gray-500">{user.email}</p>
                         {user.membership_type === 'PRO' && (
-                          <span className="inline-block mt-1 px-2 py-0.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-xs font-semibold rounded-full">
+                          <span className="inline-block mt-1 px-2 py-0.5 bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-xs font-semibold rounded-full">
                             PRO
                           </span>
                         )}
                       </div>
-                      <Link
-                        href="/profile"
-                        className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                        onClick={() => setShowUserMenu(false)}
-                      >
-                        <User className="w-4 h-4" />
-                        Hồ sơ cá nhân
-                      </Link>
-                      <button
-                        onClick={handleLogout}
-                        className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
-                      >
-                        <LogOut className="w-4 h-4" />
-                        Đăng xuất
-                      </button>
+
+                      {/* Main Menu Items */}
+                      <div className="py-1">
+                        <Link
+                          href={`/${user.username}`}
+                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                          onClick={() => setShowUserMenu(false)}
+                        >
+                          <User className="w-4 h-4" />
+                          <span>Trang cá nhân</span>
+                        </Link>
+                        <Link
+                          href="/write"
+                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                          onClick={() => setShowUserMenu(false)}
+                        >
+                          <FileText className="w-4 h-4" />
+                          <span>Viết blog</span>
+                        </Link>
+                        <Link
+                          href="/my-posts"
+                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                          onClick={() => setShowUserMenu(false)}
+                        >
+                          <FileText className="w-4 h-4" />
+                          <span>Bài viết của tôi</span>
+                        </Link>
+                        <Link
+                          href="/saved"
+                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                          onClick={() => setShowUserMenu(false)}
+                        >
+                          <Bookmark className="w-4 h-4" />
+                          <span>Bài viết đã lưu</span>
+                        </Link>
+                      </div>
+
+                      {/* Settings & Logout */}
+                      <div className="border-t border-gray-100 py-1">
+                        <Link
+                          href="/settings"
+                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                          onClick={() => setShowUserMenu(false)}
+                        >
+                          <Settings className="w-4 h-4" />
+                          <span>Cài đặt</span>
+                        </Link>
+                        <button
+                          onClick={handleLogout}
+                          className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                        >
+                          <LogOut className="w-4 h-4" />
+                          <span>Đăng xuất</span>
+                        </button>
+                      </div>
                     </motion.div>
                   )}
                 </AnimatePresence>
