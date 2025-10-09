@@ -14,7 +14,7 @@ import RegisterModal from "./RegisterModal";
 export default function Header() {
   const [searchValue, setSearchValue] = useState("");
   const { theme, setTheme } = useTheme();
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user, isAuthenticated, logout, isLoading } = useAuth();
   const toast = useToast();
   const router = useRouter();
   const [showUserMenu, setShowUserMenu] = useState(false);
@@ -142,7 +142,12 @@ export default function Header() {
 
           {/* Auth Buttons */}
           <div className="hidden sm:flex items-center gap-2">
-            {isAuthenticated && user ? (
+            {isLoading ? (
+              // Loading skeleton - tránh flash
+              <div className="flex items-center gap-2">
+                <div className="w-32 h-10 bg-gray-100 rounded-full animate-pulse"></div>
+              </div>
+            ) : isAuthenticated && user ? (
               <div className="relative" ref={userMenuRef}>
                 <button
                   onClick={() => setShowUserMenu(!showUserMenu)}
