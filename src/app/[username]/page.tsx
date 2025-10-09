@@ -62,10 +62,88 @@ export default function UserProfilePage() {
   if (loading) {
     return (
       <PageContainer>
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary mx-auto mb-4"></div>
-            <p className="text-gray-600">Đang tải thông tin người dùng...</p>
+        <div className="max-w-7xl mx-auto py-8 px-4">
+          {/* Profile Header Skeleton */}
+          <div className="bg-white rounded-xl border border-gray-200 p-8 mb-6 animate-pulse">
+            <div className="flex flex-col md:flex-row gap-8">
+              {/* Avatar Skeleton */}
+              <div className="flex-shrink-0">
+                <div className="w-32 h-32 rounded-full bg-gray-200"></div>
+              </div>
+
+              {/* Profile Info Skeleton */}
+              <div className="flex-1 space-y-4">
+                {/* Name */}
+                <div className="h-8 bg-gray-200 rounded-lg w-64"></div>
+                {/* Username */}
+                <div className="h-6 bg-gray-100 rounded-lg w-40"></div>
+                {/* Bio */}
+                <div className="space-y-2">
+                  <div className="h-4 bg-gray-100 rounded-lg w-full"></div>
+                  <div className="h-4 bg-gray-100 rounded-lg w-3/4"></div>
+                </div>
+                {/* Social Links */}
+                <div className="flex gap-3">
+                  <div className="h-8 bg-gray-100 rounded-lg w-24"></div>
+                  <div className="h-8 bg-gray-100 rounded-lg w-24"></div>
+                  <div className="h-8 bg-gray-100 rounded-lg w-24"></div>
+                </div>
+                {/* Meta Info */}
+                <div className="flex gap-4">
+                  <div className="h-5 bg-gray-100 rounded-lg w-32"></div>
+                  <div className="h-5 bg-gray-100 rounded-lg w-32"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Stats Grid Skeleton */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="bg-white rounded-xl border border-gray-200 p-6 animate-pulse">
+                <div className="h-10 w-10 bg-gray-200 rounded-lg mb-3"></div>
+                <div className="h-8 bg-gray-200 rounded-lg w-16 mb-2"></div>
+                <div className="h-4 bg-gray-100 rounded-lg w-24"></div>
+              </div>
+            ))}
+          </div>
+
+          {/* Activity Heatmap Skeleton */}
+          <div className="bg-white rounded-xl border border-gray-200 p-6 mb-6 animate-pulse">
+            <div className="flex items-center justify-between mb-4">
+              <div className="h-6 bg-gray-200 rounded-lg w-48"></div>
+              <div className="flex gap-4">
+                <div className="h-5 bg-gray-100 rounded-lg w-32"></div>
+                <div className="h-5 bg-gray-100 rounded-lg w-32"></div>
+              </div>
+            </div>
+            <div className="space-y-2">
+              {[1, 2, 3, 4, 5, 6, 7].map((i) => (
+                <div key={i} className="flex gap-1">
+                  {Array.from({ length: 53 }).map((_, j) => (
+                    <div key={j} className="w-3 h-3 bg-gray-100 rounded-sm"></div>
+                  ))}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Tabs Skeleton */}
+          <div className="bg-white rounded-xl border border-gray-200 animate-pulse">
+            <div className="border-b border-gray-200 p-2">
+              <div className="flex gap-2">
+                {[1, 2, 3, 4].map((i) => (
+                  <div key={i} className="h-10 bg-gray-100 rounded-lg w-40"></div>
+                ))}
+              </div>
+            </div>
+            <div className="p-6">
+              <div className="text-center py-12 space-y-4">
+                <div className="w-16 h-16 bg-gray-200 rounded-full mx-auto"></div>
+                <div className="h-6 bg-gray-200 rounded-lg w-48 mx-auto"></div>
+                <div className="h-4 bg-gray-100 rounded-lg w-64 mx-auto"></div>
+              </div>
+            </div>
           </div>
         </div>
       </PageContainer>
