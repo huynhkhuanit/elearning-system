@@ -100,9 +100,24 @@ export default function SettingsPage() {
     setLoading(true);
 
     try {
-      // TODO: Implement API call to update profile
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const response = await fetch('/api/users/profile', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(profileForm),
+      });
+
+      const data = await response.json();
+
+      if (!data.success) {
+        throw new Error(data.message);
+      }
+
       toast.success('Cập nhật thông tin thành công!');
+      
+      // Refresh page to update user data
+      window.location.reload();
     } catch (error: any) {
       toast.error(error.message || 'Có lỗi xảy ra!');
     } finally {
@@ -126,8 +141,23 @@ export default function SettingsPage() {
     setLoading(true);
 
     try {
-      // TODO: Implement API call to change password
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const response = await fetch('/api/users/password', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          current_password: passwordForm.current_password,
+          new_password: passwordForm.new_password,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!data.success) {
+        throw new Error(data.message);
+      }
+
       toast.success('Đổi mật khẩu thành công!');
       setPasswordForm({
         current_password: '',
