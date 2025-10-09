@@ -169,17 +169,37 @@ export default function Header() {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -10 }}
                       transition={{ duration: 0.2 }}
-                      className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-50"
+                      className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden z-50"
                     >
-                      {/* User Info Header */}
-                      <div className="px-4 py-3 border-b border-gray-100">
-                        <p className="text-sm font-semibold text-gray-900">{user.full_name}</p>
-                        <p className="text-xs text-gray-500">{user.email}</p>
-                        {user.membership_type === 'PRO' && (
-                          <span className="inline-block mt-1 px-2 py-0.5 bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-xs font-semibold rounded-full">
-                            PRO
-                          </span>
-                        )}
+                      {/* User Info Header - 2 Columns */}
+                      <div className="px-4 py-4 border-b border-gray-100">
+                        <div className="flex items-start gap-3">
+                          {/* Avatar Column */}
+                          <div className="flex-shrink-0 relative">
+                            {user.avatar_url ? (
+                              <img
+                                src={user.avatar_url}
+                                alt={user.full_name}
+                                className="w-12 h-12 rounded-full object-cover"
+                              />
+                            ) : (
+                              <div className="w-12 h-12 rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 flex items-center justify-center text-white font-bold text-lg">
+                                {user.full_name.charAt(0).toUpperCase()}
+                              </div>
+                            )}
+                            {user.membership_type === 'PRO' && (
+                              <div className="absolute -bottom-1 -right-1 bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-1.5 py-0.5 rounded-full text-[10px] font-bold border-2 border-white">
+                                PRO
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Info Column */}
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-semibold text-gray-900 truncate">{user.full_name}</p>
+                            <p style={{ fontSize: '14px' }} className="text-gray-500 truncate">@{user.username}</p>
+                          </div>
+                        </div>
                       </div>
 
                       {/* Main Menu Items */}
