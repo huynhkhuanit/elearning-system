@@ -19,38 +19,49 @@ export default function ActivityHeatmap({
   const [hoveredDay, setHoveredDay] = useState<ActivityDay | null>(null);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
 
-  // Group activities by week (starting from Sunday)
-  const weeks: (ActivityDay | null)[][] = [];
-  
-  // Get the first and last date
-  const firstDate = activities.length > 0 ? new Date(activities[0].date) : new Date();
-  const lastDate = activities.length > 0 ? new Date(activities[activities.length - 1].date) : new Date();
-  
-  // Start from the Sunday of the week containing the first date
-  const startDate = new Date(firstDate);
-  startDate.setDate(startDate.getDate() - startDate.getDay());
-  
-  // Create a map for quick lookup
+  // Create activity map for quick lookup
   const activityMap = new Map<string, ActivityDay>();
   activities.forEach(activity => {
     activityMap.set(activity.date, activity);
   });
+
+  // Calculate date range (last 12 months)
+  const today = new Date();
+  const endDate = new Date(today);
+  const startDate = new Date(today);
+  startDate.setMonth(startDate.getMonth() - 12);
+  startDate.setDate(startDate.getDate() + 1); // Start from 12 months ago + 1 day
   
-  // Build weeks array
-  let currentDate = new Date(startDate);
+  // Find the Sunday before start date (GitHub starts weeks on Sunday)
+  const firstSunday = new Date(startDate);
+  firstSunday.setDate(firstSunday.getDate() - firstSunday.getDay());
+  
+  // Build weeks array (7 days per week, Sunday to Saturday)
+  const weeks: (ActivityDay | null)[][] = [];
   let currentWeek: (ActivityDay | null)[] = [];
+  let currentDate = new Date(firstSunday);
   
-  while (currentDate <= lastDate) {
+  while (currentDate <= endDate) {
     const dateStr = currentDate.toISOString().split('T')[0];
     const activity = activityMap.get(dateStr);
     
-    if (activity) {
-      currentWeek.push(activity);
+    // Only add activities within our date range
+    if (currentDate >= startDate && currentDate <= endDate) {
+      if (activity) {
+        currentWeek.push(activity);
+      } else {
+        // Create a default activity with 0 count
+        currentWeek.push({
+          date: dateStr,
+          count: 0,
+          level: 0
+        });
+      }
     } else {
-      currentWeek.push(null);
+      currentWeek.push(null); // Outside range
     }
     
-    // If Sunday (end of week) or last date, push week
+    // If Saturday (end of week), push week and start new one
     if (currentDate.getDay() === 6) {
       weeks.push([...currentWeek]);
       currentWeek = [];
@@ -59,7 +70,7 @@ export default function ActivityHeatmap({
     currentDate.setDate(currentDate.getDate() + 1);
   }
   
-  // Push remaining days
+  // Push remaining days if any
   if (currentWeek.length > 0) {
     while (currentWeek.length < 7) {
       currentWeek.push(null);
@@ -67,14 +78,14 @@ export default function ActivityHeatmap({
     weeks.push(currentWeek);
   }
 
-  // Get color based on activity level - GitHub style
+  // Get color based on activity level - GitHub green palette
   const getColor = (level: number): string => {
     const colors = {
-      0: '#ebedf0', // No activity - light gray
-      1: '#9be9a8', // Low - light green
-      2: '#40c463', // Medium - medium green
-      3: '#30a14e', // High - dark green
-      4: '#216e39', // Very high - very dark green
+      0: '#ebedf0', // No activity
+      1: '#9be9a8', // Low
+      2: '#40c463', // Medium
+      3: '#30a14e', // High
+      4: '#216e39', // Very high
     };
     return colors[level as keyof typeof colors] || colors[0];
   };
@@ -92,19 +103,21 @@ export default function ActivityHeatmap({
     setHoveredDay(null);
   };
 
-  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-  const daysOfWeek = ['Mon', 'Wed', 'Fri'];
+  // Month labels
+  const months = ['Th1', 'Th2', 'Th3', 'Th4', 'Th5', 'Th6', 'Th7', 'Th8', 'Th9', 'Th10', 'Th11', 'Th12'];
 
-  // Get month labels for the timeline
+  // Get month labels positioned correctly
   const getMonthLabels = () => {
     const labels: { month: string; weekIndex: number }[] = [];
     let lastMonth = -1;
 
     weeks.forEach((week, weekIndex) => {
-      const firstDayOfWeek = week.find(day => day !== null);
-      if (firstDayOfWeek) {
-        const date = new Date(firstDayOfWeek.date);
+      const firstDay = week.find(day => day !== null);
+      if (firstDay) {
+        const date = new Date(firstDay.date);
         const month = date.getMonth();
+        
+        // Only show if it's a new month and we have at least 2 weeks visible
         if (month !== lastMonth && weekIndex > 0) {
           labels.push({ month: months[month], weekIndex });
           lastMonth = month;
@@ -118,69 +131,63 @@ export default function ActivityHeatmap({
   const monthLabels = getMonthLabels();
 
   return (
-    <div className="w-full bg-white rounded-lg border border-gray-200 p-5">
+    <div className="bg-white rounded-lg border border-gray-200 p-6">
       {/* Header */}
-      <div className="mb-4">
-        <h3 className="text-sm font-semibold text-gray-900 mb-2">
-          {totalCount} hoạt động trong năm qua
+      <div className="mb-5">
+        <h3 className="text-sm font-semibold text-gray-900">
+          {totalCount} hoạt động trong 12 tháng qua
         </h3>
       </div>
 
-      {/* Activity Grid */}
-      <div className="relative">
-        <div className="inline-block">
+      {/* Grid container with overflow scroll */}
+      <div className="overflow-x-auto">
+        <div className="inline-block min-w-full">
           {/* Month labels */}
-          <div className="flex mb-1 ml-7" style={{ height: '15px' }}>
+          <div className="relative mb-2" style={{ paddingLeft: '30px', height: '15px' }}>
             {monthLabels.map(({ month, weekIndex }) => (
-              <div
+              <span
                 key={`${month}-${weekIndex}`}
-                className="text-xs text-gray-600 font-normal"
+                className="absolute text-xs text-gray-600"
                 style={{
-                  position: 'absolute',
-                  left: `${weekIndex * 13 + 28}px`,
+                  left: `${weekIndex * 13 + 30}px`,
                 }}
               >
                 {month}
-              </div>
+              </span>
             ))}
           </div>
 
-          {/* Grid container */}
-          <div className="flex">
-            {/* Day labels */}
-            <div className="flex flex-col justify-between pr-2 text-xs text-gray-600" style={{ width: '25px', height: `${7 * 11}px` }}>
-              {daysOfWeek.map((day) => (
-                <div
-                  key={day}
-                  className="leading-none"
-                  style={{ height: '11px', display: 'flex', alignItems: 'center' }}
-                >
-                  {day}
-                </div>
-              ))}
+          {/* Grid with day labels and activity cells */}
+          <div className="flex gap-1">
+            {/* Day labels on the left */}
+            <div className="flex flex-col justify-around text-xs text-gray-600 pr-1" style={{ width: '28px' }}>
+              <div style={{ height: '10px' }}></div> {/* Sun */}
+              <div>T2</div>
+              <div style={{ height: '10px' }}></div> {/* Tue */}
+              <div>T4</div>
+              <div style={{ height: '10px' }}></div> {/* Thu */}
+              <div>T6</div>
+              <div style={{ height: '10px' }}></div> {/* Sat */}
             </div>
 
-            {/* Activity cells */}
+            {/* Activity cells grid */}
             <div className="flex gap-[3px]">
               {weeks.map((week, weekIndex) => (
                 <div key={weekIndex} className="flex flex-col gap-[3px]">
-                  {week.map((activity, dayIndex) => {
-                    return (
-                      <div
-                        key={`${weekIndex}-${dayIndex}`}
-                        className="rounded-sm cursor-pointer transition-all"
-                        style={{
-                          width: '10px',
-                          height: '10px',
-                          backgroundColor: activity ? getColor(activity.level) : '#ebedf0',
-                          outline: hoveredDay === activity ? '2px solid rgba(0,0,0,0.3)' : 'none',
-                          outlineOffset: '2px',
-                        }}
-                        onMouseEnter={(e) => activity && handleMouseEnter(activity, e)}
-                        onMouseLeave={handleMouseLeave}
-                      />
-                    );
-                  })}
+                  {week.map((day, dayIndex) => (
+                    <div
+                      key={`${weekIndex}-${dayIndex}`}
+                      className={`rounded-sm transition-all ${day ? 'cursor-pointer hover:ring-2 hover:ring-gray-400' : ''}`}
+                      style={{
+                        width: '10px',
+                        height: '10px',
+                        backgroundColor: day ? getColor(day.level) : '#ebedf0',
+                        opacity: day === null ? 0 : 1,
+                      }}
+                      onMouseEnter={(e) => day && handleMouseEnter(day, e)}
+                      onMouseLeave={handleMouseLeave}
+                    />
+                  ))}
                 </div>
               ))}
             </div>
@@ -188,27 +195,28 @@ export default function ActivityHeatmap({
         </div>
       </div>
 
-      {/* Footer with legend and streak */}
-      <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-200">
-        <div className="text-xs text-gray-600">
-          <span className="font-semibold text-orange-600">🔥 {currentStreak} ngày</span> streak hiện tại
+      {/* Footer */}
+      <div className="mt-4 pt-4 border-t border-gray-200 flex items-center justify-between text-xs">
+        <div className="text-gray-600">
+          <span className="font-semibold text-orange-600">🔥 {currentStreak} ngày</span> chuỗi học tập
         </div>
         
         {/* Legend */}
-        <div className="flex items-center gap-2 text-xs text-gray-600">
+        <div className="flex items-center gap-2 text-gray-600">
           <span>Ít</span>
-          {[0, 1, 2, 3, 4].map((level) => (
-            <div
-              key={level}
-              className="rounded-sm"
-              style={{ 
-                width: '10px', 
-                height: '10px',
-                backgroundColor: getColor(level) 
-              }}
-              title={`Level ${level}`}
-            />
-          ))}
+          <div className="flex gap-1">
+            {[0, 1, 2, 3, 4].map((level) => (
+              <div
+                key={level}
+                className="rounded-sm"
+                style={{
+                  width: '10px',
+                  height: '10px',
+                  backgroundColor: getColor(level),
+                }}
+              />
+            ))}
+          </div>
           <span>Nhiều</span>
         </div>
       </div>
@@ -216,25 +224,21 @@ export default function ActivityHeatmap({
       {/* Tooltip */}
       {hoveredDay && (
         <div
-          className="fixed z-50 bg-gray-900 text-white text-xs px-3 py-2 rounded-md shadow-lg pointer-events-none"
+          className="fixed z-50 bg-gray-900 text-white px-3 py-2 rounded-md shadow-lg pointer-events-none whitespace-nowrap"
           style={{
             left: `${tooltipPosition.x}px`,
             top: `${tooltipPosition.y}px`,
             transform: 'translate(-50%, -100%)',
           }}
         >
-          <div className="font-medium mb-0.5">
-            {hoveredDay.count > 0 ? (
-              <span>{hoveredDay.count} hoạt động</span>
-            ) : (
-              <span>Không có hoạt động</span>
-            )}
+          <div className="text-xs font-semibold mb-0.5">
+            {hoveredDay.count} hoạt động
           </div>
-          <div className="text-gray-300">
+          <div className="text-xs text-gray-300">
             {new Date(hoveredDay.date).toLocaleDateString('vi-VN', {
               weekday: 'short',
-              month: 'short',
               day: 'numeric',
+              month: 'short',
               year: 'numeric',
             })}
           </div>
