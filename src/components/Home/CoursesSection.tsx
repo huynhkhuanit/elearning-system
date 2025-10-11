@@ -145,7 +145,7 @@ export default function CoursesSection() {
                 <h2 className="font-[900] text-gray-900 mb-2">
                   Khóa học Pro
                   <span className="ml-3 text-sm font-semibold text-white bg-gradient-to-r from-yellow-500 to-orange-500 px-3 py-1 rounded-full">
-                     Premium
+                     PRO
                   </span>
                 </h2>
                 <p className="text-gray-600">Khóa học JavaScript chuyên sâu cho developer</p>
@@ -195,11 +195,22 @@ function CourseCard({ course, onEnroll, isEnrolling }: { course: Course; onEnrol
   const router = useRouter();
   
   const handleClick = () => {
-    router.push(`/courses/${course.slug}`);
+    // Nếu là khóa PRO, chuyển đến landing page
+    if (course.isPro) {
+      router.push(`/courses/${course.slug}`);
+    } else {
+      // Nếu là khóa FREE, đăng ký luôn
+      onEnroll();
+    }
   };
   
   return (
-    <motion.div whileHover={{ y: -4 }} className="group rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 h-full flex flex-col hover:bg-[#f7f7f7] cursor-pointer" style={{ backgroundColor: "#f7f7f7" }} onClick={handleClick}>
+    <motion.div 
+      whileHover={{ y: -4 }} 
+      className="group rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 h-full flex flex-col hover:bg-[#f7f7f7] cursor-pointer" 
+      style={{ backgroundColor: "#f7f7f7" }} 
+      onClick={handleClick}
+    >
       <div className={`relative h-32 bg-gradient-to-br ${course.gradient} flex items-center justify-center flex-shrink-0`}>
         <div className="text-white text-center">
           <Play className="w-8 h-8 mx-auto mb-2 opacity-80 group-hover:opacity-100 transition-opacity duration-200" />
@@ -208,7 +219,7 @@ function CourseCard({ course, onEnroll, isEnrolling }: { course: Course; onEnrol
         {course.featured && (
           <div className="absolute top-3 right-3">
             <div className="w-[26px] px-[6px] py-[6px] bg-[#0000004d] rounded-lg flex items-center justify-center">
-              <span className="text-white text-xs"></span>
+              <span className="text-white text-xs">⭐</span>
             </div>
           </div>
         )}
@@ -250,18 +261,6 @@ function CourseCard({ course, onEnroll, isEnrolling }: { course: Course; onEnrol
           <Badge variant={levelDisplay === "Nâng cao" ? "warning" : "success"} size="sm">
             {levelDisplay}
           </Badge>
-        </div>
-        <div className="mt-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-          <button 
-            onClick={(e) => {
-              e.stopPropagation();
-              onEnroll();
-            }}
-            disabled={isEnrolling} 
-            className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold py-2 px-4 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {isEnrolling ? "Đang đăng ký..." : "Xem chi tiết"}
-          </button>
         </div>
       </div>
     </motion.div>
