@@ -10,7 +10,7 @@ import { User, Lock, Bell, Wand2, Camera, Globe, Linkedin, Github, Twitter, Face
 type SettingsTab = 'profile' | 'password' | 'notifications' | 'ai';
 
 export default function SettingsPage() {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, isLoading: authLoading } = useAuth();
   const toast = useToast();
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -43,7 +43,9 @@ export default function SettingsPage() {
   const [avatarPreview, setAvatarPreview] = useState('');
 
   useEffect(() => {
-    if (!isAuthenticated) {
+    // Chỉ redirect khi đã load xong và không authenticated
+    // Tránh redirect khi đang loading auth state
+    if (!authLoading && !isAuthenticated) {
       router.push('/auth/login');
       return;
     }
@@ -87,7 +89,7 @@ export default function SettingsPage() {
     if (user) {
       loadProfileData();
     }
-  }, [user?.username, isAuthenticated, router]);
+  }, [user?.username, isAuthenticated, authLoading, router]);
 
   const handleAvatarClick = () => {
     fileInputRef.current?.click();
@@ -204,6 +206,21 @@ export default function SettingsPage() {
     { id: 'ai' as SettingsTab, label: 'AI Assistant', icon: Wand2 },
   ];
 
+  // Hiển thị loading khi đang check authentication
+  if (authLoading) {
+    return (
+      <PageContainer>
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-gray-600">Đang tải...</p>
+          </div>
+        </div>
+      </PageContainer>
+    );
+  }
+
+  // Không render gì nếu chưa authenticate (đang redirect)
   if (!user) {
     return null;
   }
