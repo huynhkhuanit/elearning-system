@@ -147,10 +147,10 @@ export default function ActivityHeatmap({
     const monthLabels = getMonthLabels();
 
     return (
-        <div className="bg-card rounded-lg border border-border p-6">
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
             {/* Header */}
             <div className="mb-5">
-                <h3 className="text-sm font-semibold text-foreground">
+                <h3 className="text-sm font-semibold text-gray-900">
                     <span className="bg-gradient-to-r font-[900] from-indigo-600 to-purple-600 bg-clip-text text-transparent">
                         {totalCount}
                     </span>{" "}
@@ -173,7 +173,7 @@ export default function ActivityHeatmap({
                         {monthLabels.map(({ month, weekIndex }) => (
                             <span
                                 key={`${month}-${weekIndex}`}
-                                className="absolute text-xs text-muted-foreground"
+                                className="absolute text-xs text-gray-600"
                                 style={{
                                     left: `${weekIndex * 13 + 30}px`,
                                 }}
@@ -187,7 +187,7 @@ export default function ActivityHeatmap({
                     <div className="flex gap-1">
                         {/* Day labels on the left */}
                         <div
-                            className="flex flex-col justify-around text-xs text-muted-foreground pr-1"
+                            className="flex flex-col justify-around text-xs text-gray-600 pr-1"
                             style={{ width: "28px" }}
                         >
                             <div style={{ height: "10px" }}></div> {/* Sun */}
@@ -236,8 +236,8 @@ export default function ActivityHeatmap({
             </div>
 
             {/* Footer */}
-            <div className="mt-4 pt-4 border-t border-border flex items-center justify-between text-xs">
-                <div className="text-muted-foreground">
+            <div className="mt-4 pt-4 border-t border-gray-200 flex items-center justify-between text-xs">
+                <div className="text-gray-600">
                     <span className="font-semibold text-orange-600">
                         🔥 {currentStreak} ngày
                     </span>{" "}
@@ -245,7 +245,7 @@ export default function ActivityHeatmap({
                 </div>
 
                 {/* Legend */}
-                <div className="flex items-center gap-2 text-muted-foreground">
+                <div className="flex items-center gap-2 text-gray-600">
                     <span>Ít</span>
                     <div className="flex gap-1">
                         {[0, 1, 2, 3, 4].map((level) => (

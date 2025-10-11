@@ -20,19 +20,20 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="vi" suppressHydrationWarning>
-      <body className="antialiased bg-background text-foreground">
+      <body className="antialiased" style={{ backgroundColor: '#ffffff' }}>
         <ToastProvider>
           <AuthProvider>
             <ThemeProvider
               attribute="class"
-              defaultTheme="system"
-              enableSystem={true}
-              disableTransitionOnChange={false}
+              defaultTheme="light"
+              forcedTheme="light"
+              enableSystem={false}
+              enableColorScheme={false}
             >
-              <div className="bg-background min-h-screen">
+              <div style={{ backgroundColor: '#ffffff', minHeight: '100vh' }}>
                 <Menu />
                 <Header />
-                <main className="bg-background ml-24">
+                <main style={{ backgroundColor: '#ffffff', marginLeft: '96px' }}>
                   {children}
                 </main>
                 <Footer />

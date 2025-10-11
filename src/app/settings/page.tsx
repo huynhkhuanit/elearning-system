@@ -254,8 +254,8 @@ export default function SettingsPage() {
     <PageContainer>
       <div className="max-w-7xl mx-auto py-8 px-4">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground">Cài đặt tài khoản</h1>
-          <p className="text-muted-foreground mt-2">
+          <h1 className="text-3xl font-bold text-gray-900">Cài đặt tài khoản</h1>
+          <p className="text-gray-600 mt-2">
             Quản lý cài đặt tài khoản của bạn như thông tin cá nhân, cài đặt bảo mật, quản lý thông báo, v.v.
           </p>
         </div>
@@ -263,7 +263,7 @@ export default function SettingsPage() {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Sidebar */}
           <div className="lg:col-span-1">
-            <nav className="bg-card rounded-xl border border-border p-2">
+            <nav className="bg-white rounded-xl border border-gray-200 p-2">
               {tabs.map((tab) => {
                 const Icon = tab.icon;
                 return (
@@ -273,8 +273,8 @@ export default function SettingsPage() {
                     className={`
                       w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all
                       ${activeTab === tab.id
-                        ? 'bg-primary text-white'
-                        : 'text-foreground hover:bg-muted'
+                        ? 'bg-gray-800 text-white'
+                        : 'text-gray-700 hover:bg-gray-50'
                       }
                     `}
                   >
@@ -288,12 +288,12 @@ export default function SettingsPage() {
 
           {/* Content */}
           <div className="lg:col-span-3">
-            <div className="bg-card rounded-xl border border-border p-6">
+            <div className="bg-white rounded-xl border border-gray-200 p-6">
               {/* Profile Tab */}
               {activeTab === 'profile' && (
                 <div>
-                  <h2 className="text-xl font-bold text-foreground mb-6">Thông tin cá nhân</h2>
-                  <p className="text-muted-foreground mb-6">
+                  <h2 className="text-xl font-bold text-gray-900 mb-6">Thông tin cá nhân</h2>
+                  <p className="text-gray-600 mb-6">
                     Quản lý tên hiển thị, tên người dùng, bio và avatar của bạn.
                   </p>
 
@@ -305,7 +305,7 @@ export default function SettingsPage() {
                     <form onSubmit={handleProfileSubmit} className="space-y-6">
                     {/* Avatar Upload */}
                     <div>
-                      <label className="block text-sm font-semibold text-foreground mb-3">
+                      <label className="block text-sm font-semibold text-gray-900 mb-3">
                         Ảnh đại diện
                       </label>
                       <div className="flex items-center gap-6">
@@ -313,7 +313,7 @@ export default function SettingsPage() {
                           <img
                             src={avatarPreview}
                             alt="Avatar"
-                            className="w-20 h-20 rounded-full object-cover border-2 border-border"
+                            className="w-20 h-20 rounded-full object-cover border-2 border-gray-200"
                           />
                           {uploadingAvatar && (
                             <div className="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center">
@@ -338,7 +338,7 @@ export default function SettingsPage() {
                             disabled={uploadingAvatar}
                             className="hidden"
                           />
-                          <p className="text-sm text-muted-foreground mb-2">
+                          <p className="text-sm text-gray-600 mb-2">
                             Ảnh hồ sơ của bạn sẽ hiển thị công khai trên các trang của bạn.
                           </p>
                           <button
@@ -355,63 +355,63 @@ export default function SettingsPage() {
 
                     {/* Full Name */}
                     <div>
-                      <label className="block text-sm font-semibold text-foreground mb-2">
+                      <label className="block text-sm font-semibold text-gray-900 mb-2">
                         Họ và tên
                       </label>
                       <input
                         type="text"
                         value={profileForm.full_name}
                         onChange={(e) => setProfileForm({ ...profileForm, full_name: e.target.value })}
-                        className="w-full px-4 py-3 border border-input bg-background text-foreground rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                         placeholder="Khuân Huynh"
                       />
                     </div>
 
                     {/* Username */}
                     <div>
-                      <label className="block text-sm font-semibold text-foreground mb-2">
+                      <label className="block text-sm font-semibold text-gray-900 mb-2">
                         Tên người dùng
                       </label>
                       <input
                         type="text"
                         value={profileForm.username}
                         onChange={(e) => setProfileForm({ ...profileForm, username: e.target.value })}
-                        className="w-full px-4 py-3 border border-input bg-background text-foreground rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                         placeholder="huynhkhuanit"
                       />
-                      <p className="text-xs text-muted-foreground mt-1">
+                      <p className="text-xs text-gray-500 mt-1">
                         Tên người dùng của bạn sẽ xuất hiện trong URL profile
                       </p>
                     </div>
 
                     {/* Bio */}
                     <div>
-                      <label className="block text-sm font-semibold text-foreground mb-2">
+                      <label className="block text-sm font-semibold text-gray-900 mb-2">
                         Giới thiệu
                       </label>
                       <textarea
                         value={profileForm.bio}
                         onChange={(e) => setProfileForm({ ...profileForm, bio: e.target.value })}
                         rows={4}
-                        className="w-full px-4 py-3 border border-input bg-background text-foreground rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
                         placeholder="Hãy điền Bio giới thiệu về bản thân tại đây nhé..."
                       />
-                      <p className="text-xs text-muted-foreground mt-1">
+                      <p className="text-xs text-gray-500 mt-1">
                         Viết một vài dòng giới thiệu về bản thân
                       </p>
                     </div>
 
                     {/* Social Links */}
-                    <div className="border-t border-border pt-6">
-                      <h3 className="text-lg font-semibold text-foreground mb-4">Thông tin mạng xã hội</h3>
-                      <p className="text-sm text-muted-foreground mb-4">
+                    <div className="border-t border-gray-200 pt-6">
+                      <h3 className="text-lg font-semibold text-gray-900 mb-4">Thông tin mạng xã hội</h3>
+                      <p className="text-sm text-gray-600 mb-4">
                         Quản lý liên kết tới các trang mạng xã hội của bạn.
                       </p>
 
                       <div className="space-y-4">
                         {/* Website */}
                         <div>
-                          <label className="flex items-center gap-2 text-sm font-medium text-foreground mb-2">
+                          <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
                             <Globe className="w-4 h-4" />
                             Trang web cá nhân
                           </label>
@@ -419,14 +419,14 @@ export default function SettingsPage() {
                             type="url"
                             value={profileForm.website}
                             onChange={(e) => setProfileForm({ ...profileForm, website: e.target.value })}
-                            className="w-full px-4 py-2.5 border border-input bg-background text-foreground rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                             placeholder="https://yourwebsite.com"
                           />
                         </div>
 
                         {/* LinkedIn */}
                         <div>
-                          <label className="flex items-center gap-2 text-sm font-medium text-foreground mb-2">
+                          <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
                             <Linkedin className="w-4 h-4" />
                             LinkedIn
                           </label>
@@ -434,14 +434,14 @@ export default function SettingsPage() {
                             type="url"
                             value={profileForm.linkedin}
                             onChange={(e) => setProfileForm({ ...profileForm, linkedin: e.target.value })}
-                            className="w-full px-4 py-2.5 border border-input bg-background text-foreground rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                             placeholder="https://linkedin.com/in/username"
                           />
                         </div>
 
                         {/* GitHub */}
                         <div>
-                          <label className="flex items-center gap-2 text-sm font-medium text-foreground mb-2">
+                          <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
                             <Github className="w-4 h-4" />
                             GitHub
                           </label>
@@ -449,14 +449,14 @@ export default function SettingsPage() {
                             type="url"
                             value={profileForm.github}
                             onChange={(e) => setProfileForm({ ...profileForm, github: e.target.value })}
-                            className="w-full px-4 py-2.5 border border-input bg-background text-foreground rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                             placeholder="https://github.com/username"
                           />
                         </div>
 
                         {/* Twitter */}
                         <div>
-                          <label className="flex items-center gap-2 text-sm font-medium text-foreground mb-2">
+                          <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
                             <Twitter className="w-4 h-4" />
                             Twitter / X
                           </label>
@@ -464,14 +464,14 @@ export default function SettingsPage() {
                             type="url"
                             value={profileForm.twitter}
                             onChange={(e) => setProfileForm({ ...profileForm, twitter: e.target.value })}
-                            className="w-full px-4 py-2.5 border border-input bg-background text-foreground rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                             placeholder="https://twitter.com/username"
                           />
                         </div>
 
                         {/* Facebook */}
                         <div>
-                          <label className="flex items-center gap-2 text-sm font-medium text-foreground mb-2">
+                          <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
                             <Facebook className="w-4 h-4" />
                             Facebook
                           </label>
@@ -479,7 +479,7 @@ export default function SettingsPage() {
                             type="url"
                             value={profileForm.facebook}
                             onChange={(e) => setProfileForm({ ...profileForm, facebook: e.target.value })}
-                            className="w-full px-4 py-2.5 border border-input bg-background text-foreground rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                             placeholder="https://facebook.com/username"
                           />
                         </div>
@@ -504,22 +504,22 @@ export default function SettingsPage() {
               {/* Password Tab */}
               {activeTab === 'password' && (
                 <div>
-                  <h2 className="text-xl font-bold text-foreground mb-6">Mật khẩu và bảo mật</h2>
-                  <p className="text-muted-foreground mb-6">
+                  <h2 className="text-xl font-bold text-gray-900 mb-6">Mật khẩu và bảo mật</h2>
+                  <p className="text-gray-600 mb-6">
                     Cập nhật mật khẩu của bạn để bảo vệ tài khoản.
                   </p>
 
                   <form onSubmit={handlePasswordSubmit} className="space-y-6">
                     {/* Current Password */}
                     <div>
-                      <label className="block text-sm font-semibold text-foreground mb-2">
+                      <label className="block text-sm font-semibold text-gray-900 mb-2">
                         Mật khẩu hiện tại
                       </label>
                       <input
                         type="password"
                         value={passwordForm.current_password}
                         onChange={(e) => setPasswordForm({ ...passwordForm, current_password: e.target.value })}
-                        className="w-full px-4 py-3 border border-input bg-background text-foreground rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                         placeholder="••••••••"
                         required
                       />
@@ -527,32 +527,32 @@ export default function SettingsPage() {
 
                     {/* New Password */}
                     <div>
-                      <label className="block text-sm font-semibold text-foreground mb-2">
+                      <label className="block text-sm font-semibold text-gray-900 mb-2">
                         Mật khẩu mới
                       </label>
                       <input
                         type="password"
                         value={passwordForm.new_password}
                         onChange={(e) => setPasswordForm({ ...passwordForm, new_password: e.target.value })}
-                        className="w-full px-4 py-3 border border-input bg-background text-foreground rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                         placeholder="••••••••"
                         required
                       />
-                      <p className="text-xs text-muted-foreground mt-1">
+                      <p className="text-xs text-gray-500 mt-1">
                         Mật khẩu phải có ít nhất 6 ký tự
                       </p>
                     </div>
 
                     {/* Confirm Password */}
                     <div>
-                      <label className="block text-sm font-semibold text-foreground mb-2">
+                      <label className="block text-sm font-semibold text-gray-900 mb-2">
                         Xác nhận mật khẩu mới
                       </label>
                       <input
                         type="password"
                         value={passwordForm.confirm_password}
                         onChange={(e) => setPasswordForm({ ...passwordForm, confirm_password: e.target.value })}
-                        className="w-full px-4 py-3 border border-input bg-background text-foreground rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                         placeholder="••••••••"
                         required
                       />
@@ -575,13 +575,13 @@ export default function SettingsPage() {
               {/* Notifications Tab */}
               {activeTab === 'notifications' && (
                 <div>
-                  <h2 className="text-xl font-bold text-foreground mb-6">Tùy chọn thông báo</h2>
-                  <p className="text-muted-foreground mb-6">
+                  <h2 className="text-xl font-bold text-gray-900 mb-6">Tùy chọn thông báo</h2>
+                  <p className="text-gray-600 mb-6">
                     Tùy chỉnh các thông báo bạn muốn nhận.
                   </p>
                   <div className="text-center py-12">
-                    <Bell className="w-16 h-16 text-muted-foreground/50 mx-auto mb-4" />
-                    <p className="text-muted-foreground">Chức năng đang được phát triển...</p>
+                    <Bell className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                    <p className="text-gray-600">Chức năng đang được phát triển...</p>
                   </div>
                 </div>
               )}
@@ -589,13 +589,13 @@ export default function SettingsPage() {
               {/* AI Assistant Tab */}
               {activeTab === 'ai' && (
                 <div>
-                  <h2 className="text-xl font-bold text-foreground mb-6">AI Assistant</h2>
-                  <p className="text-muted-foreground mb-6">
+                  <h2 className="text-xl font-bold text-gray-900 mb-6">AI Assistant</h2>
+                  <p className="text-gray-600 mb-6">
                     Cài đặt trợ lý AI để hỗ trợ học tập.
                   </p>
                   <div className="text-center py-12">
-                    <Wand2 className="w-16 h-16 text-muted-foreground/50 mx-auto mb-4" />
-                    <p className="text-muted-foreground">Chức năng đang được phát triển...</p>
+                    <Wand2 className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                    <p className="text-gray-600">Chức năng đang được phát triển...</p>
                   </div>
                 </div>
               )}

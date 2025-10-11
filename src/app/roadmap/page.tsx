@@ -178,7 +178,7 @@ export default function RoadmapPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-white">
       <PageContainer size="lg" className="py-12">
         {/* Header */}
         <motion.div
@@ -187,10 +187,10 @@ export default function RoadmapPage() {
           transition={{ duration: 0.6 }}
           className="mb-12"
         >
-          <h1 className="font-[900] text-foreground mb-4">
+          <h1 className="font-[900] text-gray-900 mb-4">
             Lộ trình học
           </h1>
-          <p className="text-muted-foreground leading-relaxed max-w-4xl">
+          <p className="text-gray-600 leading-relaxed max-w-4xl">
             Để bắt đầu một cách thuận lợi, bạn nên tập trung vào một lộ trình học. Ví dụ: Để đi làm với vị trí "Lập trình viên Front-end" bạn nên tập trung vào lộ trình "Front-end".
           </p>
         </motion.div>
@@ -203,11 +203,11 @@ export default function RoadmapPage() {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
-              className="w-full max-w-[500px] bg-card rounded-2xl border border-border hover:shadow-lg transition-all duration-300 overflow-hidden group"
+              className="w-full max-w-[500px] bg-white rounded-2xl border border-gray-200 hover:shadow-lg transition-all duration-300 overflow-hidden group"
             >
               {/* Header with Icon */}
-              <div className="relative h-28 bg-gradient-to-br from-muted/50 to-muted flex items-center justify-center">
-                <div className="w-20 h-20 bg-card rounded-full border-4 border-orange-500 flex items-center justify-center shadow-md">
+              <div className="relative h-28 bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
+                <div className="w-20 h-20 bg-white rounded-full border-4 border-orange-500 flex items-center justify-center shadow-md">
                   <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
                     {item.id === 'frontend' ? (
                       <Code className="w-6 h-6 text-white" />
@@ -224,11 +224,11 @@ export default function RoadmapPage() {
               
               {/* Content */}
               <div className="p-6">
-                <h3 className="main-roadmap-card-title text-foreground mb-1 group-hover:text-indigo-600 transition-colors">
+                <h3 className="main-roadmap-card-title text-gray-900 mb-1 group-hover:text-indigo-600 transition-colors">
                   {item.title}
                 </h3>
                 
-                <p className="main-roadmap-card-desc text-muted-foreground mb-4 leading-relaxed line-clamp-3">
+                <p className="main-roadmap-card-desc text-gray-600 mb-4 leading-relaxed line-clamp-3">
                   {item.description}
                 </p>
 
@@ -237,10 +237,10 @@ export default function RoadmapPage() {
                   {item.technologies.slice(0, 7).map((tech, idx) => (
                     <div
                       key={idx}
-                      className="w-10 h-10 bg-muted rounded-full flex items-center justify-center hover:bg-muted/70 transition-colors cursor-pointer border border-border"
+                      className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors cursor-pointer border border-gray-200"
                       title={tech.name}
                     >
-                      <span className="text-xs font-medium text-muted-foreground">
+                      <span className="text-xs font-medium text-gray-600">
                         {tech.name === 'HTML' ? 'H' :
                          tech.name === 'CSS' ? 'C' :
                          tech.name === 'JavaScript' ? 'JS' :
@@ -285,10 +285,10 @@ export default function RoadmapPage() {
           className="mt-20"
         >
           <div className="text-center mb-12">
-            <h2 className="font-[900] text-foreground mb-4">
+            <h2 className="font-[900] text-gray-900 mb-4">
               Role Based <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">Roadmaps</span>
             </h2>
-            <p className="text-muted-foreground max-w-3xl mx-auto">
+            <p className="text-gray-600 max-w-3xl mx-auto">
               Khám phá các lộ trình học được thiết kế đặc biệt cho từng vai trò công việc cụ thể trong ngành công nghệ
             </p>
           </div>
@@ -309,13 +309,13 @@ export default function RoadmapPage() {
                   <div 
                     onClick={() => handleRoadmapClick(roadmap)}
                     className={`
-                      relative p-5 rounded-2xl border-2 transition-all duration-300 cursor-pointer bg-card h-32
-                      ${roadmap.category === 'development' ? 'border-blue-100 dark:border-blue-900 hover:border-blue-300 dark:hover:border-blue-700 hover:bg-blue-50 dark:hover:bg-blue-950/30' :
-                        roadmap.category === 'data' ? 'border-purple-100 dark:border-purple-900 hover:border-purple-300 dark:hover:border-purple-700 hover:bg-purple-50 dark:hover:bg-purple-950/30' :
-                        roadmap.category === 'design' ? 'border-pink-100 dark:border-pink-900 hover:border-pink-300 dark:hover:border-pink-700 hover:bg-pink-50 dark:hover:bg-pink-950/30' :
-                        roadmap.category === 'mobile' ? 'border-green-100 dark:border-green-900 hover:border-green-300 dark:hover:border-green-700 hover:bg-green-50 dark:hover:bg-green-950/30' :
-                        roadmap.category === 'security' ? 'border-red-100 dark:border-red-900 hover:border-red-300 dark:hover:border-red-700 hover:bg-red-50 dark:hover:bg-red-950/30' :
-                        'border-orange-100 dark:border-orange-900 hover:border-orange-300 dark:hover:border-orange-700 hover:bg-orange-50 dark:hover:bg-orange-950/30'}
+                      relative p-5 rounded-2xl border-2 transition-all duration-300 cursor-pointer bg-white h-32
+                      ${roadmap.category === 'development' ? 'border-blue-100 hover:border-blue-300 hover:bg-blue-50' :
+                        roadmap.category === 'data' ? 'border-purple-100 hover:border-purple-300 hover:bg-purple-50' :
+                        roadmap.category === 'design' ? 'border-pink-100 hover:border-pink-300 hover:bg-pink-50' :
+                        roadmap.category === 'mobile' ? 'border-green-100 hover:border-green-300 hover:bg-green-50' :
+                        roadmap.category === 'security' ? 'border-red-100 hover:border-red-300 hover:bg-red-50' :
+                        'border-orange-100 hover:border-orange-300 hover:bg-orange-50'}
                       hover:shadow-lg hover:scale-[1.02] hover:-translate-y-1
                       ${!isAvailable ? 'opacity-75' : ''}
                     `}
@@ -338,7 +338,7 @@ export default function RoadmapPage() {
                         {isAvailable ? (
                           <Bookmark className={`w-4 h-4 ${getCategoryColor(roadmap.category)}`} />
                         ) : (
-                          <Info className="w-4 h-4 text-muted-foreground" />
+                          <Info className="w-4 h-4 text-gray-400" />
                         )}
                       </div>
                     </div>
@@ -353,7 +353,7 @@ export default function RoadmapPage() {
 
                     {/* Coming Soon Badge */}
                     {!isAvailable && (
-                      <div className="absolute -top-2 -left-2 bg-gradient-to-r from-muted to-muted-foreground text-white text-xs px-2 py-1 rounded-full shadow-lg">
+                      <div className="absolute -top-2 -left-2 bg-gradient-to-r from-gray-500 to-gray-600 text-white text-xs px-2 py-1 rounded-full shadow-lg">
                         <span>Coming Soon</span>
                       </div>
                     )}
@@ -376,12 +376,12 @@ export default function RoadmapPage() {
                       </motion.div>
                       
                       <h3 className={`roadmap-card-title w-full px-1 ${
-                        roadmap.category === 'development' ? 'text-blue-900 dark:text-blue-200' :
-                        roadmap.category === 'data' ? 'text-purple-900 dark:text-purple-200' :
-                        roadmap.category === 'design' ? 'text-pink-900 dark:text-pink-200' :
-                        roadmap.category === 'mobile' ? 'text-green-900 dark:text-green-200' :
-                        roadmap.category === 'security' ? 'text-red-900 dark:text-red-200' :
-                        'text-orange-900 dark:text-orange-200'
+                        roadmap.category === 'development' ? 'text-blue-900' :
+                        roadmap.category === 'data' ? 'text-purple-900' :
+                        roadmap.category === 'design' ? 'text-pink-900' :
+                        roadmap.category === 'mobile' ? 'text-green-900' :
+                        roadmap.category === 'security' ? 'text-red-900' :
+                        'text-orange-900'
                       }`} title={roadmap.title}>
                         {roadmap.title}
                       </h3>
@@ -396,27 +396,27 @@ export default function RoadmapPage() {
           <div className="mt-8 flex flex-wrap justify-center gap-4">
             <div className="flex items-center space-x-2">
               <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-              <span className="text-sm text-muted-foreground">Development</span>
+              <span className="text-sm text-gray-600">Development</span>
             </div>
             <div className="flex items-center space-x-2">
               <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
-              <span className="text-sm text-muted-foreground">Data & AI</span>
+              <span className="text-sm text-gray-600">Data & AI</span>
             </div>
             <div className="flex items-center space-x-2">
               <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-              <span className="text-sm text-muted-foreground">Mobile</span>
+              <span className="text-sm text-gray-600">Mobile</span>
             </div>
             <div className="flex items-center space-x-2">
               <div className="w-3 h-3 bg-pink-500 rounded-full"></div>
-              <span className="text-sm text-muted-foreground">Design</span>
+              <span className="text-sm text-gray-600">Design</span>
             </div>
             <div className="flex items-center space-x-2">
               <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-              <span className="text-sm text-muted-foreground">Security</span>
+              <span className="text-sm text-gray-600">Security</span>
             </div>
             <div className="flex items-center space-x-2">
               <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
-              <span className="text-sm text-muted-foreground">Management</span>
+              <span className="text-sm text-gray-600">Management</span>
             </div>
           </div>
         </motion.div>
@@ -426,7 +426,7 @@ export default function RoadmapPage() {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.8 }}
-          className="mt-16 bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 dark:from-indigo-950/30 dark:via-purple-950/30 dark:to-pink-950/30 rounded-3xl p-10 border border-indigo-100 dark:border-indigo-900 shadow-xl"
+          className="mt-16 bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 rounded-3xl p-10 border border-indigo-100 shadow-xl"
         >
           <div className="text-center max-w-4xl mx-auto">
             <motion.div
@@ -438,10 +438,10 @@ export default function RoadmapPage() {
               <Users className="w-10 h-10 text-white" />
             </motion.div>
             
-            <h2 className="font-bold text-foreground mb-4">
+            <h2 className="font-bold text-gray-900 mb-4">
               Bạn chưa chắc chắn về lộ trình?
             </h2>
-            <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed">
+            <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto leading-relaxed">
               Đừng lo lắng! Hãy tham gia cộng đồng của chúng tôi để được tư vấn và hỗ trợ từ các mentor kinh nghiệm trong ngành.
             </p>
             
@@ -515,19 +515,19 @@ export default function RoadmapPage() {
               </p>
             </div>
 
-            <div className="bg-muted/50 dark:bg-muted rounded-xl p-4 mb-6">
-              <h5 className="font-semibold text-foreground mb-2">Những gì bạn có thể làm:</h5>
-              <ul className="text-sm text-muted-foreground space-y-2">
+            <div className="bg-gray-50 rounded-xl p-4 mb-6">
+              <h5 className="font-semibold text-gray-700 mb-2">Những gì bạn có thể làm:</h5>
+              <ul className="text-sm text-gray-600 space-y-2">
                 <li className="flex items-center space-x-2">
-                  <CheckCircle className="w-4 h-4 text-green-500 dark:text-green-400" />
+                  <CheckCircle className="w-4 h-4 text-green-500" />
                   <span>Khám phá các lộ trình khác đang có sẵn</span>
                 </li>
                 <li className="flex items-center space-x-2">
-                  <CheckCircle className="w-4 h-4 text-green-500 dark:text-green-400" />
+                  <CheckCircle className="w-4 h-4 text-green-500" />
                   <span>Đăng ký nhận thông báo khi lộ trình ra mắt</span>
                 </li>
                 <li className="flex items-center space-x-2">
-                  <CheckCircle className="w-4 h-4 text-green-500 dark:text-green-400" />
+                  <CheckCircle className="w-4 h-4 text-green-500" />
                   <span>Tham gia cộng đồng để thảo luận</span>
                 </li>
               </ul>

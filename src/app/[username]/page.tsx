@@ -64,12 +64,12 @@ export default function UserProfilePage() {
       <PageContainer>
         <div className="max-w-7xl mx-auto py-8 px-4">
           {/* Profile Header Skeleton */}
-          <div className="bg-card rounded-xl border border-border p-8 mb-6 animate-pulse">
+          <div className="bg-white rounded-xl border border-gray-200 p-8 mb-6 animate-pulse">
             <div className="flex flex-col md:flex-row gap-8">
               {/* Avatar Skeleton */}
               <div className="flex-shrink-0">
                 <div className="relative">
-                  <div className="w-32 h-32 rounded-full bg-muted/50 border-4 border-border"></div>
+                  <div className="w-32 h-32 rounded-full bg-gray-200 border-4 border-gray-100"></div>
                 </div>
               </div>
 
@@ -78,14 +78,14 @@ export default function UserProfilePage() {
                 <div className="flex items-start justify-between flex-col md:flex-row gap-4">
                   <div className="flex-1">
                     {/* Name - h1 text-3xl with mb-1 */}
-                    <div className="h-9 bg-muted/70 rounded-lg w-64 mb-1"></div>
+                    <div className="h-9 bg-gray-200 rounded-lg w-64 mb-1"></div>
                     {/* Username - text-lg with mb-4 */}
-                    <div className="h-7 bg-muted/50 rounded-lg w-40 mb-4"></div>
+                    <div className="h-7 bg-gray-100 rounded-lg w-40 mb-4"></div>
                     
                     {/* Bio - 2 lines with mb-4 */}
                     <div className="space-y-2 mb-4">
-                      <div className="h-5 bg-muted/50 rounded-lg w-full"></div>
-                      <div className="h-5 bg-muted/50 rounded-lg w-3/4"></div>
+                      <div className="h-5 bg-gray-100 rounded-lg w-full"></div>
+                      <div className="h-5 bg-gray-100 rounded-lg w-3/4"></div>
                     </div>
 
                     {/* Social Links - flex gap-3 mb-4 */}
@@ -109,28 +109,28 @@ export default function UserProfilePage() {
           {/* Stats Grid Skeleton */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="bg-card rounded-xl border border-border p-6 animate-pulse">
-                <div className="h-10 w-10 bg-muted/70 rounded-lg mb-3"></div>
-                <div className="h-8 bg-muted/70 rounded-lg w-16 mb-2"></div>
-                <div className="h-4 bg-muted/50 rounded-lg w-24"></div>
+              <div key={i} className="bg-white rounded-xl border border-gray-200 p-6 animate-pulse">
+                <div className="h-10 w-10 bg-gray-200 rounded-lg mb-3"></div>
+                <div className="h-8 bg-gray-200 rounded-lg w-16 mb-2"></div>
+                <div className="h-4 bg-gray-100 rounded-lg w-24"></div>
               </div>
             ))}
           </div>
 
           {/* Activity Heatmap Skeleton */}
-          <div className="bg-card rounded-xl border border-border p-6 mb-6 animate-pulse">
+          <div className="bg-white rounded-xl border border-gray-200 p-6 mb-6 animate-pulse">
             <div className="flex items-center justify-between mb-4">
-              <div className="h-6 bg-muted/70 rounded-lg w-48"></div>
+              <div className="h-6 bg-gray-200 rounded-lg w-48"></div>
               <div className="flex gap-4">
-                <div className="h-5 bg-muted/50 rounded-lg w-32"></div>
-                <div className="h-5 bg-muted/50 rounded-lg w-32"></div>
+                <div className="h-5 bg-gray-100 rounded-lg w-32"></div>
+                <div className="h-5 bg-gray-100 rounded-lg w-32"></div>
               </div>
             </div>
             <div className="space-y-2">
               {[1, 2, 3, 4, 5, 6, 7].map((i) => (
                 <div key={i} className="flex gap-1">
                   {Array.from({ length: 53 }).map((_, j) => (
-                    <div key={j} className="w-3 h-3 bg-muted/50 rounded-sm"></div>
+                    <div key={j} className="w-3 h-3 bg-gray-100 rounded-sm"></div>
                   ))}
                 </div>
               ))}
@@ -138,19 +138,19 @@ export default function UserProfilePage() {
           </div>
 
           {/* Tabs Skeleton */}
-          <div className="bg-card rounded-xl border border-border animate-pulse">
-            <div className="border-b border-border p-2">
+          <div className="bg-white rounded-xl border border-gray-200 animate-pulse">
+            <div className="border-b border-gray-200 p-2">
               <div className="flex gap-2">
                 {[1, 2, 3, 4].map((i) => (
-                  <div key={i} className="h-10 bg-muted/50 rounded-lg w-40"></div>
+                  <div key={i} className="h-10 bg-gray-100 rounded-lg w-40"></div>
                 ))}
               </div>
             </div>
             <div className="p-6">
               <div className="text-center py-12 space-y-4">
-                <div className="w-16 h-16 bg-muted/70 rounded-full mx-auto"></div>
-                <div className="h-6 bg-muted/70 rounded-lg w-48 mx-auto"></div>
-                <div className="h-4 bg-muted/50 rounded-lg w-64 mx-auto"></div>
+                <div className="w-16 h-16 bg-gray-200 rounded-full mx-auto"></div>
+                <div className="h-6 bg-gray-200 rounded-lg w-48 mx-auto"></div>
+                <div className="h-4 bg-gray-100 rounded-lg w-64 mx-auto"></div>
               </div>
             </div>
           </div>
@@ -165,8 +165,8 @@ export default function UserProfilePage() {
         <div className="flex items-center justify-center min-h-screen">
           <div className="text-center">
             <div className="text-6xl mb-4">😔</div>
-            <h1 className="text-2xl font-bold text-foreground mb-2">Không tìm thấy người dùng</h1>
-            <p className="text-muted-foreground">{error || 'Người dùng không tồn tại hoặc đã bị xóa'}</p>
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">Không tìm thấy người dùng</h1>
+            <p className="text-gray-600">{error || 'Người dùng không tồn tại hoặc đã bị xóa'}</p>
           </div>
         </div>
       </PageContainer>
@@ -183,7 +183,7 @@ export default function UserProfilePage() {
     <PageContainer>
       <div className="max-w-7xl mx-auto py-8 px-4">
         {/* Profile Header */}
-        <div className="bg-card rounded-xl border border-border p-8 mb-6">
+        <div className="bg-white rounded-xl border border-gray-200 p-8 mb-6">
           <div className="flex flex-col md:flex-row gap-8">
             {/* Avatar */}
             <div className="flex-shrink-0">
@@ -191,7 +191,7 @@ export default function UserProfilePage() {
                 <img
                   src={avatarUrl}
                   alt={profile.full_name}
-                  className="w-32 h-32 rounded-full border-4 border-border object-cover"
+                  className="w-32 h-32 rounded-full border-4 border-gray-200 object-cover"
                 />
                 {profile.membership_type === 'PRO' && (
                   <div className="absolute -bottom-2 -right-2 bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 border-2 border-white">
@@ -206,13 +206,13 @@ export default function UserProfilePage() {
             <div className="flex-1">
               <div className="flex items-start justify-between flex-col md:flex-row gap-4">
                 <div className="flex-1">
-                  <h1 className="text-3xl font-bold text-foreground mb-1">
+                  <h1 className="text-3xl font-bold text-gray-900 mb-1">
                     {profile.full_name}
                   </h1>
-                  <p className="text-lg text-muted-foreground mb-4">@{profile.username}</p>
+                  <p className="text-lg text-gray-600 mb-4">@{profile.username}</p>
                   
                   {profile.bio && (
-                    <p className="text-foreground mb-4 max-w-2xl">{profile.bio}</p>
+                    <p className="text-gray-700 mb-4 max-w-2xl">{profile.bio}</p>
                   )}
 
                   {/* Social Links */}
@@ -223,7 +223,7 @@ export default function UserProfilePage() {
                           href={profile.website}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="flex items-center gap-2 px-3 py-1.5 bg-muted hover:bg-muted/80 rounded-lg text-sm text-foreground transition-colors"
+                          className="flex items-center gap-2 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm text-gray-700 transition-colors"
                         >
                           <Globe className="w-4 h-4" />
                           <span>Website</span>
@@ -276,7 +276,7 @@ export default function UserProfilePage() {
                     </div>
                   )}
 
-                  <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
+                  <div className="flex flex-wrap gap-4 text-sm text-gray-600">
                     <div className="flex items-center gap-2">
                       <Calendar className="w-4 h-4" />
                       <span>Tham gia từ {joinDate}</span>
@@ -321,9 +321,9 @@ export default function UserProfilePage() {
         )}
 
         {/* Tabs */}
-        <div className="bg-card rounded-xl border border-border">
+        <div className="bg-white rounded-xl border border-gray-200">
           {/* Tab Headers */}
-          <div className="border-b border-border">
+          <div className="border-b border-gray-200">
             <nav className="flex gap-1 p-2 overflow-x-auto">
               {tabs.map((tab) => (
                 <button
@@ -333,13 +333,13 @@ export default function UserProfilePage() {
                     px-4 py-2.5 rounded-lg text-sm font-medium transition-all whitespace-nowrap
                     ${activeTab === tab.id
                       ? 'bg-primary/10 text-primary'
-                      : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                     }
                   `}
                 >
                   {tab.label}
                   {tab.count !== undefined && (
-                    <span className="ml-2 px-2 py-0.5 bg-muted text-muted-foreground rounded-full text-xs">
+                    <span className="ml-2 px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full text-xs">
                       {tab.count}
                     </span>
                   )}
@@ -352,11 +352,11 @@ export default function UserProfilePage() {
           <div className="p-6">
             {activeTab === 'enrolled' && (
               <div className="text-center py-12">
-                <BookOpen className="w-16 h-16 text-muted-foreground/50 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-foreground mb-2">
+                <BookOpen className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
                   Chưa có khóa học nào
                 </h3>
-                <p className="text-muted-foreground">
+                <p className="text-gray-600">
                   Người dùng này chưa đăng ký khóa học nào
                 </p>
               </div>
@@ -364,11 +364,11 @@ export default function UserProfilePage() {
 
             {activeTab === 'completed' && (
               <div className="text-center py-12">
-                <Award className="w-16 h-16 text-muted-foreground/50 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-foreground mb-2">
+                <Award className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
                   Chưa hoàn thành khóa học nào
                 </h3>
-                <p className="text-muted-foreground">
+                <p className="text-gray-600">
                   Người dùng này chưa hoàn thành khóa học nào
                 </p>
               </div>
@@ -376,11 +376,11 @@ export default function UserProfilePage() {
 
             {activeTab === 'articles' && (
               <div className="text-center py-12">
-                <FileText className="w-16 h-16 text-muted-foreground/50 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-foreground mb-2">
+                <FileText className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
                   Chưa có bài viết nào
                 </h3>
-                <p className="text-muted-foreground">
+                <p className="text-gray-600">
                   Người dùng này chưa xuất bản bài viết nào
                 </p>
               </div>
@@ -388,11 +388,11 @@ export default function UserProfilePage() {
 
             {activeTab === 'saved' && (
               <div className="text-center py-12">
-                <BookOpen className="w-16 h-16 text-muted-foreground/50 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-foreground mb-2">
+                <BookOpen className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
                   Chưa lưu bài viết nào
                 </h3>
-                <p className="text-muted-foreground">
+                <p className="text-gray-600">
                   Người dùng này chưa lưu bài viết nào
                 </p>
               </div>

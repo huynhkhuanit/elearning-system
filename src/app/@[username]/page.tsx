@@ -75,17 +75,15 @@ export default function UserProfilePage() {
 
   if (error || !profile) {
     return (
-      <div className="min-h-screen bg-background transition-colors duration-300">
-        <PageContainer>
-          <div className="flex items-center justify-center min-h-screen">
-            <div className="text-center">
-              <div className="text-6xl mb-4">😔</div>
-              <h1 className="text-2xl font-bold text-foreground mb-2">Không tìm thấy người dùng</h1>
-              <p className="text-muted-foreground">{error || 'Người dùng không tồn tại hoặc đã bị xóa'}</p>
-            </div>
+      <PageContainer>
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <div className="text-6xl mb-4">😔</div>
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">Không tìm thấy người dùng</h1>
+            <p className="text-gray-600">{error || 'Người dùng không tồn tại hoặc đã bị xóa'}</p>
           </div>
-        </PageContainer>
-      </div>
+        </div>
+      </PageContainer>
     );
   }
 
@@ -96,11 +94,10 @@ export default function UserProfilePage() {
   });
 
   return (
-    <div className="min-h-screen bg-background transition-colors duration-300">
-      <PageContainer>
-        <div className="max-w-7xl mx-auto py-8 px-4">
-          {/* Profile Header */}
-          <div className="bg-card rounded-xl border border-border p-8 mb-6">
+    <PageContainer>
+      <div className="max-w-7xl mx-auto py-8 px-4">
+        {/* Profile Header */}
+        <div className="bg-white rounded-xl border border-gray-200 p-8 mb-6">
           <div className="flex flex-col md:flex-row gap-8">
             {/* Avatar */}
             <div className="flex-shrink-0">
@@ -167,7 +164,7 @@ export default function UserProfilePage() {
                   <button className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium">
                     Theo dõi
                   </button>
-                  <button className="px-4 py-2 border border-border text-foreground rounded-lg hover:bg-muted transition-colors font-medium">
+                  <button className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium">
                     Nhắn tin
                   </button>
                 </div>
@@ -205,13 +202,13 @@ export default function UserProfilePage() {
                     px-4 py-2.5 rounded-lg text-sm font-medium transition-all
                     ${activeTab === tab.id
                       ? 'bg-primary/10 text-primary'
-                      : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                     }
                   `}
                 >
                   {tab.label}
                   {tab.count !== undefined && (
-                    <span className="ml-2 px-2 py-0.5 bg-muted text-muted-foreground rounded-full text-xs">
+                    <span className="ml-2 px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full text-xs">
                       {tab.count}
                     </span>
                   )}
@@ -260,11 +257,11 @@ export default function UserProfilePage() {
 
             {activeTab === 'saved' && (
               <div className="text-center py-12">
-                <BookOpen className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-foreground mb-2">
+                <BookOpen className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
                   Chưa lưu bài viết nào
                 </h3>
-                <p className="text-muted-foreground">
+                <p className="text-gray-600">
                   Người dùng này chưa lưu bài viết nào
                 </p>
               </div>
@@ -272,7 +269,6 @@ export default function UserProfilePage() {
           </div>
         </div>
       </div>
-      </PageContainer>
-    </div>
+    </PageContainer>
   );
 }

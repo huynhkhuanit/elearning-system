@@ -117,13 +117,13 @@ export default function CoursesSection() {
         >
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h2 className="font-[900] text-foreground mb-2">
+              <h2 className="font-[900] text-gray-900 mb-2">
                 Khóa học Pro
                 <Badge variant="primary" size="md" className="ml-3">
                   Nâng cao
                 </Badge>
               </h2>
-              <p className="text-muted-foreground">Khóa học JavaScript chuyên sâu cho developer</p>
+              <p className="text-gray-600">Khóa học JavaScript chuyên sâu cho developer</p>
             </div>
             <a
               href="/roadmap"
@@ -156,8 +156,8 @@ export default function CoursesSection() {
         >
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h2 className="font-[900] text-foreground mb-2">Khóa học miễn phí</h2>
-              <p className="text-muted-foreground">Học miễn phí với các khóa học chất lượng</p>
+              <h2 className="font-[900] text-gray-900 mb-2">Khóa học miễn phí</h2>
+              <p className="text-gray-600">Học miễn phí với các khóa học chất lượng</p>
             </div>
             <a
               href="/roadmap"
@@ -214,48 +214,48 @@ function ComingSoonModal({ onClose }: { onClose: () => void }) {
     >
       <div className="space-y-6">
         <div className="text-center">
-          <p className="text-muted-foreground mb-6">
+          <p className="text-gray-600 mb-6">
             Khóa học này đang trong quá trình phát triển và sẽ sớm ra mắt.
           </p>
 
-          <div className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-950/30 dark:to-purple-950/30 rounded-lg p-4 mb-6">
-            <h4 className="font-semibold text-foreground mb-4 text-left">Tính năng sắp có:</h4>
+          <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg p-4 mb-6">
+            <h4 className="font-semibold text-gray-900 mb-4 text-left">Tính năng sắp có:</h4>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-indigo-100 dark:bg-indigo-900/50 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <Video className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                <div className="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <Video className="w-4 h-4 text-indigo-600" />
                 </div>
-                <span className="text-foreground leading-tight text-small">Video lectures 4K</span>
+                <span className="text-gray-700 leading-tight text-small">Video lectures 4K</span>
               </div>
               <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-purple-100 dark:bg-purple-900/50 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <Code className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <Code className="w-4 h-4 text-purple-600" />
                 </div>
-                <span className="text-foreground leading-tight text-small">Bài tập interactive</span>
+                <span className="text-gray-700 leading-tight text-small">Bài tập interactive</span>
               </div>
               <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-pink-100 dark:bg-pink-900/50 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <HeadphonesIcon className="w-4 h-4 text-pink-600 dark:text-pink-400" />
+                <div className="w-8 h-8 bg-pink-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <HeadphonesIcon className="w-4 h-4 text-pink-600" />
                 </div>
-                <span className="text-foreground leading-tight text-small">Hỗ trợ 24/7</span>
+                <span className="text-gray-700 leading-tight text-small">Hỗ trợ 24/7</span>
               </div>
               <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-indigo-100 dark:bg-indigo-900/50 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <Users className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                <div className="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <Users className="w-4 h-4 text-indigo-600" />
                 </div>
-                <span className="text-foreground leading-tight text-small">Cộng đồng học tập</span>
+                <span className="text-gray-700 leading-tight text-small">Cộng đồng học tập</span>
               </div>
               <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-purple-100 dark:bg-purple-900/50 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <Trophy className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <Trophy className="w-4 h-4 text-purple-600" />
                 </div>
-                <span className="text-foreground leading-tight text-small">Certificate</span>
+                <span className="text-gray-700 leading-tight text-small">Certificate</span>
               </div>
               <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-pink-100 dark:bg-pink-900/50 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <Smartphone className="w-4 h-4 text-pink-600 dark:text-pink-400" />
+                <div className="w-8 h-8 bg-pink-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <Smartphone className="w-4 h-4 text-pink-600" />
                 </div>
-                <span className="text-foreground leading-tight text-small">Mobile app</span>
+                <span className="text-gray-700 leading-tight text-small">Mobile app</span>
               </div>
             </div>
           </div>
@@ -298,9 +298,10 @@ function CourseCard({ course, onComingSoon }: { course: Course; onComingSoon?: (
   return (
     <motion.div
       whileHover={{ y: -4 }}
-      className={`group rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-border h-full flex flex-col bg-card hover:bg-muted/30 ${
+      className={`group rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 h-full flex flex-col hover:bg-[#f7f7f7] ${
         course.isComingSoon ? 'cursor-pointer opacity-90' : 'cursor-pointer'
       }`}
+      style={{ backgroundColor: '#f7f7f7' }}
       onClick={handleClick}
     >
       {/* Thumbnail */}
@@ -321,10 +322,10 @@ function CourseCard({ course, onComingSoon }: { course: Course; onComingSoon?: (
       {/* Content */}
       <div className="p-4 flex-1 flex flex-col">
         <div className="mb-3 flex-1">
-          <h3 className="course-card-title font-bold text-foreground mb-1 line-clamp-2 group-hover:text-primary transition-colors duration-200 min-h-[2.5rem] flex items-start">
+          <h3 className="course-card-title font-bold text-gray-900 mb-1 line-clamp-2 group-hover:text-primary transition-colors duration-200 min-h-[2.5rem] flex items-start">
             {course.title}
           </h3>
-          <p className="text-small text-muted-foreground line-clamp-1">{course.subtitle}</p>
+          <p className="text-small text-gray-600 line-clamp-1">{course.subtitle}</p>
         </div>
 
         {/* Stats */}

@@ -65,8 +65,8 @@ export default function Header() {
   };
 
   return (
-    <header className="border-b border-border sticky top-0 z-50 bg-card">
-      <div className="mx-auto px-[28px] h-[66px] flex items-center justify-between bg-card">
+    <header className="border-b border-border sticky top-0 z-50" style={{ backgroundColor: '#ffffff' }}>
+      <div className="mx-auto px-[28px] h-[66px] flex items-center justify-between" style={{ backgroundColor: '#ffffff' }}>
         {/* Logo Section */}
         <div className="flex items-center gap-3">
           <Link href="/" className="flex items-center justify-center transition-all duration-200 cursor-pointer">
@@ -98,7 +98,8 @@ export default function Header() {
               onChange={handleSearchChange}
               onKeyDown={handleKeyDown}
               aria-label="Tìm kiếm"
-              className="w-full pl-12 pr-12 py-3 border border-border rounded-full bg-background text-foreground text-sm placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
+              className="w-full pl-12 pr-12 py-3 border border-border rounded-full text-card-foreground text-sm placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
+              style={{ backgroundColor: '#ffffff' }}
             />
             {searchValue && (
               <span
@@ -120,38 +121,23 @@ export default function Header() {
             <Search className="h-5 w-5" />
           </Link>
 
-          {/* Theme Toggle */}
+          {/* Theme Toggle - Vô hiệu hóa vì chỉ dùng light mode */}
           <motion.button
-            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+            onClick={() => {/* Không làm gì cả */}}
             className="p-2 rounded-xl text-muted-foreground hover:bg-muted transition-all duration-200 cursor-pointer"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-            title={theme === 'dark' ? 'Chuyển sang chế độ sáng' : 'Chuyển sang chế độ tối'}
+            aria-label="Light mode"
+            title="Light mode"
           >
-            <AnimatePresence mode="wait" initial={false}>
-              {theme === 'dark' ? (
-                <motion.div
-                  key="moon"
-                  initial={{ rotate: -90, opacity: 0 }}
-                  animate={{ rotate: 0, opacity: 1 }}
-                  exit={{ rotate: 90, opacity: 0 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <Moon className="h-5 w-5" />
-                </motion.div>
-              ) : (
-                <motion.div
-                  key="sun"
-                  initial={{ rotate: -90, opacity: 0 }}
-                  animate={{ rotate: 0, opacity: 1 }}
-                  exit={{ rotate: 90, opacity: 0 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <Sun className="h-5 w-5" />
-                </motion.div>
-              )}
-            </AnimatePresence>
+            <motion.div
+              initial={{ rotate: -90, opacity: 0 }}
+              animate={{ rotate: 0, opacity: 1 }}
+              exit={{ rotate: 90, opacity: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <Sun className="h-5 w-5" />
+            </motion.div>
           </motion.button>
 
           {/* Auth Buttons */}
@@ -178,7 +164,7 @@ export default function Header() {
                       {user.full_name.charAt(0).toUpperCase()}
                     </div>
                   )}
-                  <span className="text-sm font-medium text-foreground">{user.username}</span>
+                  <span className="text-sm font-medium text-gray-700">{user.username}</span>
                 </button>
 
                 <AnimatePresence>
@@ -188,10 +174,10 @@ export default function Header() {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -10 }}
                       transition={{ duration: 0.2 }}
-                      className="absolute right-0 mt-2 w-64 bg-card rounded-xl shadow-xl border border-border overflow-hidden z-50"
+                      className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden z-50"
                     >
                       {/* User Info Header - 2 Columns */}
-                      <div className="px-4 py-4 border-b border-border">
+                      <div className="px-4 py-4 border-b border-gray-100">
                         <div className="flex items-start gap-3">
                           {/* Avatar Column */}
                           <div className="flex-shrink-0 relative">
@@ -215,8 +201,8 @@ export default function Header() {
 
                           {/* Info Column */}
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm font-semibold text-foreground truncate">{user.full_name}</p>
-                            <p style={{ fontSize: '14px' }} className="text-muted-foreground truncate">@{user.username}</p>
+                            <p className="text-sm font-semibold text-gray-900 truncate">{user.full_name}</p>
+                            <p style={{ fontSize: '14px' }} className="text-gray-500 truncate">@{user.username}</p>
                           </div>
                         </div>
                       </div>
@@ -225,7 +211,7 @@ export default function Header() {
                       <div className="py-1">
                         <Link
                           href={`/${user.username}`}
-                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-foreground hover:bg-muted transition-colors"
+                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                           onClick={() => setShowUserMenu(false)}
                         >
                           <User className="w-4 h-4" />
@@ -233,7 +219,7 @@ export default function Header() {
                         </Link>
                         <Link
                           href="/write"
-                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-foreground hover:bg-muted transition-colors"
+                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                           onClick={() => setShowUserMenu(false)}
                         >
                           <FileText className="w-4 h-4" />
@@ -241,7 +227,7 @@ export default function Header() {
                         </Link>
                         <Link
                           href="/my-posts"
-                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-foreground hover:bg-muted transition-colors"
+                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                           onClick={() => setShowUserMenu(false)}
                         >
                           <FileText className="w-4 h-4" />
@@ -249,7 +235,7 @@ export default function Header() {
                         </Link>
                         <Link
                           href="/saved"
-                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-foreground hover:bg-muted transition-colors"
+                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                           onClick={() => setShowUserMenu(false)}
                         >
                           <Bookmark className="w-4 h-4" />
@@ -258,10 +244,10 @@ export default function Header() {
                       </div>
 
                       {/* Settings & Logout */}
-                      <div className="border-t border-border py-1">
+                      <div className="border-t border-gray-100 py-1">
                         <Link
                           href="/settings"
-                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-foreground hover:bg-muted transition-colors"
+                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                           onClick={() => setShowUserMenu(false)}
                         >
                           <Settings className="w-4 h-4" />
