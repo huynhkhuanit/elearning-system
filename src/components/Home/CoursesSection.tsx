@@ -144,7 +144,7 @@ export default function CoursesSection() {
               <div>
                 <h2 className="font-[900] text-gray-900 mb-2">
                   Khóa học Pro
-                  <span className="ml-3 text-sm font-semibold text-white bg-gradient-to-r from-yellow-500 to-orange-500 px-3 py-1 rounded-full">
+                  <span className="ml-3 text-sm font-semibold text-white bg-gradient-to-r from-indigo-600 to-purple-600 px-3 py-1 rounded-full">
                      PRO
                   </span>
                 </h2>
@@ -249,13 +249,18 @@ function CourseCard({ course, onEnroll, isEnrolling }: { course: Course; onEnrol
         </div>
         <div className="flex items-center justify-between flex-shrink-0">
           <div className="flex items-center space-x-2">
-            <div className="flex flex-col">
-              <span className={`font-bold ${course.isPro ? "text-lg text-indigo-600" : "text-base text-emerald-600"}`}>{course.price}</span>
-            </div>
-            {course.isPro && (
-              <Badge variant="featured" size="sm">
-                PRO
-              </Badge>
+            {course.isPro ? (
+              <div className="flex flex-col">
+                <span className="text-lg font-bold text-indigo-600">
+                  {new Intl.NumberFormat('vi-VN').format(course.priceAmount)}₫
+                </span>
+              </div>
+            ) : (
+              <div className="flex flex-col">
+                <span className="text-base font-bold text-emerald-600">
+                  {course.price}
+                </span>
+              </div>
             )}
           </div>
           <Badge variant={levelDisplay === "Nâng cao" ? "warning" : "success"} size="sm">
