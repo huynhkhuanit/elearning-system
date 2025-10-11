@@ -19,7 +19,7 @@ export default function NotFound() {
   }, []);
 
   return (
-    <div className="min-h-screen flex items-center justify-center py-12" style={{ backgroundColor: '#ffffff' }}>
+    <div className="min-h-screen bg-background flex items-center justify-center py-12">
       <div className="max-w-2xl mx-auto px-6 text-center">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -43,7 +43,7 @@ export default function NotFound() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="font-[900] text-gray-900 mb-3"
+            className="font-[900] text-foreground mb-3"
           >
             Oops! Trang không tồn tại
           </motion.h1>
@@ -52,7 +52,7 @@ export default function NotFound() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.3 }}
-            className="text-base text-gray-600 mb-6 max-w-xl mx-auto leading-relaxed"
+            className="text-base text-muted-foreground mb-6 max-w-xl mx-auto leading-relaxed"
           >
             Rất tiếc, trang bạn đang tìm kiếm không tồn tại hoặc đã bị di chuyển.
           </motion.p>
@@ -74,7 +74,7 @@ export default function NotFound() {
 
             <Link
               href="/roadmap"
-              className="group inline-flex items-center gap-2 px-6 py-2.5 bg-white text-gray-700 font-medium rounded-lg border border-gray-300 hover:border-indigo-600 hover:text-indigo-600 transition-all duration-200 text-sm"
+              className="group inline-flex items-center gap-2 px-6 py-2.5 bg-card text-foreground font-medium rounded-lg border border-border hover:border-primary hover:text-primary transition-all duration-200 text-sm"
             >
               <ArrowLeft className="w-4 h-4" />
               Quay lại
@@ -86,27 +86,27 @@ export default function NotFound() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.5 }}
-            className="pt-6 border-t border-gray-200"
+            className="pt-6 border-t border-border"
           >
-            <p className="text-xs text-gray-500 mb-3">
+            <p className="text-xs text-muted-foreground mb-3">
               Có thể bạn đang tìm kiếm:
             </p>
             <div className="flex flex-wrap items-center justify-center gap-2">
               <Link
                 href="/roadmap"
-                className="px-4 py-1.5 bg-gray-50 text-gray-700 rounded-full hover:bg-indigo-50 hover:text-indigo-600 transition-all duration-200 text-xs font-medium"
+                className="px-4 py-1.5 bg-muted text-foreground rounded-full hover:bg-accent hover:text-accent-foreground transition-all duration-200 text-xs font-medium"
               >
                 Lộ trình học tập
               </Link>
               <Link
                 href="/articles"
-                className="px-4 py-1.5 bg-gray-50 text-gray-700 rounded-full hover:bg-indigo-50 hover:text-indigo-600 transition-all duration-200 text-xs font-medium"
+                className="px-4 py-1.5 bg-muted text-foreground rounded-full hover:bg-accent hover:text-accent-foreground transition-all duration-200 text-xs font-medium"
               >
                 Bài viết
               </Link>
               <Link
                 href="/qa"
-                className="px-4 py-1.5 bg-gray-50 text-gray-700 rounded-full hover:bg-indigo-50 hover:text-indigo-600 transition-all duration-200 text-xs font-medium"
+                className="px-4 py-1.5 bg-muted text-foreground rounded-full hover:bg-accent hover:text-accent-foreground transition-all duration-200 text-xs font-medium"
               >
                 Hỏi đáp
               </Link>
@@ -120,11 +120,11 @@ export default function NotFound() {
             transition={{ duration: 0.6, delay: 0.6 }}
             className="mt-6"
           >
-            <p className="text-xs text-gray-400">
+            <p className="text-xs text-muted-foreground">
               Cần hỗ trợ?{" "}
               <a
                 href="mailto:huynhkhuanit@gmail.com"
-                className="text-indigo-600 hover:text-indigo-700 font-medium underline"
+                className="text-primary hover:text-primary/80 font-medium underline"
               >
                 Liên hệ với chúng tôi
               </a>

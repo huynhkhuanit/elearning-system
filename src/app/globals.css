@@ -42,30 +42,38 @@
   --font-mono: 'SF Mono', Monaco, Inconsolata, 'Roboto Mono', monospace;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #ffffff;
-    --foreground: #1a1a1a;
-    --primary: #6366f1;
-    --primary-foreground: #ffffff;
-    --secondary: #f8fafc;
-    --secondary-foreground: #475569;
-    --muted: #f1f5f9;
-    --muted-foreground: #64748b;
-    --accent: #eef2ff;
-    --accent-foreground: #3730a3;
-    --destructive: #ef4444;
-    --destructive-foreground: #ffffff;
-    --card: #ffffff;
-    --card-foreground: #1a1a1a;
-    --border: #e2e8f0;
-    --input: #e2e8f0;
-    --ring: #6366f1;
-  }
+/* Dark Mode Variables */
+.dark {
+  --background: #0a0a0a;
+  --foreground: #ededed;
+  --primary: #818cf8;
+  --primary-foreground: #ffffff;
+  --secondary: #1e293b;
+  --secondary-foreground: #cbd5e1;
+  --muted: #1e293b;
+  --muted-foreground: #94a3b8;
+  --accent: #312e81;
+  --accent-foreground: #c7d2fe;
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
+  --card: #18181b;
+  --card-foreground: #ededed;
+  --border: #27272a;
+  --input: #27272a;
+  --ring: #818cf8;
+}
+
+.dark {
+  color-scheme: dark;
+}
+
+.dark body {
+  background: var(--background);
+  color: var(--foreground);
 }
 
 body {
-  background: #ffffff;
+  background: var(--background);
   color: var(--foreground);
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   transition: background-color 0.3s ease, color 0.3s ease;
@@ -76,7 +84,7 @@ html {
   transition: color-scheme 0.3s ease;
 }
 
-/* Dark mode classes - giữ background trắng */
+/* Dark mode classes */
 html.dark {
   color-scheme: dark;
 }

@@ -65,8 +65,8 @@ export default function Header() {
   };
 
   return (
-    <header className="border-b border-border sticky top-0 z-50" style={{ backgroundColor: '#ffffff' }}>
-      <div className="mx-auto px-[28px] h-[66px] flex items-center justify-between" style={{ backgroundColor: '#ffffff' }}>
+    <header className="border-b border-border sticky top-0 z-50 bg-card">
+      <div className="mx-auto px-[28px] h-[66px] flex items-center justify-between bg-card">
         {/* Logo Section */}
         <div className="flex items-center gap-3">
           <Link href="/" className="flex items-center justify-center transition-all duration-200 cursor-pointer">
@@ -98,8 +98,7 @@ export default function Header() {
               onChange={handleSearchChange}
               onKeyDown={handleKeyDown}
               aria-label="Tìm kiếm"
-              className="w-full pl-12 pr-12 py-3 border border-border rounded-full text-card-foreground text-sm placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
-              style={{ backgroundColor: '#ffffff' }}
+              className="w-full pl-12 pr-12 py-3 border border-border rounded-full bg-background text-foreground text-sm placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
             />
             {searchValue && (
               <span
@@ -121,23 +120,38 @@ export default function Header() {
             <Search className="h-5 w-5" />
           </Link>
 
-          {/* Theme Toggle - Vô hiệu hóa vì chỉ dùng light mode */}
+          {/* Theme Toggle */}
           <motion.button
-            onClick={() => {/* Không làm gì cả */}}
+            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
             className="p-2 rounded-xl text-muted-foreground hover:bg-muted transition-all duration-200 cursor-pointer"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            aria-label="Light mode"
-            title="Light mode"
+            aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+            title={theme === 'dark' ? 'Chuyển sang chế độ sáng' : 'Chuyển sang chế độ tối'}
           >
-            <motion.div
-              initial={{ rotate: -90, opacity: 0 }}
-              animate={{ rotate: 0, opacity: 1 }}
-              exit={{ rotate: 90, opacity: 0 }}
-              transition={{ duration: 0.3 }}
-            >
-              <Sun className="h-5 w-5" />
-            </motion.div>
+            <AnimatePresence mode="wait" initial={false}>
+              {theme === 'dark' ? (
+                <motion.div
+                  key="moon"
+                  initial={{ rotate: -90, opacity: 0 }}
+                  animate={{ rotate: 0, opacity: 1 }}
+                  exit={{ rotate: 90, opacity: 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <Moon className="h-5 w-5" />
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="sun"
+                  initial={{ rotate: -90, opacity: 0 }}
+                  animate={{ rotate: 0, opacity: 1 }}
+                  exit={{ rotate: 90, opacity: 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <Sun className="h-5 w-5" />
+                </motion.div>
+              )}
+            </AnimatePresence>
           </motion.button>
 
           {/* Auth Buttons */}
