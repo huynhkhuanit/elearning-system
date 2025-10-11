@@ -515,19 +515,19 @@ export default function RoadmapPage() {
               </p>
             </div>
 
-            <div className="bg-gray-50 rounded-xl p-4 mb-6">
-              <h5 className="font-semibold text-gray-700 mb-2">Những gì bạn có thể làm:</h5>
-              <ul className="text-sm text-gray-600 space-y-2">
+            <div className="bg-muted/50 dark:bg-muted rounded-xl p-4 mb-6">
+              <h5 className="font-semibold text-foreground mb-2">Những gì bạn có thể làm:</h5>
+              <ul className="text-sm text-muted-foreground space-y-2">
                 <li className="flex items-center space-x-2">
-                  <CheckCircle className="w-4 h-4 text-green-500" />
+                  <CheckCircle className="w-4 h-4 text-green-500 dark:text-green-400" />
                   <span>Khám phá các lộ trình khác đang có sẵn</span>
                 </li>
                 <li className="flex items-center space-x-2">
-                  <CheckCircle className="w-4 h-4 text-green-500" />
+                  <CheckCircle className="w-4 h-4 text-green-500 dark:text-green-400" />
                   <span>Đăng ký nhận thông báo khi lộ trình ra mắt</span>
                 </li>
                 <li className="flex items-center space-x-2">
-                  <CheckCircle className="w-4 h-4 text-green-500" />
+                  <CheckCircle className="w-4 h-4 text-green-500 dark:text-green-400" />
                   <span>Tham gia cộng đồng để thảo luận</span>
                 </li>
               </ul>

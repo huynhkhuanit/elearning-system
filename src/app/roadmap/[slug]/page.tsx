@@ -657,7 +657,7 @@ export default function RoadmapDetailPage({ params }: { params: Promise<{ slug: 
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50">
+    <div className="min-h-screen bg-background transition-colors duration-300">
       <PageContainer size="md" className="py-12">
         {/* Breadcrumb */}
         <motion.div
@@ -665,7 +665,7 @@ export default function RoadmapDetailPage({ params }: { params: Promise<{ slug: 
           animate={{ opacity: 1, x: 0 }}
           className="mb-8"
         >
-          <Link href="/roadmap" className="inline-flex items-center text-indigo-600 hover:text-indigo-700 font-medium">
+          <Link href="/roadmap" className="inline-flex items-center text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-medium">
             <ArrowLeft className="w-4 h-4 mr-2" />
             Quay lại lộ trình học
           </Link>

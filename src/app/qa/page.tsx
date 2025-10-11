@@ -139,7 +139,7 @@ export default function QAPage() {
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
+    <div className="min-h-screen bg-background transition-colors duration-300">
       <PageContainer size="lg" className="py-12">
         {/* Header */}
         <motion.div
