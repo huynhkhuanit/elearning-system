@@ -18,6 +18,7 @@ export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState<SettingsTab>('profile');
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
   
   // Profile form state
   const [profileForm, setProfileForm] = useState({
@@ -111,16 +112,40 @@ export default function SettingsPage() {
       return;
     }
 
-    // Create preview
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setAvatarPreview(reader.result as string);
-    };
-    reader.readAsDataURL(file);
+    try {
+      setUploadingAvatar(true);
+      toast.info('Đang tải ảnh lên...');
 
-    // TODO: Upload to server
-    // For now, just show preview
-    toast.success('Ảnh đã được chọn. Nhấn Lưu thay đổi để cập nhật!');
+      // Create FormData and upload to server
+      const formData = new FormData();
+      formData.append('avatar', file);
+
+      const response = await fetch('/api/upload/avatar', {
+        method: 'POST',
+        credentials: 'include',
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (!data.success) {
+        throw new Error(data.message || 'Upload failed');
+      }
+
+      // Update preview and form with Cloudinary URL
+      setAvatarPreview(data.data.url);
+      setProfileForm(prev => ({
+        ...prev,
+        avatar_url: data.data.url,
+      }));
+
+      toast.success('Tải ảnh lên thành công! Nhấn Lưu thay đổi để cập nhật.');
+    } catch (error: any) {
+      console.error('Upload error:', error);
+      toast.error(error.message || 'Không thể tải ảnh lên. Vui lòng thử lại!');
+    } finally {
+      setUploadingAvatar(false);
+    }
   };
 
   const handleProfileSubmit = async (e: React.FormEvent) => {
@@ -290,10 +315,16 @@ export default function SettingsPage() {
                             alt="Avatar"
                             className="w-20 h-20 rounded-full object-cover border-2 border-gray-200"
                           />
+                          {uploadingAvatar && (
+                            <div className="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center">
+                              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+                            </div>
+                          )}
                           <button
                             type="button"
                             onClick={handleAvatarClick}
-                            className="absolute bottom-0 right-0 bg-gray-800 text-white p-2 rounded-full hover:bg-gray-700 transition-colors"
+                            disabled={uploadingAvatar}
+                            className="absolute bottom-0 right-0 bg-gray-800 text-white p-2 rounded-full hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                           >
                             <Camera className="w-4 h-4" />
                           </button>
@@ -304,6 +335,7 @@ export default function SettingsPage() {
                             type="file"
                             accept="image/*"
                             onChange={handleAvatarChange}
+                            disabled={uploadingAvatar}
                             className="hidden"
                           />
                           <p className="text-sm text-gray-600 mb-2">
@@ -312,9 +344,10 @@ export default function SettingsPage() {
                           <button
                             type="button"
                             onClick={handleAvatarClick}
-                            className="text-sm text-primary hover:text-primary/80 font-medium"
+                            disabled={uploadingAvatar}
+                            className="text-sm text-primary hover:text-primary/80 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                           >
-                            Chọn ảnh mới
+                            {uploadingAvatar ? 'Đang tải lên...' : 'Chọn ảnh mới'}
                           </button>
                         </div>
                       </div>
