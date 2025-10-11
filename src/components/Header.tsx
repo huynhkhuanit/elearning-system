@@ -178,7 +178,7 @@ export default function Header() {
                       {user.full_name.charAt(0).toUpperCase()}
                     </div>
                   )}
-                  <span className="text-sm font-medium text-gray-700">{user.username}</span>
+                  <span className="text-sm font-medium text-foreground">{user.username}</span>
                 </button>
 
                 <AnimatePresence>
@@ -188,10 +188,10 @@ export default function Header() {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -10 }}
                       transition={{ duration: 0.2 }}
-                      className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden z-50"
+                      className="absolute right-0 mt-2 w-64 bg-card rounded-xl shadow-xl border border-border overflow-hidden z-50"
                     >
                       {/* User Info Header - 2 Columns */}
-                      <div className="px-4 py-4 border-b border-gray-100">
+                      <div className="px-4 py-4 border-b border-border">
                         <div className="flex items-start gap-3">
                           {/* Avatar Column */}
                           <div className="flex-shrink-0 relative">
@@ -215,8 +215,8 @@ export default function Header() {
 
                           {/* Info Column */}
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm font-semibold text-gray-900 truncate">{user.full_name}</p>
-                            <p style={{ fontSize: '14px' }} className="text-gray-500 truncate">@{user.username}</p>
+                            <p className="text-sm font-semibold text-foreground truncate">{user.full_name}</p>
+                            <p style={{ fontSize: '14px' }} className="text-muted-foreground truncate">@{user.username}</p>
                           </div>
                         </div>
                       </div>
@@ -225,7 +225,7 @@ export default function Header() {
                       <div className="py-1">
                         <Link
                           href={`/${user.username}`}
-                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-foreground hover:bg-muted transition-colors"
                           onClick={() => setShowUserMenu(false)}
                         >
                           <User className="w-4 h-4" />
@@ -233,7 +233,7 @@ export default function Header() {
                         </Link>
                         <Link
                           href="/write"
-                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-foreground hover:bg-muted transition-colors"
                           onClick={() => setShowUserMenu(false)}
                         >
                           <FileText className="w-4 h-4" />
@@ -241,7 +241,7 @@ export default function Header() {
                         </Link>
                         <Link
                           href="/my-posts"
-                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-foreground hover:bg-muted transition-colors"
                           onClick={() => setShowUserMenu(false)}
                         >
                           <FileText className="w-4 h-4" />
@@ -249,7 +249,7 @@ export default function Header() {
                         </Link>
                         <Link
                           href="/saved"
-                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-foreground hover:bg-muted transition-colors"
                           onClick={() => setShowUserMenu(false)}
                         >
                           <Bookmark className="w-4 h-4" />
@@ -258,10 +258,10 @@ export default function Header() {
                       </div>
 
                       {/* Settings & Logout */}
-                      <div className="border-t border-gray-100 py-1">
+                      <div className="border-t border-border py-1">
                         <Link
                           href="/settings"
-                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-foreground hover:bg-muted transition-colors"
                           onClick={() => setShowUserMenu(false)}
                         >
                           <Settings className="w-4 h-4" />

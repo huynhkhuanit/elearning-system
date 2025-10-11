@@ -117,13 +117,13 @@ export default function CoursesSection() {
         >
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h2 className="font-[900] text-gray-900 mb-2">
+              <h2 className="font-[900] text-foreground mb-2">
                 Khóa học Pro
                 <Badge variant="primary" size="md" className="ml-3">
                   Nâng cao
                 </Badge>
               </h2>
-              <p className="text-gray-600">Khóa học JavaScript chuyên sâu cho developer</p>
+              <p className="text-muted-foreground">Khóa học JavaScript chuyên sâu cho developer</p>
             </div>
             <a
               href="/roadmap"
@@ -156,8 +156,8 @@ export default function CoursesSection() {
         >
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h2 className="font-[900] text-gray-900 mb-2">Khóa học miễn phí</h2>
-              <p className="text-gray-600">Học miễn phí với các khóa học chất lượng</p>
+              <h2 className="font-[900] text-foreground mb-2">Khóa học miễn phí</h2>
+              <p className="text-muted-foreground">Học miễn phí với các khóa học chất lượng</p>
             </div>
             <a
               href="/roadmap"

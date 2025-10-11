@@ -33,7 +33,7 @@ const socialLinks = [
 
 export default function Footer() {
   return (
-    <footer className="bg-gray-900 text-white relative z-50">
+    <footer className="bg-gray-900 dark:bg-gray-950 text-white relative z-50">
       <div className="max-w-7xl mx-auto px-6 py-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {/* Company Info */}
@@ -51,24 +51,24 @@ export default function Footer() {
               </Link>
               <div>
                 <Link href="/" className="text-2xl font-[900]">LearnX</Link>
-                <p className="text-gray-400 text-small">Nền tảng học lập trình trực tuyến</p>
+                <p className="text-gray-400 dark:text-gray-500 text-small">Nền tảng học lập trình trực tuyến</p>
               </div>
             </div>
             
-            <p className="text-gray-400 text-sm leading-relaxed">
+            <p className="text-gray-400 dark:text-gray-500 text-sm leading-relaxed">
               Nền tảng học lập trình hàng đầu Việt Nam.
             </p>
             
             <div className="space-y-2">
-              <div className="flex items-center space-x-2 text-gray-400 text-sm">
+              <div className="flex items-center space-x-2 text-gray-400 dark:text-gray-500 text-sm">
                 <Mail className="w-3.5 h-3.5" />
                 <span>huynhkhuanit@gmail.com</span>
               </div>
-              <div className="flex items-center space-x-2 text-gray-400 text-sm">
+              <div className="flex items-center space-x-2 text-gray-400 dark:text-gray-500 text-sm">
                 <Phone className="w-3.5 h-3.5" />
                 <span>1900-xxxx</span>
               </div>
-              <div className="flex items-center space-x-2 text-gray-400 text-sm">
+              <div className="flex items-center space-x-2 text-gray-400 dark:text-gray-500 text-sm">
                 <MapPin className="w-3.5 h-3.5" />
                 <span>Hồ Chí Minh, Việt Nam</span>
               </div>
@@ -81,7 +81,7 @@ export default function Footer() {
             <ul className="space-y-2">
               {footerLinks.courses.map((link, index) => (
                 <li key={index}>
-                  <Link href={link.href} className="text-gray-400 hover:text-white transition-colors duration-200">
+                  <Link href={link.href} className="text-gray-400 dark:text-gray-500 hover:text-white transition-colors duration-200">
                     {link.name}
                   </Link>
                 </li>
@@ -95,7 +95,7 @@ export default function Footer() {
             <ul className="space-y-2">
               {footerLinks.resources.map((link, index) => (
                 <li key={index}>
-                  <Link href={link.href} className="text-gray-400 text-sm hover:text-white transition-colors duration-200">
+                  <Link href={link.href} className="text-gray-400 dark:text-gray-500 text-sm hover:text-white transition-colors duration-200">
                     {link.name}
                   </Link>
                 </li>
@@ -109,7 +109,7 @@ export default function Footer() {
             <ul className="space-y-2 mb-4">
               {footerLinks.community.map((link, index) => (
                 <li key={index}>
-                  <Link href={link.href} className="text-gray-400 text-sm hover:text-white transition-colors duration-200">
+                  <Link href={link.href} className="text-gray-400 dark:text-gray-500 text-sm hover:text-white transition-colors duration-200">
                     {link.name}
                   </Link>
                 </li>
@@ -123,7 +123,7 @@ export default function Footer() {
                   key={index}
                   href={social.href}
                   aria-label={social.label}
-                  className="w-8 h-8 bg-gray-800 rounded-lg flex items-center justify-center text-gray-400 hover:text-white hover:bg-gray-700 transition-all duration-200"
+                  className="w-8 h-8 bg-gray-800 dark:bg-gray-900 rounded-lg flex items-center justify-center text-gray-400 dark:text-gray-500 hover:text-white hover:bg-gray-700 dark:hover:bg-gray-800 transition-all duration-200"
                 >
                   <social.icon className="w-4 h-4" />
                 </a>
@@ -133,19 +133,19 @@ export default function Footer() {
         </div>
 
         {/* Bottom Section */}
-        <div className="border-t border-gray-800 mt-8 pt-6 flex flex-col md:flex-row items-center justify-between">
-          <div className="text-gray-400 text-xs mb-3 md:mb-0">
+        <div className="border-t border-gray-800 dark:border-gray-900 mt-8 pt-6 flex flex-col md:flex-row items-center justify-between">
+          <div className="text-gray-400 dark:text-gray-500 text-xs mb-3 md:mb-0">
             © 2026 DHV LearnX. All rights reserved.
           </div>
           
           <div className="flex space-x-4 text-xs">
-            <Link href="#" className="text-gray-400 hover:text-white transition-colors duration-200">
+            <Link href="#" className="text-gray-400 dark:text-gray-500 hover:text-white transition-colors duration-200">
               Điều khoản sử dụng
             </Link>
-            <Link href="#" className="text-gray-400 hover:text-white transition-colors duration-200">
+            <Link href="#" className="text-gray-400 dark:text-gray-500 hover:text-white transition-colors duration-200">
               Chính sách bảo mật
             </Link>
-            <Link href="#" className="text-gray-400 hover:text-white transition-colors duration-200">
+            <Link href="#" className="text-gray-400 dark:text-gray-500 hover:text-white transition-colors duration-200">
               Liên hệ
             </Link>
           </div>

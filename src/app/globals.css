@@ -1,80 +1,78 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #1a1a1a;
-  --primary: #6366f1;
-  --primary-foreground: #ffffff;
-  --secondary: #f8fafc;
-  --secondary-foreground: #475569;
-  --muted: #f1f5f9;
-  --muted-foreground: #64748b;
-  --accent: #eef2ff;
-  --accent-foreground: #3730a3;
-  --destructive: #ef4444;
-  --destructive-foreground: #ffffff;
-  --card: #ffffff;
-  --card-foreground: #1a1a1a;
-  --border: #e2e8f0;
-  --input: #e2e8f0;
-  --ring: #6366f1;
-}
-
 @theme inline {
+  /* Light mode colors */
   --color-background: #ffffff;
-  --color-foreground: var(--foreground);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-destructive: var(--destructive);
-  --color-destructive-foreground: var(--destructive-foreground);
+  --color-foreground: #1a1a1a;
+  --color-primary: #6366f1;
+  --color-primary-foreground: #ffffff;
+  --color-secondary: #f8fafc;
+  --color-secondary-foreground: #475569;
+  --color-muted: #f1f5f9;
+  --color-muted-foreground: #64748b;
+  --color-accent: #eef2ff;
+  --color-accent-foreground: #3730a3;
+  --color-destructive: #ef4444;
+  --color-destructive-foreground: #ffffff;
   --color-card: #ffffff;
-  --color-card-foreground: var(--card-foreground);
-  --color-border: var(--border);
-  --color-input: var(--input);
-  --color-ring: var(--ring);
+  --color-card-foreground: #1a1a1a;
+  --color-border: #e2e8f0;
+  --color-input: #e2e8f0;
+  --color-ring: #6366f1;
+  
+  /* Fonts */
   --font-sans: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-mono: 'SF Mono', Monaco, Inconsolata, 'Roboto Mono', monospace;
 }
 
-/* Dark Mode Variables */
-.dark {
-  --background: #0a0a0a;
-  --foreground: #ededed;
-  --primary: #818cf8;
-  --primary-foreground: #ffffff;
-  --secondary: #1e293b;
-  --secondary-foreground: #cbd5e1;
-  --muted: #1e293b;
-  --muted-foreground: #94a3b8;
-  --accent: #312e81;
-  --accent-foreground: #c7d2fe;
-  --destructive: #dc2626;
-  --destructive-foreground: #ffffff;
-  --card: #18181b;
-  --card-foreground: #ededed;
-  --border: #27272a;
-  --input: #27272a;
-  --ring: #818cf8;
+/* Dark Mode Colors - Tailwind v4 style */
+@media (prefers-color-scheme: dark) {
+  @theme inline {
+    --color-background: #0a0a0a;
+    --color-foreground: #ededed;
+    --color-primary: #818cf8;
+    --color-primary-foreground: #ffffff;
+    --color-secondary: #1e293b;
+    --color-secondary-foreground: #cbd5e1;
+    --color-muted: #1e293b;
+    --color-muted-foreground: #94a3b8;
+    --color-accent: #312e81;
+    --color-accent-foreground: #c7d2fe;
+    --color-destructive: #dc2626;
+    --color-destructive-foreground: #ffffff;
+    --color-card: #18181b;
+    --color-card-foreground: #ededed;
+    --color-border: #27272a;
+    --color-input: #27272a;
+    --color-ring: #818cf8;
+  }
 }
 
+/* Manual dark mode toggle */
 .dark {
+  --color-background: #0a0a0a;
+  --color-foreground: #ededed;
+  --color-primary: #818cf8;
+  --color-primary-foreground: #ffffff;
+  --color-secondary: #1e293b;
+  --color-secondary-foreground: #cbd5e1;
+  --color-muted: #1e293b;
+  --color-muted-foreground: #94a3b8;
+  --color-accent: #312e81;
+  --color-accent-foreground: #c7d2fe;
+  --color-destructive: #dc2626;
+  --color-destructive-foreground: #ffffff;
+  --color-card: #18181b;
+  --color-card-foreground: #ededed;
+  --color-border: #27272a;
+  --color-input: #27272a;
+  --color-ring: #818cf8;
   color-scheme: dark;
 }
 
-.dark body {
-  background: var(--background);
-  color: var(--foreground);
-}
-
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background-color: var(--color-background);
+  color: var(--color-foreground);
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   transition: background-color 0.3s ease, color 0.3s ease;
 }

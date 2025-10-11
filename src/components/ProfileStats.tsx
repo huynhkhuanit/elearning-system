@@ -60,15 +60,15 @@ export default function ProfileStats({ profile }: ProfileStatsProps) {
         return (
           <div
             key={index}
-            className="bg-white rounded-xl border border-gray-200 p-4 hover:shadow-md transition-all duration-200"
+            className="bg-card rounded-xl border border-border p-4 hover:shadow-md transition-all duration-200"
           >
             <div className={`w-10 h-10 rounded-lg ${stat.bgColor} flex items-center justify-center mb-3`}>
               <Icon className={`w-5 h-5 ${stat.color}`} />
             </div>
-            <div className="text-2xl font-bold text-gray-900 mb-1">
+            <div className="text-2xl font-bold text-foreground mb-1">
               {stat.value}
             </div>
-            <div className="text-sm text-gray-600">
+            <div className="text-sm text-muted-foreground">
               {stat.label}
             </div>
           </div>
