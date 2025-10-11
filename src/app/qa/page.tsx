@@ -148,23 +148,23 @@ export default function QAPage() {
           transition={{ duration: 0.6 }}
           className="text-center mb-12"
         >
-          <h1 className="font-[900] text-gray-900 mb-4">
+          <h1 className="font-[900] text-foreground mb-4">
             Hỏi đáp <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">lập trình</span>
           </h1>
-          <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto mb-8">
+          <p className="text-lg sm:text-xl text-muted-foreground max-w-3xl mx-auto mb-8">
             Đặt câu hỏi và nhận được câu trả lời từ cộng đồng developer
           </p>
           
           {/* Search and Actions */}
           <div className="flex flex-col lg:flex-row gap-4 max-w-4xl mx-auto mb-8">
             <div className="flex-1 relative">
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
               <input
                 type="text"
                 placeholder="Tìm kiếm câu hỏi..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className="w-full pl-12 pr-4 py-3 border border-border rounded-full bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
               />
             </div>
             <button className="px-6 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-semibold rounded-full hover:from-indigo-600 hover:to-purple-700 transition-all duration-200 flex items-center space-x-2">
@@ -176,7 +176,7 @@ export default function QAPage() {
           {/* Filters */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <div className="flex gap-2 flex-wrap">
-              <span className="text-sm font-medium text-gray-600">Trạng thái:</span>
+              <span className="text-sm font-medium text-muted-foreground">Trạng thái:</span>
               {statusOptions.map((status) => (
                 <button
                   key={status}
@@ -184,7 +184,7 @@ export default function QAPage() {
                   className={`px-3 py-1 rounded-full text-sm font-medium transition-all duration-200 ${
                     selectedStatus === status
                       ? "bg-indigo-500 text-white"
-                      : "bg-white text-gray-600 hover:bg-gray-100 border border-gray-200"
+                      : "bg-card text-muted-foreground hover:bg-muted border border-border"
                   }`}
                 >
                   {status}
@@ -193,11 +193,11 @@ export default function QAPage() {
             </div>
             
             <div className="flex items-center gap-2">
-              <span className="text-sm font-medium text-gray-600">Sắp xếp:</span>
+              <span className="text-sm font-medium text-muted-foreground">Sắp xếp:</span>
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="px-3 py-1 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="px-3 py-1 border border-border rounded-lg bg-card text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
               >
                 {sortOptions.map((option) => (
                   <option key={option} value={option}>{option}</option>
@@ -215,7 +215,7 @@ export default function QAPage() {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: index * 0.1 }}
-              className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer group"
+              className="bg-card rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer group"
             >
               <div className="p-6">
                 <div className="flex items-start justify-between mb-4">
@@ -231,15 +231,15 @@ export default function QAPage() {
                       </div>
                     </div>
                     
-                    <h3 className="font-bold text-gray-900 mb-3 hover:text-indigo-600 transition-colors group-hover:text-indigo-600">
+                    <h3 className="font-bold text-foreground mb-3 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors group-hover:text-indigo-600 dark:group-hover:text-indigo-400">
                       {question.title}
                     </h3>
                     
-                    <p className="text-gray-600 mb-4 line-clamp-2">
+                    <p className="text-muted-foreground mb-4 line-clamp-2">
                       {question.content}
                     </p>
                     
-                    <div className="flex items-center space-x-6 text-small text-gray-500">
+                    <div className="flex items-center space-x-6 text-small text-muted-foreground">
                       <div className="flex items-center space-x-1">
                         <User className="w-4 h-4" />
                         <span className="font-medium">{question.author}</span>
@@ -256,21 +256,21 @@ export default function QAPage() {
                   </div>
                 </div>
                 
-                <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+                <div className="flex items-center justify-between pt-4 border-t border-border">
                   <div className="flex items-center space-x-6">
-                    <div className="flex items-center space-x-1 text-gray-600">
+                    <div className="flex items-center space-x-1 text-muted-foreground">
                       <ThumbsUp className="w-4 h-4" />
                       <span className="font-medium">{question.likes}</span>
                       <span className="text-sm">likes</span>
                     </div>
-                    <div className="flex items-center space-x-1 text-gray-600">
+                    <div className="flex items-center space-x-1 text-muted-foreground">
                       <MessageCircle className="w-4 h-4" />
                       <span className="font-medium">{question.answers}</span>
                       <span className="text-sm">câu trả lời</span>
                     </div>
                   </div>
                   
-                  <button className="px-4 py-2 text-indigo-600 hover:text-indigo-700 font-medium transition-colors hover:bg-indigo-50 rounded-lg">
+                  <button className="px-4 py-2 text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-medium transition-colors hover:bg-indigo-50 dark:hover:bg-indigo-950/30 rounded-lg">
                     Xem chi tiết →
                   </button>
                 </div>

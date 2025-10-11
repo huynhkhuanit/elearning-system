@@ -212,11 +212,11 @@ function CourseCard({ course, featured }: { course: Course; featured?: boolean }
             </Badge>
           )}
 
-          <h3 className="course-card-title font-bold text-gray-900 mb-2 line-clamp-2">
+          <h3 className="course-card-title font-bold text-foreground mb-2 line-clamp-2">
             {course.title}
           </h3>
 
-          <p className="text-gray-600 mb-2 sm:mb-3 text-sm">
+          <p className="text-muted-foreground mb-2 sm:mb-3 text-sm">
             GV: <span className="font-semibold text-indigo-600">{course.instructor}</span>
           </p>
 

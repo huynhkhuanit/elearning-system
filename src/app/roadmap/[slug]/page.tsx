@@ -677,21 +677,21 @@ export default function RoadmapDetailPage({ params }: { params: Promise<{ slug: 
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-12"
         >
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
+          <h1 className="text-4xl font-bold text-foreground mb-4">
             {roadmap.title}
           </h1>
-          <p className="text-xl text-indigo-600 font-medium mb-6">
+          <p className="text-xl text-indigo-600 dark:text-indigo-400 font-medium mb-6">
             {roadmap.subtitle}
           </p>
-          <p className="text-gray-600 leading-relaxed mb-8 max-w-2xl mx-auto">
+          <p className="text-muted-foreground leading-relaxed mb-8 max-w-2xl mx-auto">
             {roadmap.description}
           </p>
 
           {/* Key Stats */}
           <div className="flex justify-center gap-6 mb-8">
             <div className="text-center">
-              <div className="text-2xl font-bold text-indigo-600">{roadmap.totalDuration}</div>
-              <div className="text-sm text-gray-500">Thời gian</div>
+              <div className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">{roadmap.totalDuration}</div>
+              <div className="text-sm text-muted-foreground">Thời gian</div>
             </div>
             <div className="text-center">
               <Badge 
@@ -700,11 +700,11 @@ export default function RoadmapDetailPage({ params }: { params: Promise<{ slug: 
               >
                 {roadmap.difficulty}
               </Badge>
-              <div className="text-sm text-gray-500 mt-1">Độ khó</div>
+              <div className="text-sm text-muted-foreground mt-1">Độ khó</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-green-600">{roadmap.salary}</div>
-              <div className="text-sm text-gray-500">Lương khởi điểm</div>
+              <div className="text-2xl font-bold text-green-600 dark:text-green-400">{roadmap.salary}</div>
+              <div className="text-sm text-muted-foreground">Lương khởi điểm</div>
             </div>
           </div>
 
@@ -730,31 +730,31 @@ export default function RoadmapDetailPage({ params }: { params: Promise<{ slug: 
           transition={{ delay: 0.4 }}
           className="grid md:grid-cols-2 gap-8 mb-12"
         >
-          <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm">
-            <h3 className="font-semibold text-gray-900 mb-4 flex items-center">
-              <BookOpen className="w-5 h-5 text-indigo-600 mr-2" />
+          <div className="bg-card rounded-2xl p-6 border border-border shadow-sm">
+            <h3 className="font-semibold text-foreground mb-4 flex items-center">
+              <BookOpen className="w-5 h-5 text-indigo-600 dark:text-indigo-400 mr-2" />
               Bạn sẽ học được
             </h3>
             <ul className="space-y-2">
               {roadmap.whatYouWillLearn.slice(0, 4).map((item, index) => (
                 <li key={index} className="flex items-start space-x-2">
-                  <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
-                  <span className="text-sm text-gray-700">{item}</span>
+                  <CheckCircle className="w-4 h-4 text-green-500 dark:text-green-400 flex-shrink-0 mt-0.5" />
+                  <span className="text-sm text-muted-foreground">{item}</span>
                 </li>
               ))}
             </ul>
           </div>
 
-          <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm">
-            <h3 className="font-semibold text-gray-900 mb-4 flex items-center">
-              <Trophy className="w-5 h-5 text-purple-600 mr-2" />
+          <div className="bg-card rounded-2xl p-6 border border-border shadow-sm">
+            <h3 className="font-semibold text-foreground mb-4 flex items-center">
+              <Trophy className="w-5 h-5 text-purple-600 dark:text-purple-400 mr-2" />
               Con đường sự nghiệp
             </h3>
             <ul className="space-y-2">
               {roadmap.careerPaths.slice(0, 4).map((path, index) => (
                 <li key={index} className="flex items-center space-x-2">
-                  <div className="w-2 h-2 bg-purple-600 rounded-full"></div>
-                  <span className="text-sm text-gray-700">{path}</span>
+                  <div className="w-2 h-2 bg-purple-600 dark:bg-purple-400 rounded-full"></div>
+                  <span className="text-sm text-muted-foreground">{path}</span>
                 </li>
               ))}
             </ul>
@@ -768,13 +768,13 @@ export default function RoadmapDetailPage({ params }: { params: Promise<{ slug: 
           transition={{ delay: 0.5 }}
           className="text-center"
         >
-          <div className="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-2xl p-8 text-white">
+          <div className="bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-700 dark:to-purple-700 rounded-2xl p-8 text-white">
             <h3 className="text-2xl font-bold mb-4">Sẵn sàng bắt đầu hành trình?</h3>
             <p className="mb-6 opacity-90">
               Khám phá sơ đồ lộ trình chi tiết với các node kỹ năng và đường dẫn học tập rõ ràng.
             </p>
             <Link href={`/roadmap/${slug}/flow`}>
-              <button className="px-8 py-3 bg-white text-indigo-600 font-semibold rounded-lg hover:bg-gray-100 transition-colors duration-200">
+              <button className="px-8 py-3 bg-white dark:bg-muted text-indigo-600 dark:text-indigo-300 font-semibold rounded-lg hover:bg-gray-100 dark:hover:bg-muted/70 transition-colors duration-200">
                 Khám phá sơ đồ lộ trình
               </button>
             </Link>

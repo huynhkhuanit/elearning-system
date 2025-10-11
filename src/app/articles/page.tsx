@@ -123,23 +123,23 @@ export default function ArticlesPage() {
           transition={{ duration: 0.6 }}
           className="text-center mb-12"
         >
-          <h1 className="font-[900] text-gray-900 mb-4">
+          <h1 className="font-[900] text-foreground mb-4">
             Bài viết <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">lập trình</span>
           </h1>
-          <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto mb-8">
+          <p className="text-lg sm:text-xl text-muted-foreground max-w-3xl mx-auto mb-8">
             Chia sẻ kiến thức và kinh nghiệm lập trình từ cộng đồng developer
           </p>
 
           {/* Search and Filter */}
           <div className="flex flex-col lg:flex-row gap-4 max-w-4xl mx-auto">
             <div className="flex-1 relative">
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
               <input
                 type="text"
                 placeholder="Tìm kiếm bài viết..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className="w-full pl-12 pr-4 py-3 border border-border rounded-full bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
               />
             </div>
             
@@ -151,7 +151,7 @@ export default function ArticlesPage() {
                   className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
                     selectedCategory === category
                       ? "bg-indigo-500 text-white"
-                      : "bg-white text-gray-600 hover:bg-gray-100 border border-gray-200"
+                      : "bg-card text-muted-foreground hover:bg-muted border border-border"
                   }`}
                 >
                   {category}
@@ -164,7 +164,7 @@ export default function ArticlesPage() {
         {/* Featured Articles */}
         {featuredArticles.length > 0 && (
           <div className="mb-16">
-            <h2 className="font-[900] text-gray-900 mb-8">Bài viết nổi bật</h2>
+            <h2 className="font-[900] text-foreground mb-8">Bài viết nổi bật</h2>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {featuredArticles.map((article, index) => (
                 <motion.div
@@ -172,7 +172,7 @@ export default function ArticlesPage() {
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 0.6, delay: index * 0.1 }}
-                  className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden cursor-pointer group"
+                  className="bg-card rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden cursor-pointer group"
                 >
                   <div className="h-48 bg-gradient-to-r from-indigo-500 to-purple-600 flex items-center justify-center">
                     <BookOpen className="w-16 h-16 text-white" />
@@ -184,13 +184,13 @@ export default function ArticlesPage() {
                       <Badge variant="secondary" size="sm">{article.category}</Badge>
                     </div>
                     
-                    <h3 className="font-bold text-gray-900 mb-3 line-clamp-2 group-hover:text-indigo-600 transition-colors">
+                    <h3 className="font-bold text-foreground mb-3 line-clamp-2 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
                       {article.title}
                     </h3>
                     
-                    <p className="text-gray-600 mb-4 line-clamp-3">{article.excerpt}</p>
+                    <p className="text-muted-foreground mb-4 line-clamp-3">{article.excerpt}</p>
                     
-                    <div className="flex items-center justify-between text-small text-gray-500 mb-4">
+                    <div className="flex items-center justify-between text-small text-muted-foreground mb-4">
                       <div className="flex items-center space-x-4">
                         <div className="flex items-center space-x-1">
                           <User className="w-4 h-4" />
@@ -216,7 +216,7 @@ export default function ArticlesPage() {
 
                     <div className="flex flex-wrap gap-2">
                       {article.tags.map((tag, idx) => (
-                        <span key={idx} className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">
+                        <span key={idx} className="px-2 py-1 bg-muted text-muted-foreground text-xs rounded-full">
                           {tag}
                         </span>
                       ))}
@@ -231,7 +231,7 @@ export default function ArticlesPage() {
         {/* Regular Articles */}
         {regularArticles.length > 0 && (
           <div className="mb-12">
-            <h2 className="font-[900] text-gray-900 mb-8">
+            <h2 className="font-[900] text-foreground mb-8">
               {featuredArticles.length > 0 ? "Bài viết khác" : "Tất cả bài viết"}
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
@@ -241,7 +241,7 @@ export default function ArticlesPage() {
                   initial={{ opacity: 0, y: 50 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: index * 0.05 }}
-                  className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer group"
+                  className="bg-card rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer group"
                 >
                   <div className="h-32 bg-gradient-to-r from-gray-400 to-gray-600 flex items-center justify-center">
                     <BookOpen className="w-8 h-8 text-white" />
@@ -252,13 +252,13 @@ export default function ArticlesPage() {
                       <Badge variant="secondary" size="sm">{article.category}</Badge>
                     </div>
                     
-                    <h3 className="font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-indigo-600 transition-colors">
+                    <h3 className="font-bold text-foreground mb-2 line-clamp-2 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
                       {article.title}
                     </h3>
                     
-                    <p className="text-gray-600 mb-3 line-clamp-2 text-small">{article.excerpt}</p>
+                    <p className="text-muted-foreground mb-3 line-clamp-2 text-small">{article.excerpt}</p>
                     
-                    <div className="flex items-center justify-between text-small text-gray-500 mb-3">
+                    <div className="flex items-center justify-between text-small text-muted-foreground mb-3">
                       <div className="flex items-center space-x-2">
                         <span>{article.author}</span>
                         <span>•</span>
@@ -278,12 +278,12 @@ export default function ArticlesPage() {
 
                     <div className="flex flex-wrap gap-1">
                       {article.tags.slice(0, 2).map((tag, idx) => (
-                        <span key={idx} className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">
+                        <span key={idx} className="px-2 py-1 bg-muted text-muted-foreground text-xs rounded-full">
                           {tag}
                         </span>
                       ))}
                       {article.tags.length > 2 && (
-                        <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">
+                        <span className="px-2 py-1 bg-muted text-muted-foreground text-xs rounded-full">
                           +{article.tags.length - 2}
                         </span>
                       )}
@@ -297,7 +297,7 @@ export default function ArticlesPage() {
 
         {filteredArticles.length === 0 && (
           <div className="text-center py-12">
-            <BookOpen className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+            <BookOpen className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-gray-900 mb-2">Không tìm thấy bài viết</h3>
             <p className="text-gray-600">Thử thay đổi từ khóa tìm kiếm hoặc bộ lọc của bạn</p>
           </div>
