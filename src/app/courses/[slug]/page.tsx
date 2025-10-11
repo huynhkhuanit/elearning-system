@@ -31,7 +31,11 @@ interface CourseDetail {
     name: string;
     avatar: string;
   };
-  category: string;
+  category: {
+    id: string;
+    name: string;
+    slug: string;
+  };
 }
 
 const LEVEL_MAP: Record<string, string> = {
@@ -414,7 +418,7 @@ export default function CourseDetailPage() {
               <div className="bg-white rounded-2xl shadow-lg p-6">
                 <h3 className="font-bold text-gray-900 mb-3">Danh mục</h3>
                 <Badge variant="primary" size="sm">
-                  {course.category}
+                  {course.category.name}
                 </Badge>
               </div>
             </motion.div>

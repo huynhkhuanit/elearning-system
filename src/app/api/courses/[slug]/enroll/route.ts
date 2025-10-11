@@ -14,7 +14,7 @@ import { verifyToken, extractTokenFromHeader } from '@/lib/auth';
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { slug: string } }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
     // 1. Authenticate user
@@ -38,7 +38,7 @@ export async function POST(
     }
 
     const userId = payload.userId;
-    const { slug } = params;
+    const { slug } = await params;
 
     // 2. Get course details
     const courseResults = await query(
