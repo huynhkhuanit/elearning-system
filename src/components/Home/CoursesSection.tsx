@@ -192,8 +192,14 @@ export default function CoursesSection() {
 
 function CourseCard({ course, onEnroll, isEnrolling }: { course: Course; onEnroll: () => void; isEnrolling: boolean }) {
   const levelDisplay = LEVEL_MAP[course.level] || "Cơ bản";
+  const router = useRouter();
+  
+  const handleClick = () => {
+    router.push(`/courses/${course.slug}`);
+  };
+  
   return (
-    <motion.div whileHover={{ y: -4 }} className="group rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 h-full flex flex-col hover:bg-[#f7f7f7] cursor-pointer" style={{ backgroundColor: "#f7f7f7" }} onClick={onEnroll}>
+    <motion.div whileHover={{ y: -4 }} className="group rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 h-full flex flex-col hover:bg-[#f7f7f7] cursor-pointer" style={{ backgroundColor: "#f7f7f7" }} onClick={handleClick}>
       <div className={`relative h-32 bg-gradient-to-br ${course.gradient} flex items-center justify-center flex-shrink-0`}>
         <div className="text-white text-center">
           <Play className="w-8 h-8 mx-auto mb-2 opacity-80 group-hover:opacity-100 transition-opacity duration-200" />
@@ -246,8 +252,15 @@ function CourseCard({ course, onEnroll, isEnrolling }: { course: Course; onEnrol
           </Badge>
         </div>
         <div className="mt-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-          <button disabled={isEnrolling} className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold py-2 px-4 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
-            {isEnrolling ? "Đang đăng ký..." : "Đăng ký ngay"}
+          <button 
+            onClick={(e) => {
+              e.stopPropagation();
+              onEnroll();
+            }}
+            disabled={isEnrolling} 
+            className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold py-2 px-4 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isEnrolling ? "Đang đăng ký..." : "Xem chi tiết"}
           </button>
         </div>
       </div>

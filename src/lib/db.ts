@@ -33,10 +33,27 @@ export async function testConnection() {
 // Execute query helper
 export async function query<T = any>(sql: string, params?: any[]): Promise<T> {
   try {
-    const [results] = await pool.execute(sql, params);
+    // Normalize parameters to ensure proper types for MySQL
+    const normalizedParams = params?.map(param => {
+      // Convert boolean to number for TINYINT fields
+      if (typeof param === 'boolean') {
+        return param ? 1 : 0;
+      }
+      // Ensure numbers are proper integers or decimals
+      if (typeof param === 'number') {
+        return param;
+      }
+      return param;
+    });
+    
+    // Use pool.query instead of pool.execute for better compatibility
+    // pool.query uses the text protocol which handles types better
+    const [results] = await pool.query(sql, normalizedParams || []);
     return results as T;
   } catch (error) {
     console.error('Database query error:', error);
+    console.error('SQL:', sql);
+    console.error('Params:', params);
     throw error;
   }
 }
@@ -44,7 +61,21 @@ export async function query<T = any>(sql: string, params?: any[]): Promise<T> {
 // Get single row
 export async function queryOne<T = any>(sql: string, params?: any[]): Promise<T | null> {
   try {
-    const [results] = await pool.execute(sql, params);
+    // Normalize parameters to ensure proper types for MySQL
+    const normalizedParams = params?.map(param => {
+      // Convert boolean to number for TINYINT fields
+      if (typeof param === 'boolean') {
+        return param ? 1 : 0;
+      }
+      // Ensure numbers are proper integers or decimals
+      if (typeof param === 'number') {
+        return param;
+      }
+      return param;
+    });
+    
+    // Use pool.query instead of pool.execute for better compatibility
+    const [results] = await pool.query(sql, normalizedParams || []);
     const rows = results as any[];
     return rows.length > 0 ? rows[0] : null;
   } catch (error) {

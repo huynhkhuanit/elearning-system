@@ -16,40 +16,43 @@ export async function GET(request: NextRequest) {
     
     // Filters
     const level = searchParams.get('level'); // BEGINNER, INTERMEDIATE, ADVANCED
-    const isFree = searchParams.get('is_free'); // '1' or '0'
+    const isFreeParam = searchParams.get('is_free'); // '1' or '0'
     const category = searchParams.get('category'); // category slug
     const search = searchParams.get('search'); // search title
-    const limit = parseInt(searchParams.get('limit') || '100');
-    const offset = parseInt(searchParams.get('offset') || '0');
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '12');
+    const offset = (page - 1) * limit;
 
-    // Build WHERE clause
-    let whereConditions: string[] = ['c.is_published = 1'];
-    let params: any[] = [];
+    // Build WHERE clause with params
+    let whereConditions: string[] = [];
+    let queryParams: any[] = [];
+
+    // Always filter published courses
+    whereConditions.push('c.is_published = ?');
+    queryParams.push(1);
 
     if (level) {
       whereConditions.push('c.level = ?');
-      params.push(level.toUpperCase());
+      queryParams.push(level.toUpperCase());
     }
 
-    if (isFree !== null && isFree !== undefined) {
+    if (isFreeParam !== null) {
       whereConditions.push('c.is_free = ?');
-      params.push(parseInt(isFree));
+      queryParams.push(parseInt(isFreeParam));
     }
 
     if (category) {
       whereConditions.push('cat.slug = ?');
-      params.push(category);
+      queryParams.push(category);
     }
 
     if (search) {
       whereConditions.push('(c.title LIKE ? OR c.short_description LIKE ?)');
       const searchPattern = `%${search}%`;
-      params.push(searchPattern, searchPattern);
+      queryParams.push(searchPattern, searchPattern);
     }
 
-    const whereClause = whereConditions.length > 0 
-      ? `WHERE ${whereConditions.join(' AND ')}`
-      : '';
+    const whereClause = `WHERE ${whereConditions.join(' AND ')}`;
 
     // Query courses
     const sqlQuery = `
@@ -82,11 +85,12 @@ export async function GET(request: NextRequest) {
       LIMIT ? OFFSET ?
     `;
 
-    params.push(limit, offset);
+    // Add limit and offset to params
+    const coursesParams = [...queryParams, limit, offset];
 
-    const courses = await query(sqlQuery, params);
+    const courses = await query(sqlQuery, coursesParams);
 
-    // Get total count
+    // Get total count (without LIMIT/OFFSET)
     const countQuery = `
       SELECT COUNT(*) as total
       FROM courses c
@@ -94,7 +98,7 @@ export async function GET(request: NextRequest) {
       ${whereClause}
     `;
 
-    const countResult = await query(countQuery, params.slice(0, -2)); // Remove limit and offset
+    const countResult = await query(countQuery, queryParams);
     const total = (countResult as any)[0].total;
 
     // Format response
@@ -130,9 +134,10 @@ export async function GET(request: NextRequest) {
         courses: formattedCourses,
         pagination: {
           total,
+          page,
           limit,
-          offset,
-          hasMore: offset + limit < total,
+          totalPages: Math.ceil(total / limit),
+          hasMore: page * limit < total,
         },
       },
     });

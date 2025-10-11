@@ -315,6 +315,11 @@ export default function SettingsPage() {
                             alt="Avatar"
                             className="w-20 h-20 rounded-full object-cover border-2 border-gray-200"
                           />
+                          {user?.membership_type === 'PRO' && (
+                            <div className="absolute -bottom-1 -right-1 bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-2 py-0.5 rounded-full text-[10px] font-bold border-2 border-white">
+                              PRO
+                            </div>
+                          )}
                           {uploadingAvatar && (
                             <div className="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center">
                               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
