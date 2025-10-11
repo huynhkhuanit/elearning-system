@@ -121,25 +121,6 @@ export default function Header() {
             <Search className="h-5 w-5" />
           </Link>
 
-          {/* Theme Toggle - Vô hiệu hóa vì chỉ dùng light mode */}
-          <motion.button
-            onClick={() => {/* Không làm gì cả */}}
-            className="p-2 rounded-xl text-muted-foreground hover:bg-muted transition-all duration-200 cursor-pointer"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            aria-label="Light mode"
-            title="Light mode"
-          >
-            <motion.div
-              initial={{ rotate: -90, opacity: 0 }}
-              animate={{ rotate: 0, opacity: 1 }}
-              exit={{ rotate: 90, opacity: 0 }}
-              transition={{ duration: 0.3 }}
-            >
-              <Sun className="h-5 w-5" />
-            </motion.div>
-          </motion.button>
-
           {/* Auth Buttons */}
           <div className="hidden sm:flex items-center gap-2">
             {isLoading ? (
