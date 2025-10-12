@@ -10,6 +10,7 @@ import { useToast } from "@/contexts/ToastContext";
 import { useRouter } from "next/navigation";
 import LoginModal from "./LoginModal";
 import RegisterModal from "./RegisterModal";
+import AvatarWithProBadge from "./AvatarWithProBadge";
 
 export default function Header() {
   const [searchValue, setSearchValue] = useState("");
@@ -134,17 +135,12 @@ export default function Header() {
                   onClick={() => setShowUserMenu(!showUserMenu)}
                   className="flex items-center gap-2 px-4 py-2 rounded-full hover:bg-gray-100 transition-all duration-200"
                 >
-                  {user.avatar_url ? (
-                    <img
-                      src={user.avatar_url}
-                      alt={user.full_name}
-                      className="w-8 h-8 rounded-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 flex items-center justify-center text-white font-semibold">
-                      {user.full_name.charAt(0).toUpperCase()}
-                    </div>
-                  )}
+                  <AvatarWithProBadge
+                    avatarUrl={user.avatar_url}
+                    fullName={user.full_name}
+                    isPro={user.membership_type === 'PRO'}
+                    size="xs"
+                  />
                   <span className="text-sm font-medium text-gray-700">{user.username}</span>
                 </button>
 
@@ -161,23 +157,13 @@ export default function Header() {
                       <div className="px-4 py-4 border-b border-gray-100">
                         <div className="flex items-start gap-3">
                           {/* Avatar Column */}
-                          <div className="flex-shrink-0 relative">
-                            {user.avatar_url ? (
-                              <img
-                                src={user.avatar_url}
-                                alt={user.full_name}
-                                className="w-12 h-12 rounded-full object-cover"
-                              />
-                            ) : (
-                              <div className="w-12 h-12 rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 flex items-center justify-center text-white font-bold text-lg">
-                                {user.full_name.charAt(0).toUpperCase()}
-                              </div>
-                            )}
-                            {user.membership_type === 'PRO' && (
-                              <div className="absolute -bottom-1 -right-1 bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-1.5 py-0.5 rounded-full text-[10px] font-bold border-2 border-white">
-                                PRO
-                              </div>
-                            )}
+                          <div className="flex-shrink-0">
+                            <AvatarWithProBadge
+                              avatarUrl={user.avatar_url}
+                              fullName={user.full_name}
+                              isPro={user.membership_type === 'PRO'}
+                              size="md"
+                            />
                           </div>
 
                           {/* Info Column */}

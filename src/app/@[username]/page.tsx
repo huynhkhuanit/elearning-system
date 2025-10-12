@@ -6,6 +6,7 @@ import { UserProfile, ActivityData, ProfileTab } from '@/types/profile';
 import ActivityHeatmap from '@/components/ActivityHeatmap';
 import ProfileStats from '@/components/ProfileStats';
 import PageContainer from '@/components/PageContainer';
+import AvatarWithProBadge from '@/components/AvatarWithProBadge';
 import { Calendar, Github, Mail, MapPin, Award, Clock, BookOpen, FileText } from 'lucide-react';
 
 export default function UserProfilePage() {
@@ -101,19 +102,12 @@ export default function UserProfilePage() {
           <div className="flex flex-col md:flex-row gap-8">
             {/* Avatar */}
             <div className="flex-shrink-0">
-              <div className="relative">
-                <img
-                  src={avatarUrl}
-                  alt={profile.full_name}
-                  className="w-32 h-32 rounded-full border-4 border-gray-200 object-cover"
-                />
-                {profile.membership_type === 'PRO' && (
-                  <div className="absolute -bottom-2 -right-2 bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 border-2 border-white">
-                    <Award className="w-3 h-3" />
-                    PRO
-                  </div>
-                )}
-              </div>
+              <AvatarWithProBadge
+                avatarUrl={avatarUrl}
+                fullName={profile.full_name}
+                isPro={profile.membership_type === 'PRO'}
+                size="2xl"
+              />
             </div>
 
             {/* Profile Info */}

@@ -5,6 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/contexts/ToastContext';
 import { useRouter } from 'next/navigation';
 import PageContainer from '@/components/PageContainer';
+import AvatarWithProBadge from '@/components/AvatarWithProBadge';
 import { User, Lock, Bell, Wand2, Camera, Globe, Linkedin, Github, Twitter, Facebook } from 'lucide-react';
 
 type SettingsTab = 'profile' | 'password' | 'notifications' | 'ai';
@@ -310,16 +311,12 @@ export default function SettingsPage() {
                       </label>
                       <div className="flex items-center gap-6">
                         <div className="relative">
-                          <img
-                            src={avatarPreview}
-                            alt="Avatar"
-                            className="w-20 h-20 rounded-full object-cover border-2 border-gray-200"
+                          <AvatarWithProBadge
+                            avatarUrl={avatarPreview}
+                            fullName={user?.full_name || 'User'}
+                            isPro={user?.membership_type === 'PRO'}
+                            size="xl"
                           />
-                          {user?.membership_type === 'PRO' && (
-                            <div className="absolute -bottom-1 -right-1 bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-2 py-0.5 rounded-full text-[10px] font-bold border-2 border-white">
-                              PRO
-                            </div>
-                          )}
                           {uploadingAvatar && (
                             <div className="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center">
                               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
@@ -329,7 +326,7 @@ export default function SettingsPage() {
                             type="button"
                             onClick={handleAvatarClick}
                             disabled={uploadingAvatar}
-                            className="absolute bottom-0 right-0 bg-gray-800 text-white p-2 rounded-full hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="absolute bottom-0 right-0 bg-gray-800 text-white p-2 rounded-full hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed z-10"
                           >
                             <Camera className="w-4 h-4" />
                           </button>
