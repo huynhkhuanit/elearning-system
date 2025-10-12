@@ -59,15 +59,11 @@ export default function LearnCoursePage() {
   const toast = useToast();
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      toast.error("Vui lòng đăng nhập để tiếp tục");
-      router.push("/auth/login");
-      return;
-    }
+    // Chỉ fetch data khi có slug, không kiểm tra auth ở đây
     if (slug) {
       fetchCourseData();
     }
-  }, [slug, isAuthenticated]);
+  }, [slug]);
 
   const fetchCourseData = async () => {
     try {
@@ -78,6 +74,13 @@ export default function LearnCoursePage() {
         fetch(`/api/courses/${slug}`, { credentials: "include" }),
         fetch(`/api/users/me/courses`, { credentials: "include" })
       ]);
+
+      // Kiểm tra authentication status từ API response
+      if (progressResponse.status === 401 || !progressResponse.ok) {
+        toast.error("Vui lòng đăng nhập để tiếp tục");
+        router.push("/auth/login");
+        return;
+      }
 
       const courseData = await courseResponse.json();
       const progressData = await progressResponse.json();
