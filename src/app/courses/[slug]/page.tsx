@@ -341,35 +341,113 @@ export default function CourseDetailPage() {
       </div>
 
       {/* Bạn sẽ làm được những gì? */}
-      <PageContainer size="lg" className="py-16">
-        <div className="text-center mb-12">
+      <PageContainer size="lg" className="py-20">
+        <div className="text-center mb-16">
           <h2 className="text-3xl lg:text-4xl font-black text-gray-900 mb-4">
             Bạn sẽ làm được những gì?
           </h2>
-          <p className="text-xl text-gray-700 max-w-3xl mx-auto">
+          <p className="text-xl text-gray-700 max-w-3xl mx-auto leading-relaxed">
             Khóa học hướng dẫn bạn thực hành nhiều dự án thực tế. Từ đó, bạn có thể tự làm hầu hết mọi ứng dụng mà bạn thấy.
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-6">
+        <div className="grid md:grid-cols-2 gap-8">
           {[
-            { number: 1, title: "Website Thương mại điện tử", desc: "Xây dựng trang web bán hàng với giỏ hàng, thanh toán" },
-            { number: 2, title: "Ứng dụng Quản lý", desc: "Dashboard admin với CRUD operations đầy đủ" },
-            { number: 3, title: "Landing Page Marketing", desc: "Trang giới thiệu sản phẩm chuyển đổi cao" },
-            { number: 4, title: "Blog/Portfolio cá nhân", desc: "Trang blog và portfolio để showcase dự án" },
+            { 
+              number: 1, 
+              title: "Website Thương mại điện tử", 
+              desc: "Xây dựng trang web bán hàng với giỏ hàng, thanh toán",
+              features: ["Shopping Cart", "Payment Gateway", "Product Management"],
+              gradient: "from-blue-500 to-cyan-500",
+              icon: "🛒"
+            },
+            { 
+              number: 2, 
+              title: "Ứng dụng Quản lý", 
+              desc: "Dashboard admin với CRUD operations đầy đủ",
+              features: ["Admin Dashboard", "Data Management", "Analytics"],
+              gradient: "from-purple-500 to-pink-500",
+              icon: "📊"
+            },
+            { 
+              number: 3, 
+              title: "Landing Page Marketing", 
+              desc: "Trang giới thiệu sản phẩm chuyển đổi cao",
+              features: ["Responsive Design", "SEO Optimized", "High Conversion"],
+              gradient: "from-orange-500 to-red-500",
+              icon: "🚀"
+            },
+            { 
+              number: 4, 
+              title: "Blog/Portfolio cá nhân", 
+              desc: "Trang blog và portfolio để showcase dự án",
+              features: ["Personal Branding", "Project Showcase", "Content Management"],
+              gradient: "from-green-500 to-emerald-500",
+              icon: "💼"
+            },
           ].map((project) => (
-            <div key={project.number} className="bg-white border-2 border-gray-200 rounded-2xl p-6 hover:border-orange-400 hover:shadow-lg transition-all">
-              <div className="flex items-start space-x-4">
-                <div className="w-12 h-12 bg-gradient-to-br from-orange-400 to-yellow-400 rounded-xl flex items-center justify-center flex-shrink-0">
-                  <span className="text-xl font-bold text-white">Dự án {project.number}</span>
+            <div 
+              key={project.number} 
+              className="group relative bg-white rounded-3xl overflow-hidden border-2 border-gray-200 hover:border-transparent hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2"
+            >
+              {/* Gradient Border Effect on Hover */}
+              <div className={`absolute inset-0 bg-gradient-to-br ${project.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10`}></div>
+              
+              {/* Content */}
+              <div className="relative bg-white m-[2px] rounded-3xl p-8">
+                {/* Header with Icon and Number */}
+                <div className="flex items-center justify-between mb-6">
+                  <div className={`w-16 h-16 bg-gradient-to-br ${project.gradient} rounded-2xl flex items-center justify-center text-3xl shadow-lg transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-300`}>
+                    {project.icon}
+                  </div>
+                  <div className={`text-6xl font-black bg-gradient-to-br ${project.gradient} bg-clip-text text-transparent opacity-20 group-hover:opacity-30 transition-opacity`}>
+                    0{project.number}
+                  </div>
                 </div>
-                <div>
-                  <h3 className="text-lg font-bold text-gray-900 mb-2">{project.title}</h3>
-                  <p className="text-gray-700">{project.desc}</p>
+
+                {/* Title and Description */}
+                <h3 className="text-2xl font-black text-gray-900 mb-3 group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:bg-clip-text group-hover:from-orange-500 group-hover:to-yellow-500 transition-all">
+                  {project.title}
+                </h3>
+                <p className="text-gray-600 leading-relaxed mb-6">
+                  {project.desc}
+                </p>
+
+                {/* Features Tags */}
+                <div className="flex flex-wrap gap-2">
+                  {project.features.map((feature, idx) => (
+                    <span 
+                      key={idx} 
+                      className="px-3 py-1.5 bg-gray-100 group-hover:bg-gradient-to-r group-hover:from-orange-100 group-hover:to-yellow-100 text-gray-700 group-hover:text-orange-700 text-sm font-semibold rounded-full transition-all duration-300"
+                    >
+                      {feature}
+                    </span>
+                  ))}
+                </div>
+
+                {/* Bottom Arrow Indicator */}
+                <div className="mt-6 flex items-center text-orange-500 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-0 group-hover:translate-x-2">
+                  <span className="font-bold text-sm mr-2">Xem chi tiết</span>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
                 </div>
               </div>
             </div>
           ))}
+        </div>
+
+        {/* Bottom CTA */}
+        <div className="mt-16 text-center">
+          <div className="inline-flex items-center justify-center space-x-3 bg-gradient-to-r from-orange-50 to-yellow-50 border-2 border-orange-200 rounded-2xl px-8 py-4">
+            <div className="w-12 h-12 bg-gradient-to-br from-orange-400 to-yellow-400 rounded-xl flex items-center justify-center">
+              <Target className="w-6 h-6 text-white" />
+            </div>
+            <div className="text-left">
+              <p className="font-black text-gray-900 text-lg">+10 dự án thực tế khác</p>
+              <p className="text-gray-600 text-sm">Giúp bạn thành thạo mọi kỹ năng cần thiết</p>
+            </div>
+          </div>
         </div>
       </PageContainer>
 
@@ -421,13 +499,131 @@ export default function CourseDetailPage() {
             Mô tả khóa học
           </h2>
           
-          <div className="prose prose-lg max-w-none text-gray-700 leading-relaxed bg-white rounded-2xl border-2 border-gray-200 p-8">
-            <p className="whitespace-pre-line">{course.description}</p>
+          <div className="bg-white rounded-2xl border-2 border-gray-200 p-8 lg:p-12">
+            {/* Parse and display markdown content */}
+            <div className="space-y-6">
+              {(() => {
+                const text = course.description;
+                const sections: React.ReactElement[] = [];
+                let currentHeading: string | null = null;
+                let currentItems: string[] = [];
+                let currentParagraph: string[] = [];
+                let sectionKey = 0;
+
+                const flushItems = () => {
+                  if (currentItems.length > 0 && currentHeading) {
+                    sections.push(
+                      <div key={`section-${sectionKey++}`} className="space-y-4">
+                        <h3 className="text-xl font-bold text-gray-900 flex items-center gap-3 pb-3 border-b-2 border-orange-200">
+                          <div className="w-1.5 h-6 bg-gradient-to-b from-orange-400 to-yellow-400 rounded-full"></div>
+                          {currentHeading}
+                        </h3>
+                        <ul className="space-y-3 pl-2">
+                          {currentItems.map((item, idx) => {
+                            const parts = item.split(/\*\*(.*?)\*\*/g);
+                            return (
+                              <li key={idx} className="flex items-start space-x-3 group">
+                                <div className="w-2 h-2 bg-orange-500 rounded-full flex-shrink-0 mt-2 group-hover:scale-125 transition-transform"></div>
+                                <span className="text-gray-700 leading-relaxed flex-1 break-words whitespace-normal">
+                                  {parts.map((part, pIdx) => 
+                                    pIdx % 2 === 1 ? (
+                                      <strong key={pIdx} className="font-bold text-gray-900">{part}</strong>
+                                    ) : part
+                                  )}
+                                </span>
+                              </li>
+                            );
+                          })}
+                        </ul>
+                      </div>
+                    );
+                    currentItems = [];
+                    currentHeading = null;
+                  }
+                };
+
+                const flushParagraph = () => {
+                  if (currentParagraph.length > 0) {
+                    const paragraphText = currentParagraph.join(' ').trim();
+                    if (paragraphText) {
+                      const parts = paragraphText.split(/\*\*(.*?)\*\*/g);
+                      sections.push(
+                        <p key={`para-${sectionKey++}`} className="text-gray-700 leading-relaxed text-base break-words whitespace-normal">
+                          {parts.map((part, pIdx) => 
+                            pIdx % 2 === 1 ? (
+                              <strong key={pIdx} className="font-bold text-gray-900">{part}</strong>
+                            ) : part
+                          )}
+                        </p>
+                      );
+                    }
+                    currentParagraph = [];
+                  }
+                };
+
+                const lines = text.split('\n');
+                
+                for (const line of lines) {
+                  const trimmed = line.trim();
+                  
+                  if (!trimmed) {
+                    flushParagraph();
+                    continue;
+                  }
+
+                  // Check for heading
+                  if (trimmed.startsWith('**') && (trimmed.includes(':**') || trimmed.includes('**:'))) {
+                    flushItems();
+                    flushParagraph();
+                    currentHeading = trimmed.replace(/\*\*/g, '').replace(/:/g, '').trim();
+                  }
+                  // Check for list item
+                  else if (trimmed.startsWith('-')) {
+                    flushParagraph();
+                    const itemText = trimmed.substring(1).trim();
+                    currentItems.push(itemText);
+                  }
+                  // Regular text
+                  else {
+                    if (currentItems.length > 0 && currentHeading) {
+                      flushItems();
+                    }
+                    currentParagraph.push(trimmed);
+                  }
+                }
+
+                // Flush any remaining content
+                flushItems();
+                flushParagraph();
+
+                return sections.length > 0 ? sections : (
+                  <p className="text-gray-700 leading-relaxed break-words whitespace-normal">
+                    {text}
+                  </p>
+                );
+              })()}
+            </div>
+
+            {/* Additional Info Box */}
+            <div className="mt-10 bg-gradient-to-br from-orange-50 to-yellow-50 rounded-xl p-6 border-2 border-orange-200">
+              <div className="flex items-start space-x-4">
+                <div className="w-12 h-12 bg-gradient-to-br from-orange-400 to-yellow-400 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <BookOpen className="w-6 h-6 text-white" />
+                </div>
+                <div className="flex-1">
+                  <h4 className="font-bold text-gray-900 mb-2 text-lg">Cam kết chất lượng</h4>
+                  <p className="text-gray-700 leading-relaxed">
+                    Khóa học được thiết kế bài bản, cập nhật thường xuyên và có đội ngũ hỗ trợ tận tình. 
+                    Bạn sẽ nhận được kiến thức thực tế, có thể áp dụng ngay vào công việc.
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </PageContainer>
 
-      {/* Người hướng dẫn tận tâm - F8 Style */}
+      {/* Người hướng dẫn tận tâm */}
       <div className="bg-gradient-to-br from-orange-50 via-yellow-50 to-pink-50 py-16">
         <PageContainer size="lg">
           <div className="text-center mb-12">
