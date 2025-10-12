@@ -174,7 +174,6 @@ export default function UserProfilePage() {
     );
   }
 
-  const avatarUrl = profile.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${profile.username}`;
   const joinDate = new Date(profile.created_at).toLocaleDateString('vi-VN', {
     year: 'numeric',
     month: 'long',
@@ -189,7 +188,7 @@ export default function UserProfilePage() {
             {/* Avatar */}
             <div className="flex-shrink-0">
               <AvatarWithProBadge
-                avatarUrl={avatarUrl}
+                avatarUrl={profile.avatar_url}
                 fullName={profile.full_name}
                 isPro={profile.membership_type === 'PRO'}
                 size="2xl"

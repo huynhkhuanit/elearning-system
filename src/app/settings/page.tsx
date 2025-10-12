@@ -78,7 +78,7 @@ export default function SettingsPage() {
             facebook: profile.facebook || '',
           });
           
-          setAvatarPreview(profile.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${profile.username}`);
+          setAvatarPreview(profile.avatar_url || '');
         }
       } catch (error) {
         console.error('Error loading profile:', error);
