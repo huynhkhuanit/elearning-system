@@ -317,3 +317,8 @@ button, .button-text {
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: #4b5563;
 }
+
+/* Course Title Font Size Override */
+.course-title-header {
+  font-size: 1rem !important; /* 25.6px - nếu muốn 16px thì dùng 1rem */
+}

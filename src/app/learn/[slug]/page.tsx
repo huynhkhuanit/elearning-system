@@ -296,7 +296,7 @@ export default function LearnCoursePage() {
             </span>
           </button>
           <div className="h-6 w-px bg-gray-600"></div>
-          <h1 className="text-base font-semibold text-gray-200 truncate max-w-md">
+          <h1 className="course-title-header font-semibold text-gray-200 truncate max-w-md">
             {course.title}
           </h1>
         </div>
