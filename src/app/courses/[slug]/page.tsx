@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { 
   Star, Users, Clock, Award, CheckCircle, PlayCircle, 
-  BookOpen, Target, TrendingUp, Shield, ChevronDown, ChevronUp, Quote, Zap 
+  BookOpen, Target, TrendingUp, Shield, ChevronDown, ChevronUp, Quote, Zap,
+  Code2, Layers, Database, Layout, Package, Settings, Terminal, GitBranch
 } from "lucide-react";
 import PageContainer from "@/components/PageContainer";
 import Badge from "@/components/Badge";
@@ -155,7 +156,8 @@ export default function CourseDetailPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-white">\n      {/* Hero Section - Simple & Clean như F8 */}
+    <div className="min-h-screen bg-white">
+      {/* Hero Section - Simple & Clean như F8 */}
       <div className="bg-gradient-to-br from-orange-50 via-yellow-50 to-pink-50 border-b border-gray-200">
         <PageContainer size="lg" className="py-12">
           <div className="max-w-4xl mx-auto text-center">
@@ -337,7 +339,8 @@ export default function CourseDetailPage() {
           </div>
 
           <div className="max-w-4xl mx-auto">
-            <div className="bg-white rounded-2xl border-2 border-gray-200 p-8 mb-6">
+            {/* Stats Summary */}
+            <div className="bg-white rounded-2xl border-2 border-gray-200 p-8 mb-8">
               <div className="grid md:grid-cols-3 gap-6 text-center">
                 <div>
                   <div className="text-4xl font-black text-orange-500 mb-2">{course.totalLessons}</div>
@@ -354,31 +357,39 @@ export default function CourseDetailPage() {
               </div>
             </div>
 
-            {/* Sample chapters */}
-            <div className="space-y-4">
-              {[
-                { title: "Giới thiệu và cài đặt", lessons: 5, duration: "45 phút", isOpen: true },
-                { title: "Kiến thức nền tảng", lessons: 12, duration: "2 giờ 30 phút", isOpen: false },
-                { title: "Thực hành với dự án thực tế", lessons: 15, duration: "4 giờ", isOpen: false },
-                { title: "Kỹ thuật nâng cao", lessons: 20, duration: "5 giờ 15 phút", isOpen: false },
-              ].map((chapter, index) => (
-                <div key={index} className="bg-white border-2 border-gray-200 rounded-xl overflow-hidden hover:border-orange-400 transition-all">
-                  <div className="p-5 flex items-center justify-between cursor-pointer hover:bg-gray-50 transition-colors">
-                    <div className="flex items-center space-x-4">
-                      <ChevronDown className="w-5 h-5 text-gray-600" />
-                      <div>
-                        <p className="font-bold text-gray-900 text-lg">{chapter.title}</p>
-                        <p className="text-sm text-gray-600">{chapter.lessons} bài học • {chapter.duration}</p>
+            {/* Technologies & Topics List */}
+            <div className="bg-white rounded-2xl border-2 border-gray-200 p-8">
+              <div className="grid md:grid-cols-2 gap-4">
+                {[
+                  { icon: Code2, text: "Giới thiệu và cài đặt", lessons: "5 bài học • 45 phút" },
+                  { icon: Layout, text: "Kiến thức nền tảng", lessons: "12 bài học • 2 giờ 30 phút" },
+                  { icon: Package, text: "Thực hành với dự án thực tế", lessons: "15 bài học • 4 giờ" },
+                  { icon: Layers, text: "Kỹ thuật nâng cao", lessons: "20 bài học • 5 giờ 15 phút" },
+                  { icon: Database, text: "Quản lý dữ liệu và API", lessons: "10 bài học • 3 giờ" },
+                  { icon: Settings, text: "Tối ưu hóa và hiệu suất", lessons: "8 bài học • 2 giờ 15 phút" },
+                  { icon: Terminal, text: "Deploy và vận hành", lessons: "6 bài học • 1 giờ 45 phút" },
+                  { icon: GitBranch, text: "Git và làm việc nhóm", lessons: "7 bài học • 2 giờ" },
+                ].map((item, index) => {
+                  const Icon = item.icon;
+                  return (
+                    <div 
+                      key={index} 
+                      className="flex items-start space-x-4 p-4 rounded-xl border-2 border-gray-200 hover:border-orange-400 hover:shadow-md transition-all cursor-pointer group"
+                    >
+                      <div className="w-12 h-12 bg-gradient-to-br from-orange-400 to-yellow-400 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                        <Icon className="w-6 h-6 text-white" />
                       </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-bold text-gray-900 mb-1 group-hover:text-orange-600 transition-colors">
+                          {item.text}
+                        </h3>
+                        <p className="text-sm text-gray-600">{item.lessons}</p>
+                      </div>
+                      <ChevronDown className="w-5 h-5 text-gray-400 flex-shrink-0 mt-1" />
                     </div>
-                    {chapter.isOpen && (
-                      <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-bold">
-                        Học thử miễn phí
-                      </span>
-                    )}
-                  </div>
-                </div>
-              ))}
+                  );
+                })}
+              </div>
             </div>
           </div>
         </PageContainer>
