@@ -330,69 +330,97 @@ export default function CourseDetailPage() {
       </PageContainer>
 
       {/* Nội dung khóa học */}
-      <div className="bg-gray-50 py-16">
-        <PageContainer size="lg">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl lg:text-4xl font-black text-gray-900 mb-4">
-              Nội dung khóa học
+      <div className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl lg:text-5xl font-black text-white mb-6">
+              Bạn sẽ học được những gì?
             </h2>
-          </div>
-
-          <div className="max-w-4xl mx-auto">
-            {/* Stats Summary */}
-            <div className="bg-white rounded-2xl border-2 border-gray-200 p-8 mb-8">
-              <div className="grid md:grid-cols-3 gap-6 text-center">
-                <div>
-                  <div className="text-4xl font-black text-orange-500 mb-2">{course.totalLessons}</div>
-                  <div className="text-gray-600 font-semibold">Bài học</div>
-                </div>
-                <div>
-                  <div className="text-4xl font-black text-orange-500 mb-2">{course.duration}</div>
-                  <div className="text-gray-600 font-semibold">Thời lượng</div>
-                </div>
-                <div>
-                  <div className="text-4xl font-black text-orange-500 mb-2">{LEVEL_MAP[course.level]}</div>
-                  <div className="text-gray-600 font-semibold">Cấp độ</div>
-                </div>
+            <div className="flex items-center justify-center gap-8 text-white/80 text-lg">
+              <div className="flex items-center gap-2">
+                <BookOpen className="w-6 h-6 text-orange-400" />
+                <span className="font-bold">{course.totalLessons}</span>
+                <span>Bài học</span>
               </div>
-            </div>
-
-            {/* Technologies & Topics List */}
-            <div className="bg-white rounded-2xl border-2 border-gray-200 p-8">
-              <div className="grid md:grid-cols-2 gap-4">
-                {[
-                  { icon: Code2, text: "Giới thiệu và cài đặt", lessons: "5 bài học • 45 phút" },
-                  { icon: Layout, text: "Kiến thức nền tảng", lessons: "12 bài học • 2 giờ 30 phút" },
-                  { icon: Package, text: "Thực hành với dự án thực tế", lessons: "15 bài học • 4 giờ" },
-                  { icon: Layers, text: "Kỹ thuật nâng cao", lessons: "20 bài học • 5 giờ 15 phút" },
-                  { icon: Database, text: "Quản lý dữ liệu và API", lessons: "10 bài học • 3 giờ" },
-                  { icon: Settings, text: "Tối ưu hóa và hiệu suất", lessons: "8 bài học • 2 giờ 15 phút" },
-                  { icon: Terminal, text: "Deploy và vận hành", lessons: "6 bài học • 1 giờ 45 phút" },
-                  { icon: GitBranch, text: "Git và làm việc nhóm", lessons: "7 bài học • 2 giờ" },
-                ].map((item, index) => {
-                  const Icon = item.icon;
-                  return (
-                    <div 
-                      key={index} 
-                      className="flex items-start space-x-4 p-4 rounded-xl border-2 border-gray-200 hover:border-orange-400 hover:shadow-md transition-all cursor-pointer group"
-                    >
-                      <div className="w-12 h-12 bg-gradient-to-br from-orange-400 to-yellow-400 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
-                        <Icon className="w-6 h-6 text-white" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-bold text-gray-900 mb-1 group-hover:text-orange-600 transition-colors">
-                          {item.text}
-                        </h3>
-                        <p className="text-sm text-gray-600">{item.lessons}</p>
-                      </div>
-                      <ChevronDown className="w-5 h-5 text-gray-400 flex-shrink-0 mt-1" />
-                    </div>
-                  );
-                })}
+              <span className="text-white/40">•</span>
+              <div className="flex items-center gap-2">
+                <Clock className="w-6 h-6 text-orange-400" />
+                <span className="font-bold">{course.duration}</span>
+                <span>Thời lượng</span>
+              </div>
+              <span className="text-white/40">•</span>
+              <div className="flex items-center gap-2">
+                <Target className="w-6 h-6 text-orange-400" />
+                <span className="font-bold">{LEVEL_MAP[course.level]}</span>
               </div>
             </div>
           </div>
-        </PageContainer>
+
+          {/* Course Content Grid */}
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-x-12 gap-y-6 text-white">
+            {[
+              "Hiểu cấu trúc chuẩn HTML",
+              "Hiểu rõ về các thẻ Meta",
+              "Thuộc tính, thuộc tính toàn cục",
+              "Sử dụng liên kết chuyên sâu",
+              "Sử dụng Emmet cơ bản",
+              "Hiểu rõ tính kế thừa trong CSS",
+              "Phân biệt thẻ inline và block",
+              "Hiểu Box-model của mỗi phần tử",
+              "Hiểu rõ về các đơn vị trong CSS",
+              "Kiến thức về Typography",
+              "Làm việc với hình ảnh và nền",
+              "Thành thạo sử dụng Position",
+              "Kỹ thuật sử dụng biến trong CSS",
+              "CSS selectors nâng cao (có game)",
+              "Thực sự hiểu về Semantic",
+              "Sử dụng Flexbox chi tiết (tặng game)",
+              "Sử dụng CSS Grid (có game và công cụ)",
+              "Forms và validations không cần JavaScript",
+              "Kỹ thuật Responsive với Grid System",
+              "Tự xây dựng Grid System giống Bootstrap",
+              "Sử dụng Animations và tối ưu hiệu năng",
+              "Sử dụng Sass và xây dựng Grid System",
+              "Hiểu về Web accessibility tự duy tối ưu UX",
+              "Hiểu rõ về màu sắc, mã màu thấp lục phần",
+              "Luyện mắt thẩm mỹ siêu chi tiết qua Quiz",
+              "Sử dụng Github đưa trang web lên Internet",
+              "Kiến thức SEO cơ bản để SEO-OnPage",
+              "Tính hợp lệ của HTML, dùng thẻ chính xác",
+              "Tự duy ứng dụng pseudo-classes/elements",
+              "Đặt tên class theo chuẩn BEM",
+              "Biết cách đặt tên class siêu dễ",
+              "Có chế cache của trình duyệt",
+              "CDN là gì và ứng dụng của CDN",
+              "Hiểu về mạng LAN và mở web qua LAN",
+              "Hiển thị ảnh khi chia sẻ lên Facebook",
+              "Tối ưu Pre-connect/khẩn giải DNS trước",
+              "Hiểu đúng cách sử dụng thẻ br, entities",
+              "Kỹ thuật giữ dụng tỉ lệ hình ảnh và video",
+              "Biết cách ứng dụng vị EM để giữ tỉ lệ",
+              "Xây dựng Breakpoints cho trang web",
+              "Tự duy Typography cho Font Scale",
+              "Sử dụng các hàm min(), max(), clamp()",
+              "Kỹ thuật tối ưu hình ảnh với SRC-SET",
+              "Kỹ thuật 7-1 Pattern khi dùng SCSS",
+              "Giới thiệu custom tag (Web components)",
+              "Xây dựng Menu đa cấp và Mega Menu",
+              "Cách sử dụng robots.txt, sitemap.xml",
+              "Cách submit URL trang web lên Google",
+              "Cách tạo Favicon cho tất cả các thiết bị",
+              "Thực hành dự án số 8 (Multiple Pages)",
+              "Thực hành làm Dark/Light mode dự án 8",
+              "Tăng ban thêm 20+ Figma bản trả phí",
+            ].map((item, index) => (
+              <div key={index} className="flex items-start space-x-3 group">
+                <CheckCircle className="w-5 h-5 text-orange-400 flex-shrink-0 mt-0.5 group-hover:scale-110 transition-transform" />
+                <span className="text-white/90 leading-relaxed hover:text-white transition-colors text-[15px]">
+                  {item}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
 
       {/* Mô tả khóa học */}
