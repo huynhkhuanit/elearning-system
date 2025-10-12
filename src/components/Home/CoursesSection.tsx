@@ -194,12 +194,35 @@ function CourseCard({ course, onEnroll, isEnrolling }: { course: Course; onEnrol
   const levelDisplay = LEVEL_MAP[course.level] || "Cơ bản";
   const router = useRouter();
   
-  const handleClick = () => {
-    // Nếu là khóa PRO, chuyển đến landing page
+  const { isAuthenticated, user } = useAuth();
+  
+  const handleClick = async () => {
+    // Kiểm tra xem user đã đăng ký khóa học chưa
+    if (isAuthenticated && course.isPro) {
+      try {
+        const response = await fetch(`/api/users/me/courses`, {
+          credentials: "include",
+        });
+        const data = await response.json();
+        
+        if (data.success) {
+          const isEnrolled = data.data.courses.some((c: any) => c.slug === course.slug);
+          
+          if (isEnrolled) {
+            // Đã đăng ký -> Chuyển đến trang học
+            router.push(`/learn/${course.slug}`);
+            return;
+          }
+        }
+      } catch (error) {
+        console.error("Error checking enrollment:", error);
+      }
+    }
+    
+    // Chưa đăng ký hoặc khóa FREE -> Chuyển đến landing page hoặc enroll
     if (course.isPro) {
       router.push(`/courses/${course.slug}`);
     } else {
-      // Nếu là khóa FREE, đăng ký luôn
       onEnroll();
     }
   };
