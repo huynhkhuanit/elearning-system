@@ -6,7 +6,7 @@ import jwt from "jsonwebtoken";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { slug: string } }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
     const cookieStore = await cookies();
@@ -21,7 +21,7 @@ export async function GET(
 
     const decoded = jwt.verify(token.value, process.env.JWT_SECRET || "") as { userId: string };
     const userId = decoded.userId;
-    const { slug } = params;
+    const { slug } = await params;
 
     // Get course ID
     const [courseRows] = await pool.query<RowDataPacket[]>(

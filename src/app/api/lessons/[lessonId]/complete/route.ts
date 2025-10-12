@@ -6,7 +6,7 @@ import jwt from "jsonwebtoken";
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { lessonId: string } }
+  { params }: { params: Promise<{ lessonId: string }> }
 ) {
   try {
     const cookieStore = await cookies();
@@ -21,7 +21,7 @@ export async function POST(
 
     const decoded = jwt.verify(token.value, process.env.JWT_SECRET || "") as { userId: string };
     const userId = decoded.userId;
-    const { lessonId } = params;
+    const { lessonId } = await params;
 
     // Check if progress record exists
     const [existingProgress] = await pool.query<RowDataPacket[]>(
