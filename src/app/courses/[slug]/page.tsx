@@ -36,6 +36,7 @@ interface CourseDetail {
     name: string;
     slug: string;
   };
+  learningOutcomes?: string[]; // Thêm field để lưu nội dung học được
 }
 
 const LEVEL_MAP: Record<string, string> = {
@@ -154,6 +155,49 @@ export default function CourseDetailPage() {
       answer: "Tất nhiên rồi! Tại mỗi bài học, bạn luôn có thể đặt câu hỏi, trao đổi và tương tác với các bạn cùng học. Ngoài ra, chuyên viên hỗ trợ sẽ luôn tận tình hướng dẫn nếu bạn gặp khó khăn."
     },
   ];
+
+  // Generate default learning outcomes nếu không có từ database
+  const getDefaultLearningOutcomes = () => {
+    const categoryName = course?.category?.name || "lập trình";
+    const level = course?.level || "BEGINNER";
+    
+    const outcomes = [
+      `Nắm vững kiến thức nền tảng về ${categoryName}`,
+      `Hiểu rõ các khái niệm cơ bản và nâng cao`,
+      `Thực hành với các dự án thực tế`,
+      `Áp dụng kiến thức vào công việc ngay lập tức`,
+      `Xây dựng ứng dụng hoàn chỉnh từ đầu đến cuối`,
+      `Hiểu về best practices và coding standards`,
+      `Tối ưu hóa hiệu suất và bảo mật`,
+      `Debug và xử lý lỗi hiệu quả`,
+      `Làm việc với các công cụ và thư viện phổ biến`,
+      `Chuẩn bị cho phỏng vấn việc làm`,
+      `Xây dựng portfolio chuyên nghiệp`,
+      `Deploy ứng dụng lên production`,
+    ];
+
+    if (level === "ADVANCED") {
+      outcomes.push(
+        "Kiến trúc hệ thống quy mô lớn",
+        "Tối ưu hóa performance cao cấp",
+        "Thiết kế patterns và design principles",
+        "Microservices và distributed systems"
+      );
+    }
+
+    if (course?.isPro) {
+      outcomes.push(
+        "Truy cập vào nội dung độc quyền PRO",
+        "Hỗ trợ 1-1 từ giảng viên",
+        "Tham gia cộng đồng học viên PRO",
+        "Nhận chứng chỉ hoàn thành khóa học"
+      );
+    }
+
+    return outcomes;
+  };
+
+  const learningOutcomes = course?.learningOutcomes || getDefaultLearningOutcomes();
 
   return (
     <div className="min-h-screen bg-white">
@@ -358,60 +402,7 @@ export default function CourseDetailPage() {
 
           {/* Course Content Grid */}
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-x-12 gap-y-6 text-white">
-            {[
-              "Hiểu cấu trúc chuẩn HTML",
-              "Hiểu rõ về các thẻ Meta",
-              "Thuộc tính, thuộc tính toàn cục",
-              "Sử dụng liên kết chuyên sâu",
-              "Sử dụng Emmet cơ bản",
-              "Hiểu rõ tính kế thừa trong CSS",
-              "Phân biệt thẻ inline và block",
-              "Hiểu Box-model của mỗi phần tử",
-              "Hiểu rõ về các đơn vị trong CSS",
-              "Kiến thức về Typography",
-              "Làm việc với hình ảnh và nền",
-              "Thành thạo sử dụng Position",
-              "Kỹ thuật sử dụng biến trong CSS",
-              "CSS selectors nâng cao (có game)",
-              "Thực sự hiểu về Semantic",
-              "Sử dụng Flexbox chi tiết (tặng game)",
-              "Sử dụng CSS Grid (có game và công cụ)",
-              "Forms và validations không cần JavaScript",
-              "Kỹ thuật Responsive với Grid System",
-              "Tự xây dựng Grid System giống Bootstrap",
-              "Sử dụng Animations và tối ưu hiệu năng",
-              "Sử dụng Sass và xây dựng Grid System",
-              "Hiểu về Web accessibility tự duy tối ưu UX",
-              "Hiểu rõ về màu sắc, mã màu thấp lục phần",
-              "Luyện mắt thẩm mỹ siêu chi tiết qua Quiz",
-              "Sử dụng Github đưa trang web lên Internet",
-              "Kiến thức SEO cơ bản để SEO-OnPage",
-              "Tính hợp lệ của HTML, dùng thẻ chính xác",
-              "Tự duy ứng dụng pseudo-classes/elements",
-              "Đặt tên class theo chuẩn BEM",
-              "Biết cách đặt tên class siêu dễ",
-              "Có chế cache của trình duyệt",
-              "CDN là gì và ứng dụng của CDN",
-              "Hiểu về mạng LAN và mở web qua LAN",
-              "Hiển thị ảnh khi chia sẻ lên Facebook",
-              "Tối ưu Pre-connect/khẩn giải DNS trước",
-              "Hiểu đúng cách sử dụng thẻ br, entities",
-              "Kỹ thuật giữ dụng tỉ lệ hình ảnh và video",
-              "Biết cách ứng dụng vị EM để giữ tỉ lệ",
-              "Xây dựng Breakpoints cho trang web",
-              "Tự duy Typography cho Font Scale",
-              "Sử dụng các hàm min(), max(), clamp()",
-              "Kỹ thuật tối ưu hình ảnh với SRC-SET",
-              "Kỹ thuật 7-1 Pattern khi dùng SCSS",
-              "Giới thiệu custom tag (Web components)",
-              "Xây dựng Menu đa cấp và Mega Menu",
-              "Cách sử dụng robots.txt, sitemap.xml",
-              "Cách submit URL trang web lên Google",
-              "Cách tạo Favicon cho tất cả các thiết bị",
-              "Thực hành dự án số 8 (Multiple Pages)",
-              "Thực hành làm Dark/Light mode dự án 8",
-              "Tăng ban thêm 20+ Figma bản trả phí",
-            ].map((item, index) => (
+            {learningOutcomes.map((item, index) => (
               <div key={index} className="flex items-start space-x-3 group">
                 <CheckCircle className="w-5 h-5 text-orange-400 flex-shrink-0 mt-0.5 group-hover:scale-110 transition-transform" />
                 <span className="text-white/90 leading-relaxed hover:text-white transition-colors text-[15px]">
