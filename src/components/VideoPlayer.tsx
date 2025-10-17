@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback, MouseEvent } from "react";
 import {
   Play,
   Pause,
@@ -45,14 +45,18 @@ export default function VideoPlayer({
   const [isMuted, setIsMuted] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [playbackRate, setPlaybackRate] = useState(1);
-  const [showControls, setShowControls] = useState(true); // ✅ Always show by default
+  const [showControls, setShowControls] = useState(true);
   const [showSettings, setShowSettings] = useState(false);
   const [bufferedPercent, setBufferedPercent] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
-  const [showAutoHideControls, setShowAutoHideControls] = useState(false); // ✅ Only auto-hide in fullscreen
+  const [showAutoHideControls, setShowAutoHideControls] = useState(false);
+  const [isDraggingProgress, setIsDraggingProgress] = useState(false); // ✅ NEW
+  const [hoverTime, setHoverTime] = useState<number | null>(null); // ✅ Preview time
+  const [hoverPosition, setHoverPosition] = useState<number>(0); // ✅ Tooltip position
 
   // Control hide timeout
   const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const progressBarRef = useRef<HTMLDivElement>(null); // ✅ Progress bar ref
 
   // Auto-save progress
   const lastSaveTimeRef = useRef(0);
@@ -117,6 +121,83 @@ export default function VideoPlayer({
     if (videoRef.current) {
       videoRef.current.currentTime = time;
     }
+  };
+
+  // ✅ NEW: Handle progress bar click/drag
+  const seekToPosition = (event: MouseEvent<HTMLDivElement>) => {
+    if (!videoRef.current) return;
+    
+    const rect = event.currentTarget.getBoundingClientRect();
+    const percent = (event.clientX - rect.left) / rect.width;
+    const newTime = Math.max(0, Math.min(percent * videoDuration, videoDuration));
+    
+    videoRef.current.currentTime = newTime;
+    setCurrentTime(newTime);
+  };
+
+  // ✅ NEW: Handle mouse down on progress bar (start drag)
+  const handleProgressMouseDown = (event: MouseEvent<HTMLDivElement>) => {
+    setIsDraggingProgress(true);
+    seekToPosition(event);
+  };
+
+  // ✅ NEW: Handle mouse move while dragging
+  useEffect(() => {
+    const handleMouseMove = (event: globalThis.MouseEvent) => {
+      if (!isDraggingProgress || !containerRef.current) return;
+
+      const progressBar = containerRef.current.querySelector('[data-progress-bar]') as HTMLDivElement;
+      if (!progressBar) return;
+
+      const rect = progressBar.getBoundingClientRect();
+      const percent = (event.clientX - rect.left) / rect.width;
+      const newTime = Math.max(0, Math.min(percent * videoDuration, videoDuration));
+
+      setCurrentTime(newTime);
+      if (videoRef.current) {
+        videoRef.current.currentTime = newTime;
+      }
+    };
+
+    const handleMouseUp = () => {
+      setIsDraggingProgress(false);
+    };
+
+    if (isDraggingProgress) {
+      document.addEventListener("mousemove", handleMouseMove);
+      document.addEventListener("mouseup", handleMouseUp);
+    }
+
+    return () => {
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, [isDraggingProgress, videoDuration]);
+
+  // ✅ NEW: Handle hover preview on progress bar
+  const handleProgressHover = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (!progressBarRef.current) return;
+
+    const rect = progressBarRef.current.getBoundingClientRect();
+    const percent = Math.max(0, Math.min((event.clientX - rect.left) / rect.width, 1));
+    const hoverTimeValue = percent * videoDuration;
+    const positionPercent = percent * 100;
+
+    setHoverTime(hoverTimeValue);
+    setHoverPosition(positionPercent);
+  };
+
+  const handleProgressLeave = () => {
+    setHoverTime(null);
+  };
+
+  // ✅ NEW: Handle video container click for play/pause
+  const handleVideoContainerClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    // Don't toggle if clicking on controls
+    if ((e.target as HTMLElement).closest(".controls-bar")) {
+      return;
+    }
+    handlePlayPause();
   };
 
   // Handle volume change
@@ -250,20 +331,29 @@ export default function VideoPlayer({
   const progressPercent = videoDuration > 0 ? (currentTime / videoDuration) * 100 : 0;
 
   return (
-    <div
-      ref={containerRef}
-      className="w-full aspect-video bg-gray-900 rounded-lg overflow-hidden group cursor-pointer relative"
-      onMouseMove={handleMouseMove}
-      onMouseEnter={() => setShowControls(true)}
-      onMouseLeave={() => {
-        if (isFullscreen && isPlaying) {
-          // Only hide in fullscreen when playing
-          setShowControls(false);
-        }
-      }}
-    >
-      {/* Video Element */}
-      <video
+    <div className="w-full space-y-2">
+      {/* Video Title - Above Player */}
+      {title && (
+        <h3 className="text-lg font-semibold text-gray-800 dark:text-white px-1">
+          {title}
+        </h3>
+      )}
+
+      {/* Video Player Container */}
+      <div
+        ref={containerRef}
+        className="w-full aspect-video bg-gray-900 rounded-lg overflow-hidden group cursor-pointer relative"
+        onMouseMove={handleMouseMove}
+        onMouseEnter={() => setShowControls(true)}
+        onMouseLeave={() => {
+          if (isFullscreen && isPlaying) {
+            setShowControls(false);
+          }
+        }}
+        onClick={handleVideoContainerClick}
+      >
+        {/* Video Element */}
+        <video
         ref={videoRef}
         src={videoUrl}
         className="w-full h-full block"
@@ -286,29 +376,29 @@ export default function VideoPlayer({
         </div>
       )}
 
-      {/* Play Button Overlay */}
+      {/* Play Button Overlay - visible when paused, clickable */}
       {!isPlaying && (
-        <div
-          className="absolute inset-0 flex items-center justify-center bg-black/40 cursor-pointer transition-opacity group-hover:bg-black/50"
-          onClick={handlePlayPause}
-        >
-          <Play className="w-16 h-16 text-white fill-white" />
+        <div className="absolute inset-0 flex items-center justify-center bg-black/20 pointer-events-none group-hover:bg-black/30 transition-colors">
+          <Play className="w-16 h-16 text-white fill-white opacity-80" />
         </div>
       )}
 
       {/* Progress Bar (always visible) */}
       <div
-        className={`absolute bottom-16 left-0 right-0 h-1 bg-gray-700 cursor-pointer transition-opacity duration-200 ${
+        ref={progressBarRef}
+        data-progress-bar
+        className={`group/progress absolute bottom-16 left-0 right-0 h-2 bg-gray-700 cursor-pointer transition-all duration-200 hover:h-3 ${
           showControls ? "opacity-100" : "opacity-0"
         }`}
-        onClick={(e) => {
-          const rect = e.currentTarget.getBoundingClientRect();
-          const percent = (e.clientX - rect.left) / rect.width;
-          const newTime = percent * videoDuration;
-          if (videoRef.current) {
-            videoRef.current.currentTime = newTime;
-          }
-        }}
+        onMouseDown={handleProgressMouseDown}
+        onClick={seekToPosition}
+        onMouseMove={handleProgressHover}
+        onMouseLeave={handleProgressLeave}
+        role="slider"
+        aria-label="Video progress"
+        aria-valuemin={0}
+        aria-valuemax={videoDuration}
+        aria-valuenow={currentTime}
       >
         {/* Buffered Progress */}
         <div
@@ -320,21 +410,36 @@ export default function VideoPlayer({
           className="h-full bg-orange-500 transition-all"
           style={{ width: `${progressPercent}%` }}
         />
+        {/* Progress Indicator (dot) - shows during drag or hover */}
+        <div
+          className={`absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-orange-500 rounded-full shadow-lg transition-opacity ${
+            isDraggingProgress || hoverTime !== null ? "opacity-100" : "opacity-0 group-hover/progress:opacity-100"
+          }`}
+          style={{ left: `${progressPercent}%`, transform: 'translate(-50%, -50%)' }}
+        />
+
+        {/* Hover Preview Tooltip */}
+        {hoverTime !== null && (
+          <div
+            className="absolute -top-12 transform -translate-x-1/2 bg-gray-900 text-white text-xs px-2 py-1 rounded shadow-lg border border-gray-600 pointer-events-none"
+            style={{ left: `${hoverPosition}%` }}
+          >
+            <div className="font-mono text-orange-400">{formatTime(hoverTime)}</div>
+            {/* Arrow pointer */}
+            <div
+              className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900"
+              style={{ borderTopColor: 'rgb(17, 24, 39)' }}
+            />
+          </div>
+        )}
       </div>
 
       {/* Controls Bar - Always visible */}
       <div
-        className={`absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black via-black/80 to-transparent pt-8 pb-4 px-4 transition-opacity duration-200 ${
+        className={`controls-bar absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black via-black/80 to-transparent pt-8 pb-4 px-4 transition-opacity duration-200 ${
           showControls ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
         }`}
       >
-        {/* Title */}
-        {title && (
-          <div className="mb-3 text-white text-sm font-medium truncate">
-            {title}
-          </div>
-        )}
-
         {/* Controls Row */}
         <div className="flex items-center justify-between gap-3">
           {/* Left Controls */}
@@ -481,6 +586,7 @@ export default function VideoPlayer({
             </button>
           </div>
         </div>
+      </div>
       </div>
     </div>
   );
