@@ -355,8 +355,8 @@ export default function LearnCoursePage() {
         <div className="flex-1 flex flex-col overflow-hidden bg-gray-900 justify-center items-center">
           {/* Video and Lesson Content - Scrollable together */}
           <div className="w-full flex-1 overflow-y-auto bg-gray-900 flex flex-col">
-            {/* Video Player Area - Centered */}
-            <div className="flex-1 bg-black flex items-center justify-center">
+            {/* Video Player Area - 85% height */}
+            <div className="h-[85%] bg-black flex items-center justify-center flex-shrink-0">
               <div className="text-center px-8">
                 <div className="w-28 h-28 mx-auto bg-gradient-to-br from-orange-500 to-yellow-500 rounded-full flex items-center justify-center mb-8 shadow-2xl hover:scale-110 transition-transform cursor-pointer group">
                   <Play className="w-14 h-14 text-white ml-2 group-hover:scale-110 transition-transform" />
@@ -377,7 +377,7 @@ export default function LearnCoursePage() {
             </div>
 
             {/* Lesson Content Section - Below Video */}
-            <div className="bg-gray-800 flex-1 overflow-y-auto">
+            <div className="bg-gray-800 w-full">
               <div className="max-w-4xl mx-auto p-8">
                 {/* Placeholder cho markdown content */}
                 <div className="prose prose-invert max-w-none">
@@ -444,10 +444,10 @@ export default function LearnCoursePage() {
           />
 
           {/* Modal Panel */}
-          <div className={`fixed right-0 top-0 h-screen w-96 bg-gray-800 border-l border-gray-700 flex flex-col overflow-hidden z-40 ${
+          <div className={`fixed right-0 top-0 h-screen w-96 bg-gray-800 border-l border-gray-700 flex flex-col overflow-hidden z-40 transition-all duration-300 ease-in-out ${
             sidebarOpen
-              ? 'animate-in slide-in-from-right duration-300 ease-out visible'
-              : 'animate-out slide-out-to-right duration-300 ease-in invisible'
+              ? 'translate-x-0 opacity-100 pointer-events-auto'
+              : 'translate-x-full opacity-0 pointer-events-none'
           }`}>
               <div className="p-5 border-b border-gray-700 flex-shrink-0">
                 <div className="flex items-center justify-between mb-4">
