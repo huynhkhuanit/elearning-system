@@ -108,8 +108,8 @@ export default function AdminLayout({
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 flex">
-      <ToastProvider>
+    <ToastProvider>
+      <div className="min-h-screen bg-slate-950 flex">
         {/* Sidebar */}
         <aside 
           className={`fixed left-0 top-0 h-screen bg-slate-900 border-r border-slate-800 transition-all duration-300 z-40 ${
@@ -188,9 +188,9 @@ export default function AdminLayout({
         </aside>
 
         {/* Main Content */}
-        <main className={`flex-1 transition-all duration-300 ${sidebarOpen ? 'ml-64' : 'ml-20'}`}>
+        <main className={`flex-1 transition-all duration-300 ${sidebarOpen ? 'ml-64' : 'ml-20'} flex flex-col`}>
           {/* Top Bar */}
-          <div className="sticky top-0 z-30 h-16 bg-slate-900/80 backdrop-blur-sm border-b border-slate-800 flex items-center justify-between px-6">
+          <div className="sticky top-0 z-30 h-16 bg-slate-900/80 backdrop-blur-sm border-b border-slate-800 flex items-center justify-between px-6 flex-shrink-0">
             <div className="flex items-center gap-3">
               <h1 className="text-lg font-semibold text-slate-100">
                 {navigationItems.find(item => isActive(item.href))?.label || 'Admin'}
@@ -210,11 +210,13 @@ export default function AdminLayout({
           </div>
 
           {/* Page Content */}
-          <div className="p-6 overflow-auto">
-            {children}
+          <div className="flex-1 overflow-auto">
+            <div className="p-6">
+              {children}
+            </div>
           </div>
         </main>
-      </ToastProvider>
-    </div>
+      </div>
+    </ToastProvider>
   );
 }

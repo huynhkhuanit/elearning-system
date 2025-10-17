@@ -1,12 +1,10 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { ThemeProvider } from "next-themes";
-import Menu from "@/components/Menu";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ToastProvider } from "@/contexts/ToastContext";
 import LayoutWrapper from "@/components/LayoutWrapper";
+import { ReactNode } from "react";
 
 export const metadata: Metadata = {
   title: "DHV LearnX - Nền tảng học lập trình trực tuyến",
