@@ -376,12 +376,12 @@ export default function VideoPlayer({
   const progressPercent = videoDuration > 0 ? (currentTime / videoDuration) * 100 : 0;
 
   return (
-    <div className="w-full space-y-2">
+    <div className="w-full space-y-1">
       {/* Video Title - Above Player */}
       {title && (
-        <h3 className="text-lg font-semibold text-gray-800 dark:text-white px-1">
+        <div className="text-sm font-medium text-gray-700 dark:text-gray-200 px-1 truncate">
           {title}
-        </h3>
+        </div>
       )}
 
       {/* Video Player Container */}
