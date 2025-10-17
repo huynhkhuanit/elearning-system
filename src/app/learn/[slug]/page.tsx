@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { 
   Play, PlayCircle, CheckCircle, Lock, Clock, FileText, 
   ChevronDown, ChevronRight, BookOpen, Award, Star, 
@@ -10,6 +12,8 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/contexts/ToastContext";
+import { usePageTitle, useLessonContent } from "@/lib/hooks";
+import "@/app/markdown.css";
 
 interface Lesson {
   id: string;
@@ -57,6 +61,12 @@ export default function LearnCoursePage() {
   const [lessonContent, setLessonContent] = useState<string>("");
   const { isAuthenticated } = useAuth();
   const toast = useToast();
+  
+  // Update page title when course changes
+  usePageTitle(course ? `${course.title} - DHV LearnX` : "DHV LearnX");
+  
+  // Load markdown content when current lesson changes
+  const markdownContent = useLessonContent(currentLesson?.id || "");
 
   useEffect(() => {
     // Chỉ fetch data khi có slug, không kiểm tra auth ở đây
@@ -324,48 +334,48 @@ export default function LearnCoursePage() {
 
   return (
     <div className="h-screen bg-gray-900 flex flex-col overflow-hidden">
-      {/* Top Header Bar - Dark */}
-      <div className="bg-gray-800 border-b border-gray-700 px-6 py-3 flex items-center justify-between flex-shrink-0">
-        <div className="flex items-center space-x-6">
+      {/* Top Header Bar - Compact Dark */}
+      <div className="bg-gray-800 border-b border-gray-700 px-6 py-2 flex items-center justify-between flex-shrink-0">
+        <div className="flex items-center space-x-4 flex-1 min-w-0">
           <button
             onClick={() => router.push("/")}
-            className="flex items-center space-x-2 text-gray-300 hover:opacity-80 transition-opacity"
+            className="flex items-center space-x-2 text-gray-300 hover:opacity-80 transition-opacity flex-shrink-0"
           >
             <img 
-              src="/assets/img/logo.png" 
+              src="/assets/img/dhvlearnx-logo.svg" 
               alt="DHVLearnX Logo" 
-              className="h-8 w-auto"
+              className="h-7 w-auto"
             />
           </button>
-          <div className="h-6 w-px bg-gray-600"></div>
-          <h1 className="course-title-header font-semibold text-gray-200 truncate max-w-md">
-            {course.title}
+          <div className="h-5 w-px bg-gray-600 flex-shrink-0"></div>
+          <h1 className="font-semibold text-gray-200 truncate text-sm">
+            {course?.title}
           </h1>
         </div>
 
-        <div className="flex items-center space-x-6">
-          {/* Circular Progress */}
-          <div className="flex items-center space-x-3">
-            <div className="relative w-14 h-14">
-              <svg className="transform -rotate-90 w-14 h-14">
+        <div className="flex items-center space-x-4 flex-shrink-0">
+          {/* Circular Progress - Compact */}
+          <div className="flex items-center space-x-2">
+            <div className="relative w-10 h-10">
+              <svg className="transform -rotate-90 w-10 h-10">
                 <circle
-                  cx="28"
-                  cy="28"
-                  r="24"
+                  cx="20"
+                  cy="20"
+                  r="18"
                   stroke="currentColor"
-                  strokeWidth="4"
+                  strokeWidth="3"
                   fill="none"
                   className="text-gray-700"
                 />
                 <circle
-                  cx="28"
-                  cy="28"
-                  r="24"
+                  cx="20"
+                  cy="20"
+                  r="18"
                   stroke="url(#gradient)"
-                  strokeWidth="4"
+                  strokeWidth="3"
                   fill="none"
-                  strokeDasharray={`${2 * Math.PI * 24}`}
-                  strokeDashoffset={`${2 * Math.PI * 24 * (1 - course.progress / 100)}`}
+                  strokeDasharray={`${2 * Math.PI * 18}`}
+                  strokeDashoffset={`${2 * Math.PI * 18 * (1 - (course?.progress || 0) / 100)}`}
                   className="transition-all duration-500"
                   strokeLinecap="round"
                 />
@@ -377,17 +387,17 @@ export default function LearnCoursePage() {
                 </defs>
               </svg>
               <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-xs font-bold text-white">{course.progress}%</span>
+                <span className="text-[10px] font-bold text-white">{course?.progress}%</span>
               </div>
             </div>
-            <div className="text-left">
-              <p className="text-sm font-semibold text-gray-200">{course.completedLessons}/{course.totalLessons} bài</p>
-              <p className="text-xs text-gray-400">Đã hoàn thành</p>
+            <div className="text-left hidden sm:block">
+              <p className="text-xs font-semibold text-gray-200">{course?.completedLessons}/{course?.totalLessons}</p>
+              <p className="text-[10px] text-gray-400">hoàn thành</p>
             </div>
           </div>
           
-          <button className="p-2 text-gray-400 hover:text-orange-400 hover:bg-gray-700 rounded-lg transition-colors">
-            <Share2 className="w-5 h-5" />
+          <button className="p-1.5 text-gray-400 hover:text-orange-400 hover:bg-gray-700 rounded-lg transition-colors flex-shrink-0">
+            <Share2 className="w-4 h-4" />
           </button>
         </div>
       </div>
@@ -420,17 +430,20 @@ export default function LearnCoursePage() {
 
             {/* Lesson Content Section - Below Video */}
             <div className="bg-gray-800 w-full">
-              <div className="max-w-4xl mx-auto p-8">
-                {/* Placeholder cho markdown content */}
-                <div className="prose prose-invert max-w-none">
-                  <h1 className="text-3xl font-bold text-white mb-6">{currentLesson?.title}</h1>
-                  
-                  {/* Nội dung markdown sẽ được render ở đây */}
-                  <div className="bg-gray-700/30 rounded-lg p-6 border border-gray-600 text-gray-300 min-h-96">
-                    <p className="text-gray-400 italic">
-                      Nội dung bài học sẽ được hiển thị ở đây. Xây dựng markdown content cho bài học này.
-                    </p>
-                  </div>
+              <div className="max-w-4xl mx-auto p-6">
+                {/* Markdown Content */}
+                <div className="prose prose-invert max-w-none text-sm">
+                  {markdownContent ? (
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                      {markdownContent}
+                    </ReactMarkdown>
+                  ) : (
+                    <div className="bg-gray-700/30 rounded-lg p-6 border border-gray-600 text-gray-300">
+                      <p className="text-gray-400 italic">
+                        Chọn một bài học để xem nội dung chi tiết.
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

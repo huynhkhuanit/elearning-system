@@ -1,0 +1,166 @@
+/* Markdown Styling for Prose */
+
+.prose h1 {
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 1rem;
+  margin-top: 1.5rem;
+}
+
+.prose h1:first-child {
+  margin-top: 0;
+}
+
+.prose h2 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #fb923c;
+  margin-bottom: 0.75rem;
+  margin-top: 1.25rem;
+}
+
+.prose h3 {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #facc15;
+  margin-bottom: 0.5rem;
+  margin-top: 1rem;
+}
+
+.prose p {
+  color: #d1d5db;
+  margin-bottom: 0.75rem;
+  line-height: 1.6;
+}
+
+.prose code {
+  background-color: rgba(17, 24, 39, 0.5);
+  color: #4ade80;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+  font-family: monospace;
+}
+
+.prose pre {
+  background-color: rgba(17, 24, 39, 0.7);
+  border: 1px solid #374151;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  overflow-x: auto;
+}
+
+.prose pre code {
+  background-color: transparent;
+  color: #86efac;
+  padding: 0;
+  border-radius: 0;
+}
+
+.prose strong,
+.prose b {
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.prose em,
+.prose i {
+  font-style: italic;
+  color: #e5e7eb;
+}
+
+.prose ul {
+  list-style-type: disc;
+  margin-left: 1.25rem;
+  margin-bottom: 1rem;
+  color: #d1d5db;
+}
+
+.prose ol {
+  list-style-type: decimal;
+  margin-left: 1.25rem;
+  margin-bottom: 1rem;
+  color: #d1d5db;
+}
+
+.prose li {
+  margin-bottom: 0.5rem;
+}
+
+.prose blockquote {
+  border-left: 4px solid #f97316;
+  padding-left: 1rem;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  background-color: rgba(17, 24, 39, 0.3);
+  color: #d1d5db;
+  font-style: italic;
+}
+
+.prose a {
+  color: #fb923c;
+  text-decoration: underline;
+  transition: color 0.3s ease;
+}
+
+.prose a:hover {
+  color: #fbbf24;
+}
+
+.prose table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid #374151;
+  margin-bottom: 1rem;
+}
+
+.prose th {
+  background-color: rgba(17, 24, 39, 0.5);
+  color: #ffffff;
+  padding: 0.75rem;
+  text-align: left;
+  border: 1px solid #374151;
+  font-weight: 700;
+}
+
+.prose td {
+  padding: 0.75rem;
+  border: 1px solid #374151;
+  color: #d1d5db;
+}
+
+.prose tr:hover {
+  background-color: rgba(31, 41, 55, 0.3);
+}
+
+.prose hr {
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+  border-top: 1px solid #374151;
+}
+
+.prose mark {
+  background-color: rgba(180, 83, 9, 0.3);
+  color: #fef08a;
+  padding: 0.125rem;
+  border-radius: 0.125rem;
+}
+
+.prose del {
+  text-decoration: line-through;
+  color: #6b7280;
+}
+
+.prose ins {
+  color: #4ade80;
+  text-decoration: underline;
+}
+
+.prose sub,
+.prose sup {
+  font-size: 0.875rem;
+}
