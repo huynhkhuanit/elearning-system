@@ -329,12 +329,13 @@ export default function LearnCoursePage() {
         <div className="flex items-center space-x-6">
           <button
             onClick={() => router.push("/")}
-            className="flex items-center space-x-2 text-gray-300 hover:text-orange-400 transition-colors"
+            className="flex items-center space-x-2 text-gray-300 hover:opacity-80 transition-opacity"
           >
-            <Home className="w-5 h-5" />
-            <span className="text-lg font-black bg-gradient-to-r from-orange-400 to-yellow-400 bg-clip-text text-transparent">
-              DHVLearnX
-            </span>
+            <img 
+              src="/assets/img/logo.png" 
+              alt="DHVLearnX Logo" 
+              className="h-8 w-auto"
+            />
           </button>
           <div className="h-6 w-px bg-gray-600"></div>
           <h1 className="course-title-header font-semibold text-gray-200 truncate max-w-md">
