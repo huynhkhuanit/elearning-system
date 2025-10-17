@@ -45,10 +45,11 @@ export default function VideoPlayer({
   const [isMuted, setIsMuted] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [playbackRate, setPlaybackRate] = useState(1);
-  const [showControls, setShowControls] = useState(true);
+  const [showControls, setShowControls] = useState(true); // ✅ Always show by default
   const [showSettings, setShowSettings] = useState(false);
   const [bufferedPercent, setBufferedPercent] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+  const [showAutoHideControls, setShowAutoHideControls] = useState(false); // ✅ Only auto-hide in fullscreen
 
   // Control hide timeout
   const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -207,15 +208,26 @@ export default function VideoPlayer({
     }
   };
 
-  // Hide controls after inactivity
+  // Hide controls after inactivity (only in fullscreen)
   const handleMouseMove = useCallback(() => {
+    // Always show controls when not fullscreen
+    if (!isFullscreen) {
+      setShowControls(true);
+      return;
+    }
+
+    // In fullscreen: show on mouse move, hide after 3 seconds
+    setShowAutoHideControls(true);
     setShowControls(true);
+    
     if (controlsTimeoutRef.current) {
       clearTimeout(controlsTimeoutRef.current);
     }
-    if (isPlaying && isFullscreen) {
+    
+    if (isPlaying) {
       controlsTimeoutRef.current = setTimeout(() => {
         setShowControls(false);
+        setShowAutoHideControls(false);
       }, 3000);
     }
   }, [isPlaying, isFullscreen]);
@@ -240,8 +252,15 @@ export default function VideoPlayer({
   return (
     <div
       ref={containerRef}
-      className="w-full bg-gray-900 rounded-lg overflow-hidden group cursor-pointer"
+      className="w-full aspect-video bg-gray-900 rounded-lg overflow-hidden group cursor-pointer relative"
       onMouseMove={handleMouseMove}
+      onMouseEnter={() => setShowControls(true)}
+      onMouseLeave={() => {
+        if (isFullscreen && isPlaying) {
+          // Only hide in fullscreen when playing
+          setShowControls(false);
+        }
+      }}
     >
       {/* Video Element */}
       <video
@@ -277,10 +296,10 @@ export default function VideoPlayer({
         </div>
       )}
 
-      {/* Progress Bar (always visible on hover) */}
+      {/* Progress Bar (always visible) */}
       <div
-        className={`absolute bottom-16 left-0 right-0 h-1 bg-gray-700 cursor-pointer transition-all ${
-          showControls || !isPlaying ? "opacity-100" : "opacity-0"
+        className={`absolute bottom-16 left-0 right-0 h-1 bg-gray-700 cursor-pointer transition-opacity duration-200 ${
+          showControls ? "opacity-100" : "opacity-0"
         }`}
         onClick={(e) => {
           const rect = e.currentTarget.getBoundingClientRect();
@@ -303,10 +322,10 @@ export default function VideoPlayer({
         />
       </div>
 
-      {/* Controls Bar */}
+      {/* Controls Bar - Always visible */}
       <div
-        className={`absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent pt-8 pb-4 px-4 transition-opacity ${
-          showControls ? "opacity-100" : "opacity-0"
+        className={`absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black via-black/80 to-transparent pt-8 pb-4 px-4 transition-opacity duration-200 ${
+          showControls ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
         }`}
       >
         {/* Title */}
