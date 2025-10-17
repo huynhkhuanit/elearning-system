@@ -14,7 +14,7 @@ export function usePageTitle(title: string) {
 }
 
 /**
- * Hook để lấy nội dung markdown của bài học
+ * Hook để lấy nội dung markdown của bài học từ database
  * @param lessonId - ID của bài học
  * @returns Nội dung markdown của bài học
  */
@@ -31,12 +31,16 @@ export function useLessonContent(lessonId: string): string | null {
     const fetchContent = async () => {
       setLoading(true);
       try {
-        const response = await fetch('/data/lessonContent.json');
-        if (!response.ok) throw new Error('Failed to load content');
+        // Fetch từ API endpoint - lấy content từ database
+        const response = await fetch(`/api/lessons/${lessonId}/content`);
+        if (!response.ok) {
+          console.warn(`Lesson ${lessonId} not found`);
+          setContent(null);
+          return;
+        }
         
         const data = await response.json();
-        const lessonData = data.lessons[lessonId];
-        setContent(lessonData?.content || null);
+        setContent(data.content || null);
       } catch (error) {
         console.error('Error loading lesson content:', error);
         setContent(null);
