@@ -351,21 +351,12 @@ export default function LearnCoursePage() {
       </div>
 
       <div className="flex-1 flex overflow-hidden">
-        {/* Main Content Area - Left Side */}
-        <div className="flex-1 flex flex-col overflow-hidden bg-gray-900">
+        {/* Main Content Area - Centered */}
+        <div className="flex-1 flex flex-col overflow-hidden bg-gray-900 justify-center items-center">
           {/* Video and Lesson Content - Scrollable together */}
-          <div className="flex-1 overflow-y-auto bg-gray-900">
-            {/* Video Player Area */}
-            <div className="bg-black w-full flex items-center justify-center" style={{ minHeight: '400px', maxHeight: '500px' }}>
-              {!sidebarOpen && (
-                <button
-                  onClick={() => setSidebarOpen(true)}
-                  className="absolute top-4 right-4 p-2 bg-gray-800/80 hover:bg-gray-700 text-white rounded-lg transition-colors z-10 backdrop-blur-sm"
-                >
-                  <Menu className="w-5 h-5" />
-                </button>
-              )}
-              
+          <div className="w-full flex-1 overflow-y-auto bg-gray-900 flex flex-col">
+            {/* Video Player Area - Centered */}
+            <div className="flex-1 bg-black flex items-center justify-center">
               <div className="text-center px-8">
                 <div className="w-28 h-28 mx-auto bg-gradient-to-br from-orange-500 to-yellow-500 rounded-full flex items-center justify-center mb-8 shadow-2xl hover:scale-110 transition-transform cursor-pointer group">
                   <Play className="w-14 h-14 text-white ml-2 group-hover:scale-110 transition-transform" />
@@ -386,7 +377,7 @@ export default function LearnCoursePage() {
             </div>
 
             {/* Lesson Content Section - Below Video */}
-            <div className="bg-gray-800">
+            <div className="bg-gray-800 flex-1 overflow-y-auto">
               <div className="max-w-4xl mx-auto p-8">
                 {/* Placeholder cho markdown content */}
                 <div className="prose prose-invert max-w-none">
@@ -403,134 +394,153 @@ export default function LearnCoursePage() {
             </div>
           </div>
 
-          {/* Bottom Control Bar */}
-          <div className="bg-gray-800 border-t border-gray-700 px-6 py-4 flex items-center justify-between flex-shrink-0">
-            <button
-              onClick={goToPreviousLesson}
-              disabled={!course.sections[0]?.lessons[0] || currentLesson?.id === course.sections[0].lessons[0].id}
-              className="px-6 py-2.5 bg-gray-700 border border-gray-600 text-gray-200 rounded-lg hover:bg-gray-600 transition-colors disabled:opacity-40 disabled:cursor-not-allowed font-medium text-sm flex items-center space-x-2"
-            >
-              <ChevronRight className="w-4 h-4 rotate-180" />
-              <span>Bài trước</span>
-            </button>
+          {/* Bottom Control Bar - Centered Buttons */}
+          <div className="w-full bg-gray-800/70 backdrop-blur-sm border-t border-gray-700 px-6 py-4 flex items-center justify-between flex-shrink-0">
+            <div className="flex-1"></div>
 
-            <div className="flex items-center space-x-3">
-              {currentLesson?.isCompleted ? (
-                <div className="flex items-center space-x-2 text-green-400 font-medium bg-green-500/10 px-4 py-2 rounded-lg">
-                  <CheckCircle className="w-5 h-5" />
-                  <span>Đã hoàn thành</span>
-                </div>
-              ) : (
-                <button
-                  onClick={markAsCompleted}
-                  className="px-6 py-2.5 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg hover:from-green-600 hover:to-emerald-600 transition-all font-medium shadow-lg text-sm flex items-center space-x-2"
-                >
-                  <CheckCircle className="w-4 h-4" />
-                  <span>Hoàn thành bài học</span>
-                </button>
-              )}
-            </div>
-
-            <button
-              onClick={goToNextLesson}
-              className="px-6 py-2.5 bg-gradient-to-r from-orange-500 to-yellow-500 text-white rounded-lg hover:from-orange-600 hover:to-yellow-600 transition-all font-medium shadow-lg text-sm flex items-center space-x-2"
-            >
-              <span>Bài tiếp theo</span>
-              <ChevronRight className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
-
-        {/* Sidebar - Course Content (Right Side) */}
-        <div className={`${sidebarOpen ? 'w-96' : 'w-0'} bg-gray-800 border-l border-gray-700 flex flex-col overflow-hidden transition-all duration-300 flex-shrink-0`}>
-          <div className="p-5 border-b border-gray-700 flex-shrink-0">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-bold text-white">Nội dung khoá học</h2>
+            <div className="flex items-center gap-6">
               <button
-                onClick={() => setSidebarOpen(false)}
-                className="text-gray-400 hover:text-white transition-colors"
+                onClick={goToPreviousLesson}
+                disabled={!course.sections[0]?.lessons[0] || currentLesson?.id === course.sections[0].lessons[0].id}
+                className="px-6 py-2.5 bg-gray-700 border border-gray-600 text-gray-200 rounded-lg hover:bg-gray-600 transition-colors disabled:opacity-40 disabled:cursor-not-allowed font-medium text-sm flex items-center space-x-2"
               >
-                <X className="w-5 h-5" />
+                <ChevronRight className="w-4 h-4 rotate-180" />
+                <span>Bài trước</span>
+              </button>
+
+              <button
+                onClick={goToNextLesson}
+                className="px-6 py-2.5 bg-gradient-to-r from-orange-500 to-yellow-500 text-white rounded-lg hover:from-orange-600 hover:to-yellow-600 transition-all font-medium shadow-lg text-sm flex items-center space-x-2"
+              >
+                <span>Bài tiếp theo</span>
+                <ChevronRight className="w-4 h-4" />
               </button>
             </div>
-            
-            <div className="flex items-center space-x-4 text-sm text-gray-400">
-              <div className="flex items-center space-x-1">
-                <BookOpen className="w-4 h-4" />
-                <span>{course.totalLessons} bài học</span>
+
+            <div className="flex-1 flex items-center justify-end gap-3">
+              <div className="text-right">
+                <p className="text-sm font-medium text-gray-200 truncate max-w-xs">{currentLesson?.title}</p>
               </div>
-              <div className="flex items-center space-x-1">
-                <Clock className="w-4 h-4" />
-                <span>{course.totalDuration}</span>
-              </div>
+              <button
+                onClick={() => setSidebarOpen(true)}
+                className="p-2 bg-gray-700/50 hover:bg-gray-600/70 text-white rounded-lg transition-colors z-10 backdrop-blur-sm"
+              >
+                <Menu className="w-5 h-5" />
+              </button>
             </div>
           </div>
-
-          {/* Sections & Lessons */}
-          <div className="flex-1 overflow-y-auto custom-scrollbar">
-            {course.sections.map((section, sectionIndex) => (
-              <div key={section.id} className="border-b border-gray-700">
-                <button
-                  onClick={() => toggleSection(section.id)}
-                  className="w-full px-5 py-4 flex items-center justify-between hover:bg-gray-700/50 transition-colors"
-                >
-                  <div className="flex items-center space-x-3 flex-1">
-                    <span className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center text-sm font-bold text-orange-400">
-                      {sectionIndex + 1}
-                    </span>
-                    <div className="text-left">
-                      <h3 className="font-semibold text-white text-sm">{section.title}</h3>
-                      <p className="text-xs text-gray-400">{section.lessons.length} bài học • {section.duration}</p>
-                    </div>
-                  </div>
-                  {expandedSections.has(section.id) ? (
-                    <ChevronDown className="w-5 h-5 text-gray-400 flex-shrink-0" />
-                  ) : (
-                    <ChevronRight className="w-5 h-5 text-gray-400 flex-shrink-0" />
-                  )}
-                </button>
-
-                {expandedSections.has(section.id) && (
-                  <div className="bg-gray-900/50">
-                    {section.lessons.map((lesson, lessonIndex) => (
-                      <button
-                        key={lesson.id}
-                        onClick={() => handleLessonClick(lesson)}
-                        className={`w-full px-5 py-3 flex items-center space-x-3 hover:bg-gray-700/30 transition-colors ${
-                          currentLesson?.id === lesson.id ? 'bg-orange-500/10 border-r-4 border-orange-500' : 'border-r-4 border-transparent'
-                        }`}
-                      >
-                        <span className="flex-shrink-0 text-xs font-medium text-gray-500 w-6">
-                          {sectionIndex + 1}.{lessonIndex + 1}
-                        </span>
-                        <div className="flex-shrink-0">
-                          {lesson.isCompleted ? (
-                            <CheckCircle className="w-5 h-5 text-green-400" />
-                          ) : (
-                            <div className="w-5 h-5 rounded-full border-2 border-gray-600"></div>
-                          )}
-                        </div>
-                        <div className="flex-1 text-left">
-                          <p className={`text-sm font-medium ${
-                            currentLesson?.id === lesson.id ? 'text-orange-400' : 'text-gray-300'
-                          }`}>
-                            {lesson.title}
-                          </p>
-                          <div className="flex items-center space-x-2 mt-0.5">
-                            <div className="text-gray-500">
-                              {getLessonIcon(lesson.type)}
-                            </div>
-                            <span className="text-xs text-gray-500">{lesson.duration}</span>
-                          </div>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
         </div>
+
+        {/* Sidebar - Course Content Modal (Right Side Overlay) */}
+        <>
+          {/* Backdrop */}
+          <div
+            className={`fixed inset-0 z-30 ${
+              sidebarOpen
+                ? 'bg-black/50 animate-in fade-in duration-200 pointer-events-auto'
+                : 'bg-black/0 animate-out fade-out duration-200 pointer-events-none'
+            }`}
+            onClick={() => setSidebarOpen(false)}
+          />
+
+          {/* Modal Panel */}
+          <div className={`fixed right-0 top-0 h-screen w-96 bg-gray-800 border-l border-gray-700 flex flex-col overflow-hidden z-40 ${
+            sidebarOpen
+              ? 'animate-in slide-in-from-right duration-300 ease-out visible'
+              : 'animate-out slide-out-to-right duration-300 ease-in invisible'
+          }`}>
+              <div className="p-5 border-b border-gray-700 flex-shrink-0">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-lg font-bold text-white">Nội dung khoá học</h2>
+                  <button
+                    onClick={() => setSidebarOpen(false)}
+                    className="text-gray-400 hover:text-white transition-colors"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+                
+                <div className="flex items-center space-x-4 text-sm text-gray-400">
+                  <div className="flex items-center space-x-1">
+                    <BookOpen className="w-4 h-4" />
+                    <span>{course.totalLessons} bài học</span>
+                  </div>
+                  <div className="flex items-center space-x-1">
+                    <Clock className="w-4 h-4" />
+                    <span>{course.totalDuration}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Sections & Lessons */}
+              <div className="flex-1 overflow-y-auto custom-scrollbar">
+                {course.sections.map((section, sectionIndex) => (
+                  <div key={section.id} className="border-b border-gray-700">
+                    <button
+                      onClick={() => toggleSection(section.id)}
+                      className="w-full px-5 py-4 flex items-center justify-between hover:bg-gray-700/50 transition-colors"
+                    >
+                      <div className="flex items-center space-x-3 flex-1">
+                        <span className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center text-sm font-bold text-orange-400">
+                          {sectionIndex + 1}
+                        </span>
+                        <div className="text-left">
+                          <h3 className="font-semibold text-white text-sm">{section.title}</h3>
+                          <p className="text-xs text-gray-400">{section.lessons.length} bài học • {section.duration}</p>
+                        </div>
+                      </div>
+                      {expandedSections.has(section.id) ? (
+                        <ChevronDown className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                      ) : (
+                        <ChevronRight className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                      )}
+                    </button>
+
+                    {expandedSections.has(section.id) && (
+                      <div className="bg-gray-900/50">
+                        {section.lessons.map((lesson, lessonIndex) => (
+                          <button
+                            key={lesson.id}
+                            onClick={() => {
+                              handleLessonClick(lesson);
+                              setSidebarOpen(false);
+                            }}
+                            className={`w-full px-5 py-3 flex items-center space-x-3 hover:bg-gray-700/30 transition-colors ${
+                              currentLesson?.id === lesson.id ? 'bg-orange-500/10 border-r-4 border-orange-500' : 'border-r-4 border-transparent'
+                            }`}
+                          >
+                            <span className="flex-shrink-0 text-xs font-medium text-gray-500 w-6">
+                              {sectionIndex + 1}.{lessonIndex + 1}
+                            </span>
+                            <div className="flex-shrink-0">
+                              {lesson.isCompleted ? (
+                                <CheckCircle className="w-5 h-5 text-green-400" />
+                              ) : (
+                                <div className="w-5 h-5 rounded-full border-2 border-gray-600"></div>
+                              )}
+                            </div>
+                            <div className="flex-1 text-left">
+                              <p className={`text-sm font-medium ${
+                                currentLesson?.id === lesson.id ? 'text-orange-400' : 'text-gray-300'
+                              }`}>
+                                {lesson.title}
+                              </p>
+                              <div className="flex items-center space-x-2 mt-0.5">
+                                <div className="text-gray-500">
+                                  {getLessonIcon(lesson.type)}
+                                </div>
+                                <span className="text-xs text-gray-500">{lesson.duration}</span>
+                              </div>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+        </>
       </div>
     </div>
   );
