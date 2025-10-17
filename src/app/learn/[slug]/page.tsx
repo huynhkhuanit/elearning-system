@@ -54,7 +54,7 @@ export default function LearnCoursePage() {
   const [currentLesson, setCurrentLesson] = useState<Lesson | null>(null);
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [activeTab, setActiveTab] = useState<"overview" | "notes" | "qa" | "resources">("overview");
+  const [lessonContent, setLessonContent] = useState<string>("");
   const { isAuthenticated } = useAuth();
   const toast = useToast();
 
@@ -353,31 +353,51 @@ export default function LearnCoursePage() {
       <div className="flex-1 flex overflow-hidden">
         {/* Main Content Area - Left Side */}
         <div className="flex-1 flex flex-col overflow-hidden bg-gray-900">
-          {/* Video Player Area */}
-          <div className="bg-black flex items-center justify-center relative" style={{ height: '65vh', maxHeight: '700px' }}>
-            {!sidebarOpen && (
-              <button
-                onClick={() => setSidebarOpen(true)}
-                className="absolute top-4 right-4 p-2 bg-gray-800/80 hover:bg-gray-700 text-white rounded-lg transition-colors z-10 backdrop-blur-sm"
-              >
-                <Menu className="w-5 h-5" />
-              </button>
-            )}
-            
-            <div className="text-center px-8">
-              <div className="w-28 h-28 mx-auto bg-gradient-to-br from-orange-500 to-yellow-500 rounded-full flex items-center justify-center mb-8 shadow-2xl hover:scale-110 transition-transform cursor-pointer group">
-                <Play className="w-14 h-14 text-white ml-2 group-hover:scale-110 transition-transform" />
-              </div>
-              <h2 className="text-3xl font-bold text-white mb-3">{currentLesson?.title}</h2>
-              <div className="flex items-center justify-center space-x-4 text-gray-400">
-                <div className="flex items-center space-x-2">
-                  <Clock className="w-4 h-4" />
-                  <span className="text-sm">{currentLesson?.duration}</span>
+          {/* Video and Lesson Content - Scrollable together */}
+          <div className="flex-1 overflow-y-auto bg-gray-900">
+            {/* Video Player Area */}
+            <div className="bg-black w-full flex items-center justify-center" style={{ minHeight: '400px', maxHeight: '500px' }}>
+              {!sidebarOpen && (
+                <button
+                  onClick={() => setSidebarOpen(true)}
+                  className="absolute top-4 right-4 p-2 bg-gray-800/80 hover:bg-gray-700 text-white rounded-lg transition-colors z-10 backdrop-blur-sm"
+                >
+                  <Menu className="w-5 h-5" />
+                </button>
+              )}
+              
+              <div className="text-center px-8">
+                <div className="w-28 h-28 mx-auto bg-gradient-to-br from-orange-500 to-yellow-500 rounded-full flex items-center justify-center mb-8 shadow-2xl hover:scale-110 transition-transform cursor-pointer group">
+                  <Play className="w-14 h-14 text-white ml-2 group-hover:scale-110 transition-transform" />
                 </div>
-                <span>•</span>
-                <div className="flex items-center space-x-2">
-                  {getLessonIcon(currentLesson?.type || "video")}
-                  <span className="text-sm capitalize">{currentLesson?.type}</span>
+                <h2 className="text-3xl font-bold text-white mb-3">{currentLesson?.title}</h2>
+                <div className="flex items-center justify-center space-x-4 text-gray-400">
+                  <div className="flex items-center space-x-2">
+                    <Clock className="w-4 h-4" />
+                    <span className="text-sm">{currentLesson?.duration}</span>
+                  </div>
+                  <span>•</span>
+                  <div className="flex items-center space-x-2">
+                    {getLessonIcon(currentLesson?.type || "video")}
+                    <span className="text-sm capitalize">{currentLesson?.type}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Lesson Content Section - Below Video */}
+            <div className="bg-gray-800">
+              <div className="max-w-4xl mx-auto p-8">
+                {/* Placeholder cho markdown content */}
+                <div className="prose prose-invert max-w-none">
+                  <h1 className="text-3xl font-bold text-white mb-6">{currentLesson?.title}</h1>
+                  
+                  {/* Nội dung markdown sẽ được render ở đây */}
+                  <div className="bg-gray-700/30 rounded-lg p-6 border border-gray-600 text-gray-300 min-h-96">
+                    <p className="text-gray-400 italic">
+                      Nội dung bài học sẽ được hiển thị ở đây. Xây dựng markdown content cho bài học này.
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -418,147 +438,6 @@ export default function LearnCoursePage() {
               <span>Bài tiếp theo</span>
               <ChevronRight className="w-4 h-4" />
             </button>
-          </div>
-
-          {/* Tabs Section */}
-          <div className="flex-1 overflow-hidden flex flex-col bg-gray-800">
-            {/* Tab Navigation */}
-            <div className="bg-gray-800 border-t border-gray-700 px-6 flex space-x-1 flex-shrink-0">
-              {[
-                { id: "overview", label: "Tổng quan", icon: BookOpen },
-                { id: "notes", label: "Ghi chú", icon: FileText },
-                { id: "qa", label: "Hỏi đáp", icon: MessageSquare },
-                { id: "resources", label: "Tài nguyên", icon: Download },
-              ].map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id as any)}
-                  className={`px-4 py-3 font-medium transition-colors relative text-sm ${
-                    activeTab === tab.id
-                      ? 'text-orange-400'
-                      : 'text-gray-400 hover:text-gray-200'
-                  }`}
-                >
-                  <div className="flex items-center space-x-2">
-                    <tab.icon className="w-4 h-4" />
-                    <span>{tab.label}</span>
-                  </div>
-                  {activeTab === tab.id && (
-                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-orange-500 to-yellow-500"></div>
-                  )}
-                </button>
-              ))}
-            </div>
-
-            {/* Tab Content */}
-            <div className="flex-1 overflow-y-auto p-6 bg-gray-900">
-              {activeTab === "overview" && (
-                <div className="max-w-4xl mx-auto space-y-6">
-                  <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
-                    <h3 className="text-xl font-bold text-white mb-4">Về bài học này</h3>
-                    <p className="text-gray-300 leading-relaxed mb-6">
-                      Trong bài học này, bạn sẽ học được các kiến thức quan trọng và thực hành 
-                      với các ví dụ thực tế. Đây là nền tảng quan trọng giúp bạn nắm vững 
-                      các khái niệm cơ bản và áp dụng vào dự án thực tế.
-                    </p>
-
-                    <div className="grid md:grid-cols-3 gap-4">
-                      <div className="bg-gray-700/50 rounded-lg p-4 text-center border border-gray-600">
-                        <Clock className="w-8 h-8 text-orange-400 mx-auto mb-2" />
-                        <p className="text-2xl font-bold text-white mb-1">{currentLesson?.duration}</p>
-                        <p className="text-sm text-gray-400">Thời lượng</p>
-                      </div>
-                      <div className="bg-gray-700/50 rounded-lg p-4 text-center border border-gray-600">
-                        <Users className="w-8 h-8 text-blue-400 mx-auto mb-2" />
-                        <p className="text-2xl font-bold text-white mb-1">1,234</p>
-                        <p className="text-sm text-gray-400">Học viên</p>
-                      </div>
-                      <div className="bg-gray-700/50 rounded-lg p-4 text-center border border-gray-600">
-                        <Star className="w-8 h-8 text-yellow-400 mx-auto mb-2" />
-                        <p className="text-2xl font-bold text-white mb-1">4.9</p>
-                        <p className="text-sm text-gray-400">Đánh giá</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
-                    <h3 className="text-lg font-bold text-white mb-4">Nội dung chính</h3>
-                    <ul className="space-y-3">
-                      {[
-                        "Hiểu rõ các khái niệm cốt lõi",
-                        "Thực hành với ví dụ thực tế",
-                        "Áp dụng kiến thức vào dự án",
-                        "Best practices và tips hữu ích",
-                      ].map((item, index) => (
-                        <li key={index} className="flex items-start space-x-3">
-                          <CheckCircle className="w-5 h-5 text-green-400 mt-0.5 flex-shrink-0" />
-                          <span className="text-gray-300">{item}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              )}
-
-              {activeTab === "notes" && (
-                <div className="max-w-4xl mx-auto">
-                  <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
-                    <h3 className="text-xl font-bold text-white mb-6">Ghi chú của bạn</h3>
-                    <textarea
-                      placeholder="Viết ghi chú của bạn ở đây..."
-                      className="w-full h-64 bg-gray-700 text-gray-100 rounded-lg p-4 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-none placeholder-gray-400"
-                    ></textarea>
-                    <button className="mt-4 px-6 py-2 bg-gradient-to-r from-orange-500 to-yellow-500 text-white rounded-lg font-medium hover:from-orange-600 hover:to-yellow-600 transition-all shadow-sm">
-                      Lưu ghi chú
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {activeTab === "qa" && (
-                <div className="max-w-4xl mx-auto">
-                  <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
-                    <h3 className="text-xl font-bold text-white mb-6">Hỏi đáp</h3>
-                    <p className="text-gray-400 text-center py-12">
-                      Chưa có câu hỏi nào. Hãy là người đầu tiên đặt câu hỏi!
-                    </p>
-                    <button className="w-full px-6 py-3 bg-gradient-to-r from-orange-500 to-yellow-500 text-white rounded-lg font-medium hover:from-orange-600 hover:to-yellow-600 transition-all shadow-sm">
-                      Đặt câu hỏi mới
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {activeTab === "resources" && (
-                <div className="max-w-4xl mx-auto">
-                  <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
-                    <h3 className="text-xl font-bold text-white mb-6">Tài nguyên bài học</h3>
-                    <div className="space-y-3">
-                      {[
-                        { name: "Slide bài giảng.pdf", size: "2.5 MB", type: "PDF" },
-                        { name: "Source code.zip", size: "15.3 MB", type: "ZIP" },
-                        { name: "Tài liệu tham khảo.docx", size: "1.2 MB", type: "DOCX" },
-                      ].map((file, index) => (
-                        <div key={index} className="flex items-center justify-between bg-gray-700/50 rounded-lg p-4 hover:bg-gray-700 transition-colors border border-gray-600">
-                          <div className="flex items-center space-x-3">
-                            <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-yellow-500 rounded-lg flex items-center justify-center">
-                              <FileText className="w-5 h-5 text-white" />
-                            </div>
-                            <div>
-                              <p className="text-white font-medium">{file.name}</p>
-                              <p className="text-sm text-gray-400">{file.size} • {file.type}</p>
-                            </div>
-                          </div>
-                          <button className="px-4 py-2 bg-gray-800 border border-gray-600 hover:bg-gray-700 text-gray-300 rounded-lg transition-colors">
-                            <Download className="w-4 h-4" />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
           </div>
         </div>
 
