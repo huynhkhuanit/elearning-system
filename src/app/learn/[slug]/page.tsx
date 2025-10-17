@@ -225,16 +225,57 @@ export default function LearnCoursePage() {
     }
   };
 
-  const goToNextLesson = () => {
+  const goToNextLesson = async () => {
     if (!course || !currentLesson) return;
 
-    const allLessons = course.sections.flatMap(s => s.lessons);
-    const currentIndex = allLessons.findIndex(l => l.id === currentLesson.id);
-    
-    if (currentIndex < allLessons.length - 1) {
-      setCurrentLesson(allLessons[currentIndex + 1]);
-    } else {
-      toast.success("Chúc mừng! Bạn đã hoàn thành khóa học!");
+    try {
+      // Mark current lesson as completed
+      const response = await fetch(`/api/lessons/${currentLesson.id}/complete`, {
+        method: 'POST',
+        credentials: 'include',
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        // Update local state
+        setCourse(prev => {
+          if (!prev) return prev;
+          
+          const updatedSections = prev.sections.map(section => ({
+            ...section,
+            lessons: section.lessons.map(lesson => 
+              lesson.id === currentLesson.id 
+                ? { ...lesson, isCompleted: true }
+                : lesson
+            )
+          }));
+
+          const completedLessons = updatedSections.reduce((acc, section) => 
+            acc + section.lessons.filter(l => l.isCompleted).length, 0
+          );
+
+          return {
+            ...prev,
+            sections: updatedSections,
+            completedLessons,
+            progress: Math.round((completedLessons / prev.totalLessons) * 100)
+          };
+        });
+      }
+
+      // Navigate to next lesson
+      const allLessons = course.sections.flatMap(s => s.lessons);
+      const currentIndex = allLessons.findIndex(l => l.id === currentLesson.id);
+      
+      if (currentIndex < allLessons.length - 1) {
+        setCurrentLesson(allLessons[currentIndex + 1]);
+      } else {
+        toast.success("Chúc mừng! Bạn đã hoàn thành khóa học!");
+      }
+    } catch (error) {
+      console.error("Error marking lesson as completed:", error);
+      toast.error("Đã có lỗi xảy ra");
     }
   };
 
