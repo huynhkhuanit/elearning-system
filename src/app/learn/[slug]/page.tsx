@@ -335,20 +335,20 @@ export default function LearnCoursePage() {
   return (
     <div className="h-screen bg-gray-900 flex flex-col overflow-hidden">
       {/* Top Header Bar - Compact Dark */}
-      <div className="bg-gray-800 border-b border-gray-700 px-6 py-2 flex items-center justify-between flex-shrink-0">
+      <div className="bg-gray-800 border-b border-gray-700 px-6 py-1.5 flex items-center justify-between flex-shrink-0">
         <div className="flex items-center space-x-4 flex-1 min-w-0">
           <button
             onClick={() => router.push("/")}
             className="flex items-center space-x-2 text-gray-300 hover:opacity-80 transition-opacity flex-shrink-0"
           >
             <img 
-              src="/assets/img/dhvlearnx-logo.svg" 
+              src="/assets/img/logo.png" 
               alt="DHVLearnX Logo" 
-              className="h-7 w-auto"
+              className="h-8 w-8 rounded"
             />
           </button>
           <div className="h-5 w-px bg-gray-600 flex-shrink-0"></div>
-          <h1 className="font-semibold text-gray-200 truncate text-sm">
+          <h1 className="font-semibold text-gray-200 truncate" style={{ fontSize: '16px' }}>
             {course?.title}
           </h1>
         </div>
@@ -413,7 +413,7 @@ export default function LearnCoursePage() {
                 <div className="w-28 h-28 mx-auto bg-gradient-to-br from-orange-500 to-yellow-500 rounded-full flex items-center justify-center mb-8 shadow-2xl hover:scale-110 transition-transform cursor-pointer group">
                   <Play className="w-14 h-14 text-white ml-2 group-hover:scale-110 transition-transform" />
                 </div>
-                <h2 className="text-3xl font-bold text-white mb-3">{currentLesson?.title}</h2>
+                <p className="text-xl font-bold text-white mb-3">{currentLesson?.title}</p>
                 <div className="flex items-center justify-center space-x-4 text-gray-400">
                   <div className="flex items-center space-x-2">
                     <Clock className="w-4 h-4" />
