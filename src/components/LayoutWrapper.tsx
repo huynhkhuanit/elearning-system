@@ -11,9 +11,12 @@ export default function LayoutWrapper({ children }: { children: ReactNode }) {
   
   // Kiểm tra nếu đang ở trang học tập (/learn/*)
   const isLearningPage = pathname?.startsWith("/learn/");
+  
+  // Kiểm tra nếu đang ở trang admin (/admin/*)
+  const isAdminPage = pathname?.startsWith("/admin/");
 
-  // Nếu là trang học tập, không hiển thị Menu, Header, Footer
-  if (isLearningPage) {
+  // Nếu là trang học tập hoặc admin, không hiển thị Menu, Header, Footer
+  if (isLearningPage || isAdminPage) {
     return (
       <div className="bg-gray-900 min-h-screen">
         {children}
