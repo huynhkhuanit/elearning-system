@@ -191,6 +191,51 @@ export default function VideoPlayer({
     setHoverTime(null);
   };
 
+  // ✅ NEW: Better hover tracking with throttle
+  useEffect(() => {
+    const progressBar = progressBarRef.current;
+    if (!progressBar) return;
+
+    let throttleTimer: NodeJS.Timeout;
+    let isHovering = false;
+
+    const handleMouseEnterBar = () => {
+      isHovering = true;
+    };
+
+    const handleMouseMoveBar = (e: globalThis.MouseEvent) => {
+      if (!isHovering) return;
+
+      clearTimeout(throttleTimer);
+      throttleTimer = setTimeout(() => {
+        const rect = progressBar.getBoundingClientRect();
+        const percent = Math.max(0, Math.min((e.clientX - rect.left) / rect.width, 1));
+        const hoverTimeValue = percent * videoDuration;
+        const positionPercent = percent * 100;
+
+        setHoverTime(hoverTimeValue);
+        setHoverPosition(positionPercent);
+      }, 10); // 10ms throttle
+    };
+
+    const handleMouseLeaveBar = () => {
+      isHovering = false;
+      clearTimeout(throttleTimer);
+      setHoverTime(null);
+    };
+
+    progressBar.addEventListener("mouseenter", handleMouseEnterBar);
+    progressBar.addEventListener("mousemove", handleMouseMoveBar as EventListener);
+    progressBar.addEventListener("mouseleave", handleMouseLeaveBar);
+
+    return () => {
+      progressBar.removeEventListener("mouseenter", handleMouseEnterBar);
+      progressBar.removeEventListener("mousemove", handleMouseMoveBar as EventListener);
+      progressBar.removeEventListener("mouseleave", handleMouseLeaveBar);
+      clearTimeout(throttleTimer);
+    };
+  }, [videoDuration]);
+
   // ✅ NEW: Handle video container click for play/pause
   const handleVideoContainerClick = (e: React.MouseEvent<HTMLDivElement>) => {
     // Don't toggle if clicking on controls
@@ -387,33 +432,36 @@ export default function VideoPlayer({
       <div
         ref={progressBarRef}
         data-progress-bar
-        className={`group/progress absolute bottom-16 left-0 right-0 h-2 bg-gray-700 cursor-pointer transition-all duration-200 hover:h-3 ${
-          showControls ? "opacity-100" : "opacity-0"
+        className={`group/progress absolute bottom-16 left-0 right-0 h-1 bg-gray-600 cursor-pointer transition-all duration-100 hover:h-2 z-40 ${
+          showControls ? "opacity-100" : "opacity-0 pointer-events-none"
         }`}
         onMouseDown={handleProgressMouseDown}
         onClick={seekToPosition}
-        onMouseMove={handleProgressHover}
-        onMouseLeave={handleProgressLeave}
         role="slider"
         aria-label="Video progress"
         aria-valuemin={0}
-        aria-valuemax={videoDuration}
-        aria-valuenow={currentTime}
+        aria-valuemax={Math.round(videoDuration)}
+        aria-valuenow={Math.round(currentTime)}
       >
+        {/* Background track */}
+        <div className="absolute inset-0 bg-gray-600" />
+        
         {/* Buffered Progress */}
         <div
-          className="h-full bg-gray-500 transition-all"
+          className="absolute top-0 left-0 h-full bg-gray-500 transition-all"
           style={{ width: `${bufferedPercent}%` }}
         />
+        
         {/* Watched Progress */}
         <div
-          className="h-full bg-orange-500 transition-all"
+          className="absolute top-0 left-0 h-full bg-orange-500 transition-all"
           style={{ width: `${progressPercent}%` }}
         />
+        
         {/* Progress Indicator (dot) - shows during drag or hover */}
         <div
-          className={`absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-orange-500 rounded-full shadow-lg transition-opacity ${
-            isDraggingProgress || hoverTime !== null ? "opacity-100" : "opacity-0 group-hover/progress:opacity-100"
+          className={`absolute top-1/2 w-3 h-3 bg-orange-500 rounded-full shadow-lg transition-opacity z-50 ${
+            isDraggingProgress || hoverTime !== null ? "opacity-100 scale-100" : "opacity-0 group-hover/progress:opacity-100 group-hover/progress:scale-100 scale-0"
           }`}
           style={{ left: `${progressPercent}%`, transform: 'translate(-50%, -50%)' }}
         />
@@ -421,14 +469,18 @@ export default function VideoPlayer({
         {/* Hover Preview Tooltip */}
         {hoverTime !== null && (
           <div
-            className="absolute -top-12 transform -translate-x-1/2 bg-gray-900 text-white text-xs px-2 py-1 rounded shadow-lg border border-gray-600 pointer-events-none"
+            className="absolute -top-14 transform -translate-x-1/2 bg-gray-900 text-white text-xs px-3 py-1 rounded shadow-xl border border-gray-600 pointer-events-none z-50 whitespace-nowrap"
             style={{ left: `${hoverPosition}%` }}
           >
-            <div className="font-mono text-orange-400">{formatTime(hoverTime)}</div>
+            <div className="font-mono font-bold text-orange-400">{formatTime(hoverTime)}</div>
             {/* Arrow pointer */}
             <div
-              className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900"
-              style={{ borderTopColor: 'rgb(17, 24, 39)' }}
+              className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0"
+              style={{
+                borderLeft: '6px solid transparent',
+                borderRight: '6px solid transparent',
+                borderTop: '6px solid rgb(17, 24, 39)',
+              }}
             />
           </div>
         )}
