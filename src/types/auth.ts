@@ -27,6 +27,7 @@ export interface PublicUser {
   full_name: string;
   avatar_url: string | null;
   bio: string | null;
+  role?: string;
   membership_type: 'FREE' | 'PRO';
   learning_streak: number;
   total_study_time: number;

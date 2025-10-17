@@ -80,6 +80,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(data.data.user);
         setToken(data.data.token);
       }
+      
+      // Refresh to get full user data including role
+      await checkAuth();
     } catch (error) {
       throw error;
     } finally {

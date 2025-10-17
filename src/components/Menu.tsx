@@ -3,7 +3,7 @@
 import { Home, BookOpen, MessageCircle, Menu as MenuIcon, SettingsIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface MenuItem {
   id: string;
@@ -48,33 +48,11 @@ const adminMenuItem: MenuItem = {
 
 export default function Menu() {
   const pathname = usePathname();
-  const [userRole, setUserRole] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
 
-  // Fetch user role
-  useEffect(() => {
-    const fetchUserRole = async () => {
-      try {
-        const response = await fetch('/api/auth/me', {
-          credentials: 'include',
-        });
-
-        if (response.ok) {
-          const responseData = await response.json();
-          const role = responseData.data?.user?.role;
-          setUserRole(role);
-        }
-      } catch (error) {
-        console.error('Error fetching user role:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchUserRole();
-  }, []);
-
-  const isAdmin = userRole?.toLowerCase() === 'admin' || userRole?.toLowerCase() === 'teacher';
+  // Get user role from AuthContext
+  const userRole = user?.role?.toLowerCase();
+  const isAdmin = userRole === 'admin' || userRole === 'teacher';
   const menuItems = isAdmin ? [...publicMenuItems, adminMenuItem] : publicMenuItems;
 
   return (
