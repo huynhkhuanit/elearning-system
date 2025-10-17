@@ -442,8 +442,8 @@ export default function LearnCoursePage() {
             <div className="flex items-center gap-6">
               <button
                 onClick={goToPreviousLesson}
-                disabled={!course.sections[0]?.lessons[0] || currentLesson?.id === course.sections[0].lessons[0].id}
-                className="px-6 py-2.5 bg-gray-700 border border-gray-600 text-gray-200 rounded-lg hover:bg-gray-600 transition-colors disabled:opacity-40 disabled:cursor-not-allowed font-medium text-sm flex items-center space-x-2"
+                disabled={!course || !currentLesson || course.sections.flatMap(s => s.lessons)[0]?.id === currentLesson.id}
+                className="px-6 py-2 text-gray-200 bg-transparent border-[2px] border-gray-600 rounded-md transition-all font-medium text-sm flex items-center space-x-2 disabled:opacity-40 disabled:cursor-not-allowed hover:border-orange-500"
               >
                 <ChevronRight className="w-4 h-4 rotate-180" />
                 <span>Bài trước</span>
@@ -451,7 +451,7 @@ export default function LearnCoursePage() {
 
               <button
                 onClick={goToNextLesson}
-                className="px-6 py-2.5 bg-gradient-to-r from-orange-500 to-yellow-500 text-white rounded-lg hover:from-orange-600 hover:to-yellow-600 transition-all font-medium shadow-lg text-sm flex items-center space-x-2"
+                className="px-6 py-2 text-orange-500 bg-transparent border-[2px] border-orange-500 rounded-md transition-all font-medium text-sm flex items-center space-x-2 hover:bg-gradient-to-r hover:from-orange-500 hover:to-yellow-500 hover:text-white hover:border-0"
               >
                 <span>Bài tiếp theo</span>
                 <ChevronRight className="w-4 h-4" />
