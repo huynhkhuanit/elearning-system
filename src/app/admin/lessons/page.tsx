@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import {
   BookOpen,
   ChevronDown,
@@ -10,7 +9,6 @@ import {
   Edit,
   Loader,
   AlertCircle,
-  Lock,
 } from 'lucide-react';
 import { useAdminAccess } from '@/lib/hooks/useAdminAccess';
 
@@ -37,7 +35,6 @@ interface Course {
 }
 
 export default function AdminCoursesPage() {
-  const router = useRouter();
   const { user, loading: authLoading, hasAccess } = useAdminAccess();
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
@@ -54,7 +51,6 @@ export default function AdminCoursesPage() {
   const fetchCourses = async () => {
     try {
       setLoading(true);
-      // Use optimized endpoint that fetches all data at once
       const response = await fetch('/api/admin/courses-full');
       if (!response.ok) throw new Error('Không tải được danh sách khóa học');
 
@@ -89,43 +85,27 @@ export default function AdminCoursesPage() {
 
   const hasContent = (lesson: Lesson) => lesson.content && lesson.content.trim().length > 0;
 
-  // Chờ auth check xong
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+      <div className="min-h-[calc(100vh-80px)] flex items-center justify-center">
         <div className="text-center">
-          <Loader className="w-12 h-12 text-orange-500 animate-spin mx-auto mb-4" />
-          <p className="text-gray-300">Đang xác thực quyền truy cập...</p>
+          <Loader className="w-12 h-12 text-indigo-600 animate-spin mx-auto mb-4" />
+          <p className="text-slate-600">Đang xác thực quyền truy cập...</p>
         </div>
       </div>
     );
   }
 
-  // Kiểm tra quyền access
   if (!hasAccess) {
-    return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-        <div className="text-center">
-          <Lock className="w-12 h-12 text-red-500 mx-auto mb-4" />
-          <p className="text-gray-300 mb-4">Bạn không có quyền truy cập trang này</p>
-          <p className="text-gray-400 text-sm mb-6">Chỉ admin hoặc teacher mới có thể chỉnh sửa nội dung</p>
-          <button
-            onClick={() => router.push('/')}
-            className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition"
-          >
-            Về trang chủ
-          </button>
-        </div>
-      </div>
-    );
+    return null; // Layout sẽ hiển thị access denied screen
   }
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+      <div className="min-h-[calc(100vh-80px)] flex items-center justify-center">
         <div className="text-center">
-          <Loader className="w-12 h-12 text-orange-500 animate-spin mx-auto mb-4" />
-          <p className="text-gray-300">Đang tải khóa học...</p>
+          <Loader className="w-12 h-12 text-indigo-600 animate-spin mx-auto mb-4" />
+          <p className="text-slate-600">Đang tải khóa học...</p>
         </div>
       </div>
     );
@@ -133,15 +113,15 @@ export default function AdminCoursesPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-        <div className="text-center">
+      <div className="min-h-[calc(100vh-80px)] flex items-center justify-center p-6">
+        <div className="text-center max-w-md">
           <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-          <p className="text-gray-300 mb-4">{error}</p>
+          <p className="text-slate-700 mb-6 font-medium">{error}</p>
           <button
             onClick={fetchCourses}
-            className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition"
+            className="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition font-medium"
           >
-            Thử lại
+            Thử Lại
           </button>
         </div>
       </div>
@@ -149,130 +129,120 @@ export default function AdminCoursesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900">
-      {/* Header */}
-      <div className="border-b border-gray-800 bg-gray-800/50 backdrop-blur sticky top-0 z-10">
-        <div className="max-w-6xl mx-auto px-6 py-4">
-          <div className="flex items-center gap-3">
-            <BookOpen className="w-8 h-8 text-orange-500" />
-            <div>
-              <h1 className="text-3xl font-bold text-white">Quản lý nội dung khóa học</h1>
-              {user && (
-                <p className="text-gray-400 text-sm mt-1">
-                  Xin chào, {user.full_name} ({user.role})
-                </p>
-              )}
-            </div>
+    <div className="py-8 px-6">
+      {/* Section Header */}
+      <div className="mb-8">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="p-2 bg-indigo-100 rounded-lg">
+            <BookOpen className="w-6 h-6 text-indigo-600" />
           </div>
-          <p className="text-gray-400 mt-2">
-            Chỉnh sửa markdown content cho từng bài học
-          </p>
+          <div>
+            <h2 className="text-3xl font-bold text-slate-900">Quản Lý Nội Dung</h2>
+            <p className="text-slate-600 mt-1">Chỉnh sửa markdown content cho từng bài học</p>
+          </div>
         </div>
       </div>
 
-      {/* Content */}
-      <div className="max-w-6xl mx-auto px-6 py-8">
+      {/* Content Grid */}
+      <div className="space-y-4">
         {courses.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-gray-400">Không có khóa học nào</p>
+          <div className="text-center py-16 bg-slate-50 rounded-lg border border-slate-200">
+            <BookOpen className="w-12 h-12 text-slate-300 mx-auto mb-4" />
+            <p className="text-slate-500 font-medium">Không có khóa học nào</p>
           </div>
         ) : (
-          <div className="space-y-4">
-            {courses.map((course) => (
-              <div
-                key={course.id}
-                className="border border-gray-800 rounded-lg overflow-hidden"
+          courses.map((course) => (
+            <div
+              key={course.id}
+              className="border border-slate-200 rounded-lg overflow-hidden bg-white hover:shadow-md transition-shadow"
+            >
+              {/* Course Header */}
+              <button
+                onClick={() => toggleCourse(course.id)}
+                className="w-full px-6 py-4 bg-gradient-to-r from-slate-50 to-white hover:from-slate-100 hover:to-slate-50 transition flex items-center justify-between text-left border-b border-slate-200"
               >
-                {/* Course Header */}
-                <button
-                  onClick={() => toggleCourse(course.id)}
-                  className="w-full px-6 py-4 bg-gray-800/50 hover:bg-gray-800 transition flex items-center justify-between text-left"
-                >
-                  <div className="flex items-center gap-3">
-                    {expandedCourses.has(course.id) ? (
-                      <ChevronDown className="w-5 h-5 text-orange-500" />
-                    ) : (
-                      <ChevronRight className="w-5 h-5 text-gray-400" />
-                    )}
-                    <div>
-                      <h2 className="text-lg font-semibold text-white">
-                        {course.title}
-                      </h2>
-                      <p className="text-sm text-gray-400">{course.slug}</p>
-                    </div>
+                <div className="flex items-center gap-4 flex-1">
+                  {expandedCourses.has(course.id) ? (
+                    <ChevronDown className="w-5 h-5 text-indigo-600 flex-shrink-0" />
+                  ) : (
+                    <ChevronRight className="w-5 h-5 text-slate-400 flex-shrink-0" />
+                  )}
+                  <div>
+                    <h3 className="text-lg font-semibold text-slate-900">
+                      {course.title}
+                    </h3>
+                    <p className="text-sm text-slate-500 mt-1">{course.slug}</p>
                   </div>
-                  <div className="text-sm text-gray-400">
-                    {course.chapters?.length || 0} chương
-                  </div>
-                </button>
+                </div>
+                <div className="px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-xs font-semibold">
+                  {course.chapters?.length || 0} chương
+                </div>
+              </button>
 
-                {/* Chapters */}
-                {expandedCourses.has(course.id) && (
-                  <div className="border-t border-gray-800 divide-y divide-gray-800">
-                    {course.chapters?.map((chapter) => (
-                      <div key={chapter.id}>
-                        {/* Chapter Header */}
-                        <button
-                          onClick={() => toggleChapter(chapter.id)}
-                          className="w-full px-6 py-3 bg-gray-900 hover:bg-gray-800/50 transition flex items-center justify-between text-left ml-4"
-                        >
-                          <div className="flex items-center gap-3">
-                            {expandedChapters.has(chapter.id) ? (
-                              <ChevronDown className="w-4 h-4 text-blue-400" />
-                            ) : (
-                              <ChevronRight className="w-4 h-4 text-gray-500" />
-                            )}
-                            <div>
-                              <h3 className="text-base font-medium text-gray-200">
-                                {chapter.title}
-                              </h3>
-                            </div>
-                          </div>
-                          <div className="text-sm text-gray-400">
-                            {chapter.lessons?.length || 0} bài
-                          </div>
-                        </button>
+              {/* Chapters */}
+              {expandedCourses.has(course.id) && (
+                <div className="divide-y divide-slate-200">
+                  {course.chapters?.map((chapter) => (
+                    <div key={chapter.id}>
+                      {/* Chapter Header */}
+                      <button
+                        onClick={() => toggleChapter(chapter.id)}
+                        className="w-full px-6 py-3 bg-slate-50 hover:bg-slate-100 transition flex items-center justify-between text-left"
+                      >
+                        <div className="flex items-center gap-3">
+                          {expandedChapters.has(chapter.id) ? (
+                            <ChevronDown className="w-4 h-4 text-indigo-600" />
+                          ) : (
+                            <ChevronRight className="w-4 h-4 text-slate-400" />
+                          )}
+                          <h4 className="font-medium text-slate-900">
+                            {chapter.title}
+                          </h4>
+                        </div>
+                        <span className="text-xs text-slate-600 bg-slate-200 px-2 py-1 rounded">
+                          {chapter.lessons?.length || 0} bài
+                        </span>
+                      </button>
 
-                        {/* Lessons */}
-                        {expandedChapters.has(chapter.id) && (
-                          <div className="bg-gray-900/50 divide-y divide-gray-800">
-                            {chapter.lessons?.map((lesson) => (
-                              <Link
-                                key={lesson.id}
-                                href={`/admin/lessons/${lesson.id}/edit`}
-                                className="px-6 py-3 ml-8 flex items-center justify-between hover:bg-gray-800/50 transition group"
-                              >
-                                <div className="flex items-center gap-3 flex-1">
-                                  <span
-                                    className={`inline-block w-2 h-2 rounded-full ${
-                                      hasContent(lesson)
-                                        ? 'bg-green-500'
-                                        : 'bg-gray-600'
-                                    }`}
-                                  />
-                                  <div>
-                                    <p className="text-sm text-gray-300 group-hover:text-white transition">
-                                      {lesson.title}
+                      {/* Lessons */}
+                      {expandedChapters.has(chapter.id) && (
+                        <div className="bg-white divide-y divide-slate-100">
+                          {chapter.lessons?.map((lesson) => (
+                            <Link
+                              key={lesson.id}
+                              href={`/admin/lessons/${lesson.id}/edit`}
+                              className="px-6 py-3 flex items-center justify-between hover:bg-indigo-50 transition group"
+                            >
+                              <div className="flex items-center gap-3 flex-1 min-w-0">
+                                <span
+                                  className={`inline-block w-2 h-2 rounded-full flex-shrink-0 ${
+                                    hasContent(lesson)
+                                      ? 'bg-green-500'
+                                      : 'bg-slate-300'
+                                  }`}
+                                />
+                                <div className="min-w-0">
+                                  <p className="text-sm text-slate-900 group-hover:text-indigo-600 transition font-medium truncate">
+                                    {lesson.title}
+                                  </p>
+                                  {hasContent(lesson) && (
+                                    <p className="text-xs text-green-600 mt-1">
+                                      ✓ Có nội dung
                                     </p>
-                                    {hasContent(lesson) && (
-                                      <p className="text-xs text-green-400 mt-0.5">
-                                        ✓ Có nội dung
-                                      </p>
-                                    )}
-                                  </div>
+                                  )}
                                 </div>
-                                <Edit className="w-4 h-4 text-gray-500 group-hover:text-orange-500 transition" />
-                              </Link>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
+                              </div>
+                              <Edit className="w-4 h-4 text-slate-400 group-hover:text-indigo-600 transition flex-shrink-0 ml-4" />
+                            </Link>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))
         )}
       </div>
     </div>

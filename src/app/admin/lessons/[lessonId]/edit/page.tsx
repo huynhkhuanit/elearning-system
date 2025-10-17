@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import MDEditor from '@uiw/react-md-editor';
-import { Save, ArrowLeft, Loader, Check, AlertCircle, Lock } from 'lucide-react';
+import { Save, ArrowLeft, Loader, Check, AlertCircle } from 'lucide-react';
 import { useAdminAccess } from '@/lib/hooks/useAdminAccess';
 import '@uiw/react-md-editor/markdown-editor.css';
 import '@uiw/react-markdown-preview/markdown.css';
@@ -114,10 +114,10 @@ export default function LessonContentEditor() {
   // Chờ auth check xong
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+      <div className="min-h-[calc(100vh-80px)] flex items-center justify-center">
         <div className="text-center">
-          <Loader className="w-12 h-12 text-orange-500 animate-spin mx-auto mb-4" />
-          <p className="text-gray-300">Đang xác thực quyền truy cập...</p>
+          <Loader className="w-12 h-12 text-indigo-600 animate-spin mx-auto mb-4" />
+          <p className="text-slate-600">Đang xác thực quyền truy cập...</p>
         </div>
       </div>
     );
@@ -125,29 +125,15 @@ export default function LessonContentEditor() {
 
   // Kiểm tra quyền access
   if (!hasAccess) {
-    return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-        <div className="text-center">
-          <Lock className="w-12 h-12 text-red-500 mx-auto mb-4" />
-          <p className="text-gray-300 mb-4">Bạn không có quyền truy cập trang này</p>
-          <p className="text-gray-400 text-sm mb-6">Chỉ admin hoặc teacher mới có thể chỉnh sửa nội dung</p>
-          <button
-            onClick={() => router.push('/')}
-            className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition"
-          >
-            Về trang chủ
-          </button>
-        </div>
-      </div>
-    );
+    return null; // Layout sẽ hiển thị access denied
   }
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+      <div className="min-h-[calc(100vh-80px)] flex items-center justify-center">
         <div className="text-center">
-          <Loader className="w-12 h-12 text-orange-500 animate-spin mx-auto mb-4" />
-          <p className="text-gray-300">Đang tải bài học...</p>
+          <Loader className="w-12 h-12 text-indigo-600 animate-spin mx-auto mb-4" />
+          <p className="text-slate-600">Đang tải bài học...</p>
         </div>
       </div>
     );
@@ -155,15 +141,15 @@ export default function LessonContentEditor() {
 
   if (!lesson) {
     return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-        <div className="text-center">
+      <div className="min-h-[calc(100vh-80px)] flex items-center justify-center p-6">
+        <div className="text-center max-w-md">
           <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-          <p className="text-gray-300 mb-4">Không tìm thấy bài học</p>
+          <p className="text-slate-700 mb-6 font-medium">Không tìm thấy bài học</p>
           <button
             onClick={() => router.back()}
-            className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition"
+            className="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition font-medium"
           >
-            Quay lại
+            Quay Lại
           </button>
         </div>
       </div>
@@ -171,34 +157,34 @@ export default function LessonContentEditor() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900" data-color-mode="dark">
-      {/* Header */}
-      <div className="border-b border-gray-800 bg-gray-800/50 backdrop-blur">
+    <div className="min-h-[calc(100vh-80px)] bg-gradient-to-br from-slate-50 via-white to-slate-100" data-color-mode="light">
+      {/* Editor Header */}
+      <div className="sticky top-16 z-40 border-b border-slate-200 bg-white/80 backdrop-blur-sm shadow-sm">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 flex-1 min-w-0">
             <button
               onClick={() => router.back()}
-              className="p-2 hover:bg-gray-700 rounded-lg transition text-gray-400 hover:text-white"
+              className="p-2 hover:bg-slate-100 rounded-lg transition text-slate-600 hover:text-slate-900 flex-shrink-0"
               title="Quay lại"
             >
               <ArrowLeft className="w-5 h-5" />
             </button>
-            <div>
-              <h1 className="text-2xl font-bold text-white">{lesson.title}</h1>
-              <p className="text-gray-400 text-sm mt-1">
+            <div className="min-w-0">
+              <h2 className="text-xl font-bold text-slate-900 truncate">{lesson.title}</h2>
+              <p className="text-slate-600 text-sm mt-1">
                 Chỉnh sửa nội dung markdown
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-shrink-0 ml-4">
             {/* Status Message */}
             {status !== 'idle' && (
               <div
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition ${
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition text-sm font-medium ${
                   status === 'success'
-                    ? 'bg-green-900/30 text-green-300'
-                    : 'bg-red-900/30 text-red-300'
+                    ? 'bg-green-100 text-green-700'
+                    : 'bg-red-100 text-red-700'
                 }`}
               >
                 {status === 'success' ? (
@@ -206,7 +192,7 @@ export default function LessonContentEditor() {
                 ) : (
                   <AlertCircle className="w-4 h-4" />
                 )}
-                <span className="text-sm">{message}</span>
+                <span>{message}</span>
               </div>
             )}
 
@@ -214,7 +200,7 @@ export default function LessonContentEditor() {
             <button
               onClick={handleSave}
               disabled={saving}
-              className="flex items-center gap-2 px-6 py-2 bg-orange-500 hover:bg-orange-600 disabled:bg-gray-600 text-white rounded-lg transition disabled:cursor-not-allowed"
+              className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-400 text-white rounded-lg transition disabled:cursor-not-allowed font-medium"
             >
               {saving ? (
                 <Loader className="w-4 h-4 animate-spin" />
@@ -227,9 +213,9 @@ export default function LessonContentEditor() {
         </div>
       </div>
 
-      {/* Editor */}
-      <div className="max-w-7xl mx-auto px-6 py-6">
-        <div className="rounded-lg border border-gray-800 overflow-hidden shadow-xl">
+      {/* Editor Content */}
+      <div className="max-w-7xl mx-auto px-6 py-8">
+        <div className="rounded-lg border border-slate-200 overflow-hidden shadow-lg bg-white">
           <MDEditor
             value={content}
             onChange={(val) => setContent(val || '')}
@@ -237,28 +223,42 @@ export default function LessonContentEditor() {
             hideToolbar={false}
             visibleDragbar={true}
             height={600}
-            className="bg-gray-800"
+            className="bg-white"
             textareaProps={{
               disabled: saving,
             }}
           />
         </div>
 
-        {/* Help Text */}
-        <div className="mt-6 p-4 bg-blue-900/20 border border-blue-800 rounded-lg text-blue-300 text-sm">
-          <p className="font-semibold mb-2">💡 Mẹo sử dụng:</p>
-          <ul className="list-disc list-inside space-y-1">
-            <li>Sử dụng <code className="bg-black/30 px-2 py-1 rounded">#</code> cho tiêu đề (h1, h2, h3...)</li>
-            <li>Sử dụng <code className="bg-black/30 px-2 py-1 rounded">```</code> cho code blocks</li>
-            <li>Sử dụng <code className="bg-black/30 px-2 py-1 rounded">**text**</code> cho bold, <code className="bg-black/30 px-2 py-1 rounded">*text*</code> cho italic</li>
-            <li>Nhấn <code className="bg-black/30 px-2 py-1 rounded">Ctrl+S</code> hoặc click nút "Lưu" để lưu thay đổi</li>
-          </ul>
-        </div>
+        {/* Help Section */}
+        <div className="mt-8 grid md:grid-cols-2 gap-6">
+          {/* Tips */}
+          <div className="p-6 bg-blue-50 border border-blue-200 rounded-lg">
+            <h3 className="font-bold text-blue-900 mb-3">💡 Mẹo Sử Dụng Markdown</h3>
+            <ul className="space-y-2 text-sm text-blue-800">
+              <li>• <code className="bg-blue-100 px-2 py-1 rounded text-xs">#</code> cho tiêu đề (h1, h2, h3...)</li>
+              <li>• <code className="bg-blue-100 px-2 py-1 rounded text-xs">```</code> cho code blocks</li>
+              <li>• <code className="bg-blue-100 px-2 py-1 rounded text-xs">**text**</code> cho bold, <code className="bg-blue-100 px-2 py-1 rounded text-xs">*text*</code> cho italic</li>
+              <li>• <code className="bg-blue-100 px-2 py-1 rounded text-xs">[link](url)</code> cho links</li>
+              <li>• Nhấn <code className="bg-blue-100 px-2 py-1 rounded text-xs">Ctrl+S</code> để lưu nhanh</li>
+            </ul>
+          </div>
 
-        {/* Last Updated Info */}
-        <div className="mt-4 text-gray-400 text-sm">
-          Cập nhật lần cuối:{' '}
-          {new Date(lesson.updated_at).toLocaleString('vi-VN')}
+          {/* Info */}
+          <div className="p-6 bg-slate-50 border border-slate-200 rounded-lg">
+            <h3 className="font-bold text-slate-900 mb-3">ℹ️ Thông Tin Bài Học</h3>
+            <div className="space-y-2 text-sm text-slate-700">
+              <p>
+                <span className="font-medium">ID:</span> <code className="bg-slate-200 px-2 py-1 rounded text-xs">{lesson.id}</code>
+              </p>
+              <p>
+                <span className="font-medium">Chương ID:</span> <code className="bg-slate-200 px-2 py-1 rounded text-xs">{lesson.chapter_id}</code>
+              </p>
+              <p>
+                <span className="font-medium">Cập nhật lần cuối:</span> {new Date(lesson.updated_at).toLocaleString('vi-VN')}
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
