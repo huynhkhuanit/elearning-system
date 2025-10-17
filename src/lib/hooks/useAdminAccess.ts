@@ -11,13 +11,15 @@ interface AuthUser {
 
 /**
  * Hook để kiểm tra xem user có phải admin/teacher không
- * Nếu không, redirect về home
+ * Không redirect, chỉ trả về hasAccess status
+ * Component sẽ hiển thị lock icon nếu user không có quyền
  */
 export function useAdminAccess() {
   const router = useRouter();
   const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [hasAccess, setHasAccess] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
     fetchCurrentUser();
@@ -30,7 +32,9 @@ export function useAdminAccess() {
       });
 
       if (!response.ok) {
+        // Chưa đăng nhập - redirect về login
         router.replace('/auth/login');
+        setLoading(false);
         return;
       }
 
@@ -38,19 +42,23 @@ export function useAdminAccess() {
       const userData = responseData.data?.user;
       
       if (!userData) {
+        // Không có user data - redirect về login
         router.replace('/auth/login');
+        setLoading(false);
         return;
       }
 
+      setIsAuthenticated(true);
       const userRole = userData.role?.toLowerCase();
 
-      // Chỉ admin hoặc teacher mới được phép
+      // Chỉ admin hoặc teacher mới có access
       if (userRole === 'admin' || userRole === 'teacher') {
         setUser(userData);
         setHasAccess(true);
       } else {
-        console.warn('User role is not admin/teacher:', userRole);
-        router.replace('/');
+        // User đã đăng nhập nhưng không có quyền - vẫn hiển thị trang với lock icon
+        setUser(userData);
+        setHasAccess(false);
       }
     } catch (error) {
       console.error('Error checking admin access:', error);
@@ -60,5 +68,5 @@ export function useAdminAccess() {
     }
   };
 
-  return { user, loading, hasAccess };
+  return { user, loading, hasAccess, isAuthenticated };
 }

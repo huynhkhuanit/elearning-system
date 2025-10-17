@@ -1,8 +1,9 @@
 "use client";
 
-import { Home, BookOpen, MessageCircle, Menu as MenuIcon } from "lucide-react";
+import { Home, BookOpen, MessageCircle, Menu as MenuIcon, SettingsIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 
 interface MenuItem {
   id: string;
@@ -11,7 +12,7 @@ interface MenuItem {
   href: string;
 }
 
-const menuItems: MenuItem[] = [
+const publicMenuItems: MenuItem[] = [
   {
     id: "home",
     icon: Home,
@@ -38,8 +39,43 @@ const menuItems: MenuItem[] = [
   },
 ];
 
+const adminMenuItem: MenuItem = {
+  id: "admin",
+  icon: SettingsIcon,
+  label: "Admin",
+  href: "/admin/lessons",
+};
+
 export default function Menu() {
   const pathname = usePathname();
+  const [userRole, setUserRole] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch user role
+  useEffect(() => {
+    const fetchUserRole = async () => {
+      try {
+        const response = await fetch('/api/auth/me', {
+          credentials: 'include',
+        });
+
+        if (response.ok) {
+          const responseData = await response.json();
+          const role = responseData.data?.user?.role;
+          setUserRole(role);
+        }
+      } catch (error) {
+        console.error('Error fetching user role:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserRole();
+  }, []);
+
+  const isAdmin = userRole?.toLowerCase() === 'admin' || userRole?.toLowerCase() === 'teacher';
+  const menuItems = isAdmin ? [...publicMenuItems, adminMenuItem] : publicMenuItems;
 
   return (
     <aside
@@ -52,9 +88,12 @@ export default function Menu() {
     >
       {/* Navigation Menu */}
       <nav className="flex flex-col items-start space-y-2 w-full">
-        {menuItems.map((item) => {
+        {menuItems.map((item: MenuItem) => {
           const Icon = item.icon;
           const isActive = pathname === item.href;
+          
+          // Highlight admin item differently
+          const isAdminItem = item.id === 'admin';
 
           return (
             <Link
@@ -64,8 +103,12 @@ export default function Menu() {
                 group flex flex-col items-center justify-center w-full py-3 px-2 rounded-lg
                 transition-all duration-200 cursor-pointer
                 ${isActive
-                  ? 'bg-primary/10 text-primary'
-                  : 'text-muted-foreground hover:text-foreground hover:bg-muted/30'
+                  ? isAdminItem 
+                    ? 'bg-purple-500/15 text-purple-600'
+                    : 'bg-primary/10 text-primary'
+                  : isAdminItem
+                    ? 'text-muted-foreground hover:text-purple-600 hover:bg-purple-500/10'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-muted/30'
                 }
               `}
               title={item.label}
@@ -74,8 +117,12 @@ export default function Menu() {
                 className={`
                   h-5 w-5 mb-1 transition-colors duration-200 flex-shrink-0
                   ${isActive
-                    ? 'text-primary'
-                    : 'text-muted-foreground group-hover:text-foreground'
+                    ? isAdminItem
+                      ? 'text-purple-600'
+                      : 'text-primary'
+                    : isAdminItem
+                      ? 'text-muted-foreground group-hover:text-purple-600'
+                      : 'text-muted-foreground group-hover:text-foreground'
                   }
                 `}
               />
@@ -83,8 +130,12 @@ export default function Menu() {
                 className={`
                   text-xs font-medium transition-colors duration-200 text-center leading-tight
                   ${isActive
-                    ? 'text-primary'
-                    : 'text-muted-foreground group-hover:text-foreground'
+                    ? isAdminItem
+                      ? 'text-purple-600'
+                      : 'text-primary'
+                    : isAdminItem
+                      ? 'text-muted-foreground group-hover:text-purple-600'
+                      : 'text-muted-foreground group-hover:text-foreground'
                   }
                 `}
               >
