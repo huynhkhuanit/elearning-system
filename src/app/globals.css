@@ -348,3 +348,385 @@ button, .button-text {
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: #6b7280;
 }
+
+/* ========== MARKDOWN EDITOR STYLING ========== */
+
+/* MDEditor Container */
+.w-md-editor {
+  background-color: #111827 !important;
+  border-color: #374151 !important;
+}
+
+/* MDEditor Toolbar */
+.w-md-editor-toolbar {
+  background-color: #1f2937 !important;
+  border-bottom-color: #374151 !important;
+}
+
+.w-md-editor-toolbar button {
+  color: #cbd5e1 !important;
+}
+
+.w-md-editor-toolbar button:hover {
+  background-color: #374151 !important;
+  color: #f1f5f9 !important;
+}
+
+.w-md-editor-toolbar button.active {
+  background-color: #4f46e5 !important;
+  color: #ffffff !important;
+}
+
+/* MDEditor Input Area (Left - Markdown Text) */
+.w-md-editor-input {
+  background-color: #111827 !important;
+  color: #f1f5f9 !important;
+  caret-color: #60a5fa !important;
+  font-size: 14px !important;
+  font-family: 'SF Mono', Monaco, Inconsolata, 'Roboto Mono', monospace !important;
+}
+
+.w-md-editor-input textarea,
+.w-md-editor-text-input,
+.w-md-editor-text-pre {
+  background-color: #111827 !important;
+  color: #f1f5f9 !important;
+  caret-color: #60a5fa !important;
+}
+
+.w-md-editor-text-input {
+  -webkit-text-fill-color: #f1f5f9 !important;
+}
+
+.w-md-editor-input textarea::placeholder {
+  color: #64748b !important;
+}
+
+/* MDEditor Text Input Focus */
+.w-md-editor-input textarea:focus {
+  outline: none;
+  background-color: #1f2937 !important;
+  color: #f1f5f9 !important;
+}
+
+/* MDEditor Preview Area (Right - Live Preview) */
+.w-md-editor-preview {
+  background-color: #111827 !important;
+  color: #f1f5f9 !important;
+  padding: 16px !important;
+}
+
+/* Remove background from preview mode indicator labels */
+.w-md-editor-preview::before,
+.w-md-editor-preview-content::before {
+  background-color: transparent !important;
+  background: transparent !important;
+}
+
+/* Hide or style the preview label/tab background */
+.w-md-editor-toolbar-child {
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+
+.w-md-editor-toolbar-child.active {
+  background-color: transparent !important;
+}
+
+.w-md-editor-preview-content {
+  background-color: transparent !important;
+  color: #f1f5f9 !important;
+}
+
+/* Markdown Preview Text Styling */
+.w-md-editor-preview-content,
+.w-md-editor-preview-content * {
+  background-color: transparent !important;
+}
+
+.w-md-editor-preview-content p {
+  color: #f1f5f9 !important;
+  margin-bottom: 16px;
+  background-color: transparent !important;
+}
+
+.w-md-editor-preview-content > * {
+  color: #f1f5f9 !important;
+  background-color: transparent !important;
+}
+
+.w-md-editor-preview-content h1 {
+  color: #f1f5f9 !important;
+  font-size: 2em !important;
+  font-weight: 900 !important;
+  margin-top: 24px !important;
+  margin-bottom: 16px !important;
+}
+
+.w-md-editor-preview-content h2 {
+  color: #f1f5f9 !important;
+  font-size: 1.5em !important;
+  font-weight: 700 !important;
+  margin-top: 20px !important;
+  margin-bottom: 12px !important;
+}
+
+.w-md-editor-preview-content h3 {
+  color: #f1f5f9 !important;
+  font-size: 1.25em !important;
+  font-weight: 600 !important;
+  margin-top: 16px !important;
+  margin-bottom: 8px !important;
+}
+
+.w-md-editor-preview-content h4,
+.w-md-editor-preview-content h5,
+.w-md-editor-preview-content h6 {
+  color: #f1f5f9 !important;
+  font-weight: 600 !important;
+  margin-bottom: 8px !important;
+}
+
+/* Code Styling in Preview */
+.w-md-editor-preview-content code {
+  background-color: #1f2937 !important;
+  color: #4ade80 !important;
+  padding: 2px 6px !important;
+  border-radius: 3px !important;
+  font-size: 0.875em !important;
+  font-family: 'SF Mono', Monaco, Inconsolata, 'Roboto Mono', monospace !important;
+}
+
+.w-md-editor-preview-content pre {
+  background-color: #1f2937 !important;
+  border: 1px solid #374151 !important;
+  border-radius: 6px !important;
+  padding: 12px !important;
+  margin-bottom: 16px !important;
+  overflow-x: auto;
+}
+
+.w-md-editor-preview-content pre code {
+  background-color: transparent !important;
+  color: #86efac !important;
+  padding: 0 !important;
+  font-size: 0.875em !important;
+}
+
+/* Lists Styling */
+.w-md-editor-preview-content ul,
+.w-md-editor-preview-content ol {
+  margin-bottom: 16px !important;
+  color: #e2e8f0 !important;
+}
+
+.w-md-editor-preview-content li {
+  color: #e2e8f0 !important;
+  margin-bottom: 8px !important;
+}
+
+/* Links Styling */
+.w-md-editor-preview-content a {
+  color: #60a5fa !important;
+  text-decoration: underline !important;
+}
+
+.w-md-editor-preview-content a:hover {
+  color: #93c5fd !important;
+  text-decoration-thickness: 2px !important;
+}
+
+/* Blockquote Styling */
+.w-md-editor-preview-content blockquote {
+  border-left-color: #4f46e5 !important;
+  background-color: #1f2937 !important;
+  color: #cbd5e1 !important;
+  padding-left: 16px !important;
+  margin-left: 0 !important;
+  margin-bottom: 16px !important;
+}
+
+/* Tables Styling */
+.w-md-editor-preview-content table {
+  border-collapse: collapse;
+  margin-bottom: 16px !important;
+}
+
+.w-md-editor-preview-content table th,
+.w-md-editor-preview-content table td {
+  border-color: #374151 !important;
+  color: #e2e8f0 !important;
+  padding: 8px 12px !important;
+}
+
+.w-md-editor-preview-content table th {
+  background-color: #1f2937 !important;
+  color: #f1f5f9 !important;
+  font-weight: 600 !important;
+}
+
+.w-md-editor-preview-content table tr:nth-child(even) {
+  background-color: rgba(31, 41, 55, 0.5) !important;
+}
+
+/* Hr (Horizontal Rule) Styling */
+.w-md-editor-preview-content hr {
+  border-top-color: #374151 !important;
+  margin: 24px 0 !important;
+}
+
+/* Strong/Bold Text */
+.w-md-editor-preview-content strong,
+.w-md-editor-preview-content b {
+  color: #f1f5f9 !important;
+  font-weight: 600 !important;
+}
+
+/* Emphasis/Italic Text */
+.w-md-editor-preview-content em,
+.w-md-editor-preview-content i {
+  color: #cbd5e1 !important;
+  font-style: italic;
+}
+
+/* Image Styling */
+.w-md-editor-preview-content img {
+  max-width: 100% !important;
+  height: auto !important;
+  border-radius: 6px !important;
+  margin: 16px 0 !important;
+}
+
+/* MDEditor Divider (between input and preview) */
+.w-md-editor-divider {
+  background-color: #374151 !important;
+}
+
+/* MDEditor Hidden textarea fallback */
+.w-md-editor .CodeMirror {
+  background-color: #111827 !important;
+  color: #f1f5f9 !important;
+}
+
+.w-md-editor .CodeMirror-gutters {
+  background-color: #1f2937 !important;
+  border-right-color: #374151 !important;
+}
+
+.w-md-editor .CodeMirror-linenumber {
+  color: #64748b !important;
+}
+
+/* Syntax Highlighting for Code Mirror */
+.w-md-editor .cm-s-default.CodeMirror {
+  background-color: #111827 !important;
+  color: #f1f5f9 !important;
+}
+
+.w-md-editor .cm-string {
+  color: #4ade80 !important;
+}
+
+.w-md-editor .cm-atom {
+  color: #f97316 !important;
+}
+
+.w-md-editor .cm-number {
+  color: #f59e0b !important;
+}
+
+.w-md-editor .cm-variable {
+  color: #60a5fa !important;
+}
+
+.w-md-editor .cm-keyword {
+  color: #a78bfa !important;
+}
+
+.w-md-editor .cm-operator {
+  color: #fbbf24 !important;
+}
+
+.w-md-editor .cm-comment {
+  color: #6b7280 !important;
+}
+
+/* ========== ADDITIONAL MARKDOWN FIXES ========== */
+
+/* Ensure all text in preview is visible with high contrast */
+.w-md-editor-preview-content {
+  background-color: #111827 !important;
+}
+
+.w-md-editor-preview-content,
+.w-md-editor-preview-content p,
+.w-md-editor-preview-content span,
+.w-md-editor-preview-content div,
+.w-md-editor-preview-content li,
+.w-md-editor-preview-content td,
+.w-md-editor-preview-content dd,
+.w-md-editor-preview-content dt,
+.w-md-editor-preview-content strong,
+.w-md-editor-preview-content em,
+.w-md-editor-preview-content b,
+.w-md-editor-preview-content i {
+  color: #f1f5f9 !important;
+}
+
+/* Remove any dark backgrounds from preview */
+.w-md-editor-preview-content {
+  background-color: #111827 !important;
+}
+
+.w-md-editor-preview-content p,
+.w-md-editor-preview-content h1,
+.w-md-editor-preview-content h2,
+.w-md-editor-preview-content h3,
+.w-md-editor-preview-content h4,
+.w-md-editor-preview-content h5,
+.w-md-editor-preview-content h6,
+.w-md-editor-preview-content ul,
+.w-md-editor-preview-content ol,
+.w-md-editor-preview-content li,
+.w-md-editor-preview-content blockquote,
+.w-md-editor-preview-content table,
+.w-md-editor-preview-content tr,
+.w-md-editor-preview-content td,
+.w-md-editor-preview-content th {
+  background-color: transparent !important;
+}
+
+/* Fix for "Live Code" / preview label area - make it blend */
+.w-md-editor .w-md-editor-preview,
+.w-md-editor-preview {
+  background-color: #111827 !important;
+  box-shadow: inset 1px 0 0 0 #374151 !important;
+}
+
+/* Text area text should be bright white */
+.w-md-editor-text {
+  color: #f1f5f9 !important;
+  background-color: transparent !important;
+}
+
+.w-md-editor-text-pre {
+  background-color: transparent !important;
+}
+
+.w-md-editor-text-pre code {
+  background-color: transparent !important;
+  color: #f1f5f9 !important;
+}
+
+/* Ensure CodeMirror syntax highlighting text is visible */
+.w-md-editor .CodeMirror,
+.w-md-editor .cm-s-default {
+  background-color: #111827 !important;
+  color: #f1f5f9 !important;
+}
+
+/* Markdown list items text */
+.w-md-editor-preview-content ul > li::before,
+.w-md-editor-preview-content ol > li::before {
+  color: #f1f5f9 !important;
+}

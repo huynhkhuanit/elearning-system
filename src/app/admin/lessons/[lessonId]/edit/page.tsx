@@ -479,7 +479,7 @@ export default function LessonContentEditor() {
         </div>
 
         {/* Markdown Editor */}
-        <div className="rounded-lg border border-slate-700 overflow-hidden shadow-2xl bg-slate-900">
+        <div className="rounded-lg border border-slate-700 overflow-hidden shadow-2xl" data-color-mode="dark">
           <MDEditor
             value={content}
             onChange={(val) => setContent(val || '')}
@@ -487,19 +487,15 @@ export default function LessonContentEditor() {
             hideToolbar={false}
             visibleDragbar={true}
             height={700}
-            className="bg-slate-900 text-slate-100"
             textareaProps={{
               disabled: saving,
               style: {
                 backgroundColor: '#111827',
                 color: '#f1f5f9',
                 fontSize: '14px',
-                fontFamily: 'SF Mono, Monaco, Inconsolata, monospace',
+                fontFamily: "'SF Mono', Monaco, Inconsolata, 'Roboto Mono', monospace",
+                lineHeight: '1.6',
               }
-            }}
-            style={{
-              backgroundColor: '#111827',
-              color: '#f1f5f9',
             }}
           />
         </div>
