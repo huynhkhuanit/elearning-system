@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import MDEditor from '@uiw/react-md-editor';
-import { Save, ArrowLeft, Loader, Check, AlertCircle, Eye, Code } from 'lucide-react';
+import { Save, ArrowLeft, Loader, Check, AlertCircle, Eye, Code, Lightbulb, Info, CheckCircle, AlertTriangle } from 'lucide-react';
 import { useAdminAccess } from '@/lib/hooks/useAdminAccess';
 import '@uiw/react-md-editor/markdown-editor.css';
 import '@uiw/react-markdown-preview/markdown.css';
@@ -244,8 +244,8 @@ export default function LessonContentEditor() {
           {/* Tips */}
           <div className="p-6 bg-slate-800/50 border border-indigo-500/30 rounded-lg hover:border-indigo-500/50 transition">
             <h3 className="font-bold text-indigo-300 mb-4 flex items-center gap-2">
-              <Code className="w-5 h-5" />
-              💡 Mẹo Markdown
+              <Lightbulb className="w-5 h-5" />
+              Mẹo Markdown
             </h3>
             <ul className="space-y-3 text-sm text-slate-300">
               <li className="flex gap-3">
@@ -278,8 +278,8 @@ export default function LessonContentEditor() {
           {/* Info */}
           <div className="p-6 bg-slate-800/50 border border-slate-700 rounded-lg hover:border-slate-600 transition">
             <h3 className="font-bold text-slate-100 mb-4 flex items-center gap-2">
-              <Eye className="w-5 h-5" />
-              ℹ️ Thông Tin Bài Học
+              <Info className="w-5 h-5" />
+              Thông Tin Bài Học
             </h3>
             <div className="space-y-3 text-sm">
               <div>
@@ -295,11 +295,17 @@ export default function LessonContentEditor() {
                 <p className="text-slate-300 font-mono text-xs">{new Date(lesson.updated_at).toLocaleString('vi-VN')}</p>
               </div>
               <div className="pt-3 border-t border-slate-700">
-                <p className="text-slate-300 font-medium">
+                <p className="text-slate-300 font-medium flex items-center gap-2">
                   {content.trim().length > 0 ? (
-                    <span className="text-green-400">✓ Có nội dung</span>
+                    <>
+                      <CheckCircle className="w-5 h-5 text-green-400" />
+                      <span className="text-green-400">Có nội dung</span>
+                    </>
                   ) : (
-                    <span className="text-amber-400">⚠ Nội dung trống</span>
+                    <>
+                      <AlertTriangle className="w-5 h-5 text-amber-400" />
+                      <span className="text-amber-400">Nội dung trống</span>
+                    </>
                   )}
                 </p>
               </div>

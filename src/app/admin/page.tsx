@@ -10,6 +10,7 @@ import {
   Zap,
   AlertCircle,
   Loader,
+  Lightbulb,
 } from 'lucide-react';
 import { useAdminAccess } from '@/lib/hooks/useAdminAccess';
 import Link from 'next/link';
@@ -110,7 +111,7 @@ export default function AdminDashboard() {
       {/* Page Header */}
       <div>
         <h1 className="text-3xl font-bold text-slate-100 mb-2">Dashboard Quản Trị</h1>
-        <p className="text-slate-400">Xin chào, {user?.full_name}! 👋</p>
+        <p className="text-slate-400">Xin chào, {user?.full_name}!</p>
       </div>
 
       {/* Error State */}
@@ -248,10 +249,10 @@ export default function AdminDashboard() {
       <div className="p-6 bg-indigo-500/10 border border-indigo-500/30 rounded-lg">
         <div className="flex items-start gap-4">
           <div className="p-3 bg-indigo-500/20 rounded-lg flex-shrink-0">
-            <Zap className="w-6 h-6 text-indigo-400" />
+            <Lightbulb className="w-6 h-6 text-indigo-400" />
           </div>
           <div>
-            <h3 className="text-lg font-semibold text-indigo-300 mb-1">💡 Mẹo</h3>
+            <h3 className="text-lg font-semibold text-indigo-300 mb-1">Mẹo</h3>
             <p className="text-sm text-indigo-200">
               Hãy đảm bảo tất cả các bài học đều có nội dung markdown chi tiết để cung cấp trải nghiệm học tập tốt nhất cho sinh viên.
             </p>
