@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
 
     // Get user from database
     const users = await query<RowDataPacket[]>(
-      `SELECT id, email, username, full_name, avatar_url, bio, phone,
+      `SELECT id, email, username, full_name, avatar_url, bio, phone, role,
               membership_type, membership_expires_at, learning_streak, 
               total_study_time, is_verified, is_active, last_login, created_at
        FROM users WHERE id = ? AND is_active = TRUE LIMIT 1`,
@@ -68,6 +68,7 @@ export async function GET(request: NextRequest) {
             avatar_url: user.avatar_url,
             bio: user.bio,
             phone: user.phone,
+            role: user.role,
             membership_type: user.membership_type,
             membership_expires_at: user.membership_expires_at,
             learning_streak: user.learning_streak,

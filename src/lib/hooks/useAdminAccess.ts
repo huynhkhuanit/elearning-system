@@ -34,7 +34,14 @@ export function useAdminAccess() {
         return;
       }
 
-      const userData = await response.json();
+      const responseData = await response.json();
+      const userData = responseData.data?.user;
+      
+      if (!userData) {
+        router.replace('/auth/login');
+        return;
+      }
+
       const userRole = userData.role?.toLowerCase();
 
       // Chỉ admin hoặc teacher mới được phép
@@ -42,6 +49,7 @@ export function useAdminAccess() {
         setUser(userData);
         setHasAccess(true);
       } else {
+        console.warn('User role is not admin/teacher:', userRole);
         router.replace('/');
       }
     } catch (error) {
