@@ -19,8 +19,9 @@ interface Params {
   lessonId: string;
 }
 
-// Maximum file sizes
-const MAX_VIDEO_SIZE = 2 * 1024 * 1024 * 1024; // 2GB
+// Maximum file sizes - Cloudinary recommends smaller sizes for better async processing
+const MAX_VIDEO_SIZE = 500 * 1024 * 1024; // 500MB (Cloudinary async limit is ~700MB but 500MB is safer)
+const CHUNK_SIZE = 50 * 1024 * 1024; // 50MB chunks
 const ALLOWED_FORMATS = ["video/mp4", "video/webm", "video/ogg", "video/quicktime"];
 
 /**
@@ -133,9 +134,11 @@ export async function POST(
 function validateVideoFile(file: File): { valid: boolean; error?: string } {
   // Check file size
   if (file.size > MAX_VIDEO_SIZE) {
+    const maxSizeMB = MAX_VIDEO_SIZE / (1024 * 1024);
+    const fileSizeMB = file.size / (1024 * 1024);
     return {
       valid: false,
-      error: `File too large. Maximum size is 2GB, got ${(file.size / (1024 * 1024 * 1024)).toFixed(2)}GB`,
+      error: `File quá lớn. Giới hạn: ${maxSizeMB.toFixed(0)}MB, file: ${fileSizeMB.toFixed(2)}MB. Vui lòng nén video hoặc giảm độ phân giải.`,
     };
   }
 
@@ -143,7 +146,7 @@ function validateVideoFile(file: File): { valid: boolean; error?: string } {
   if (!ALLOWED_FORMATS.includes(file.type)) {
     return {
       valid: false,
-      error: `Invalid video format. Allowed: ${ALLOWED_FORMATS.join(", ")}, got ${file.type}`,
+      error: `Định dạng video không hợp lệ. Hỗ trợ: ${ALLOWED_FORMATS.join(", ")}, nhận được: ${file.type}`,
     };
   }
 
@@ -153,7 +156,7 @@ function validateVideoFile(file: File): { valid: boolean; error?: string } {
   if (!ext || !allowedExts.includes(ext)) {
     return {
       valid: false,
-      error: `Invalid file extension. Allowed: ${allowedExts.join(", ")}, got .${ext}`,
+      error: `Phần mở rộng tệp không hợp lệ. Hỗ trợ: ${allowedExts.join(", ")}, nhận được: .${ext}`,
     };
   }
 
@@ -207,9 +210,17 @@ async function uploadToLocal(
     // Generate URL (relative to public folder)
     const videoUrl = `/videos/${storageName}`;
 
-    // For local files, duration should be extracted from video metadata
-    // For now, returning null - client will get duration from <video> element
-    const duration = null;
+    // For local files, extract duration if possible
+    let duration = null;
+    try {
+      // Try to get duration using ffprobe (if available)
+      // For now, we'll let the client extract duration from <video> element
+      // This is handled by the VideoPlayer component using HTMLVideoElement API
+      duration = null;
+    } catch (err) {
+      // Duration extraction failed, will be extracted on client side
+      console.log("Could not extract video duration server-side, client will handle it");
+    }
 
     console.log(`✅ Video uploaded locally: ${videoUrl}`);
 
@@ -220,7 +231,7 @@ async function uploadToLocal(
 
   } catch (error) {
     console.error("Local upload error:", error);
-    throw new Error("Failed to upload video to local storage");
+    throw new Error(`Failed to upload video to local storage: ${error instanceof Error ? error.message : String(error)}`);
   }
 }
 
@@ -244,29 +255,91 @@ async function uploadToCloudinary(
     });
 
     return new Promise((resolve, reject) => {
-      const uploadStream = cloudinary.uploader.upload_stream(
-        {
-          folder: "dhvlearnx/videos",
-          public_id: `${lessonId}-${Date.now()}`,
-          resource_type: "video",
-          video_sampling: 5, // Sample every 5 seconds for preview
-        },
-        (error: any, result: any) => {
-          if (error) {
-            reject(error);
-          } else if (result) {
-            resolve({
-              url: result.secure_url,
-              duration: result.duration || null,
-            });
-          } else {
-            reject(new Error("Upload failed"));
-          }
-        }
-      );
+      // Set timeout for upload (300 seconds = 5 minutes for large files)
+      const timeout = setTimeout(() => {
+        reject(new Error("Upload timeout - video processing took too long. Vui lòng thử lại hoặc giảm kích thước file."));
+      }, 300000); // 5 minutes
 
-      // Write buffer to stream
-      uploadStream.end(buffer);
+      try {
+        const uploadStream = cloudinary.uploader.upload_stream(
+          {
+            folder: "dhvlearnx/videos",
+            public_id: `${lessonId}-${Date.now()}`,
+            resource_type: "video",
+            // Video optimization
+            quality: "auto",      // Auto optimize quality
+            eager_async: true,    // Process video asynchronously
+            eager: [
+              { width: 300, height: 300, crop: "fill", format: "jpg" }, // Thumbnail
+            ],
+            // Performance settings
+            max_bytes: 500000000, // 500MB max
+          },
+          (error: any, result: any) => {
+            clearTimeout(timeout);
+            
+            if (error) {
+              console.error("Cloudinary error details:", {
+                message: error.message,
+                http_code: error.http_code,
+                status_code: error.status_code,
+              });
+              
+              // Handle specific Cloudinary errors
+              if (error.http_code === 400 || error.status_code === 400) {
+                // 400 errors - likely invalid parameters or unsupported codec
+                if (error.message?.includes("too large") || error.message?.includes("maximum")) {
+                  reject(new Error("Video quá lớn. Giới hạn: 500MB. Vui lòng nén video."));
+                } else if (error.message?.includes("codec") || error.message?.includes("format")) {
+                  reject(new Error("Định dạng video không được hỗ trợ. Hãy dùng MP4 (H.264 codec)."));
+                } else if (error.message?.includes("parameter") || error.message?.includes("option")) {
+                  reject(new Error("Lỗi cấu hình upload. Thử lại hoặc liên hệ support."));
+                } else {
+                  reject(new Error(`Lỗi Cloudinary: ${error.message}`));
+                }
+              } else if (error.http_code === 401 || error.http_code === 403) {
+                reject(new Error("Lỗi xác thực Cloudinary. Vui lòng kiểm tra credentials."));
+              } else if (error.http_code === 429) {
+                reject(new Error("Rate limit. Chờ vài giây rồi thử lại."));
+              } else if (error.http_code === 499 || error.message?.includes("Timeout")) {
+                reject(new Error("Timeout. Kiểm tra kết nối internet và thử lại."));
+              } else {
+                reject(error);
+              }
+            } else if (result) {
+              resolve({
+                url: result.secure_url,
+                duration: result.duration || null,
+              });
+            } else {
+              reject(new Error("Upload failed - no response from Cloudinary"));
+            }
+          }
+        );
+
+        // Handle stream errors
+        uploadStream.on("error", (error: any) => {
+          clearTimeout(timeout);
+          console.error("Stream error:", error);
+          reject(new Error(`Stream error: ${error.message}`));
+        });
+
+        // Handle stream close
+        uploadStream.on("close", () => {
+          clearTimeout(timeout);
+        });
+
+        // Write buffer to stream
+        if (buffer && buffer.length > 0) {
+          uploadStream.end(Buffer.from(buffer));
+        } else {
+          clearTimeout(timeout);
+          reject(new Error("Buffer is empty"));
+        }
+      } catch (err: any) {
+        clearTimeout(timeout);
+        reject(new Error(`Upload setup error: ${err.message}`));
+      }
     });
 
   } catch (error) {
