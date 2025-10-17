@@ -348,9 +348,9 @@ export default function LearnCoursePage() {
             />
           </button>
           <div className="h-5 w-px bg-gray-600 flex-shrink-0"></div>
-          <h1 className="font-semibold text-gray-200 truncate" style={{ fontSize: '16px' }}>
+          <div className="font-[900] text-gray-200 truncate" style={{ fontSize: '16px' }}>
             {course?.title}
-          </h1>
+          </div>
         </div>
 
         <div className="flex items-center space-x-4 flex-shrink-0">
