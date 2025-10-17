@@ -13,6 +13,7 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/contexts/ToastContext";
 import { usePageTitle, useLessonContent } from "@/lib/hooks";
+import VideoPlayer from "@/components/VideoPlayer";
 import "@/app/markdown.css";
 
 interface Lesson {
@@ -23,6 +24,8 @@ interface Lesson {
   isCompleted: boolean;
   isFree: boolean;
   order: number;
+  videoUrl?: string; // Add video URL to lesson interface
+  videoDuration?: number; // Add video duration to lesson interface
 }
 
 interface Section {
@@ -121,7 +124,9 @@ export default function LearnCoursePage() {
             type: lesson.type as "video" | "reading" | "quiz",
             isCompleted: completedLessons.includes(lesson.id),
             isFree: lesson.isPreview || false,
-            order: lesson.order
+            order: lesson.order,
+            videoUrl: lesson.videoUrl, // Add video URL from API
+            videoDuration: lesson.videoDuration, // Add video duration from API
           }))
         }));
 
@@ -407,24 +412,35 @@ export default function LearnCoursePage() {
         <div className="flex-1 flex flex-col overflow-hidden bg-gray-900 justify-center items-center">
           {/* Video and Lesson Content - Scrollable together */}
           <div className="w-full flex-1 overflow-y-auto bg-gray-900 flex flex-col">
-            {/* Video Player Area - 85% height */}
-            <div className="h-[85%] bg-black flex items-center justify-center flex-shrink-0">
-              <div className="text-center px-8">
-                <div className="w-28 h-28 mx-auto bg-gradient-to-br from-orange-500 to-yellow-500 rounded-full flex items-center justify-center mb-8 shadow-2xl hover:scale-110 transition-transform cursor-pointer group">
-                  <Play className="w-14 h-14 text-white ml-2 group-hover:scale-110 transition-transform" />
-                </div>
-                <p className="text-xl font-bold text-white mb-3">{currentLesson?.title}</p>
-                <div className="flex items-center justify-center space-x-4 text-gray-400">
-                  <div className="flex items-center space-x-2">
-                    <Clock className="w-4 h-4" />
-                    <span className="text-sm">{currentLesson?.duration}</span>
+            {/* Video Player Area */}
+            <div className="bg-black flex-shrink-0">
+              <div className="max-w-6xl mx-auto px-4 py-4">
+                {currentLesson?.videoUrl ? (
+                  <VideoPlayer
+                    videoUrl={currentLesson.videoUrl}
+                    lessonId={currentLesson.id}
+                    duration={currentLesson.videoDuration}
+                    title={currentLesson.title}
+                    onComplete={() => {
+                      toast.success("Bài học đã hoàn thành! Tiếp tục với bài học tiếp theo");
+                      goToNextLesson();
+                    }}
+                    onProgress={(data) => {
+                      // Optional: Track progress in real-time
+                      console.log(`Progress: ${data.currentTime}s / ${data.duration}s`);
+                    }}
+                    autoSave={true}
+                  />
+                ) : (
+                  // Placeholder when no video
+                  <div className="w-full aspect-video bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg flex items-center justify-center border border-gray-700">
+                    <div className="text-center">
+                      <PlayCircle className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+                      <p className="text-gray-400 text-lg font-medium">Chưa có video cho bài học này</p>
+                      <p className="text-gray-500 text-sm mt-2">Đây là bài học dạng đọc hoặc bài kiểm tra</p>
+                    </div>
                   </div>
-                  <span>•</span>
-                  <div className="flex items-center space-x-2">
-                    {getLessonIcon(currentLesson?.type || "video")}
-                    <span className="text-sm capitalize">{currentLesson?.type}</span>
-                  </div>
-                </div>
+                )}
               </div>
             </div>
 
