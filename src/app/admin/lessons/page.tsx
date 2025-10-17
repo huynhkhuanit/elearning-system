@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import {
   BookOpen,
   ChevronDown,
@@ -9,7 +10,9 @@ import {
   Edit,
   Loader,
   AlertCircle,
+  Lock,
 } from 'lucide-react';
+import { useAdminAccess } from '@/lib/hooks/useAdminAccess';
 
 interface Chapter {
   id: string;
@@ -34,64 +37,29 @@ interface Course {
 }
 
 export default function AdminCoursesPage() {
+  const router = useRouter();
+  const { user, loading: authLoading, hasAccess } = useAdminAccess();
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [expandedCourses, setExpandedCourses] = useState<Set<string>>(new Set());
-  const [expandedChapters, setExpandedChapters] = useState<Set<string>>(
-    new Set()
-  );
+  const [expandedChapters, setExpandedChapters] = useState<Set<string>>(new Set());
 
   useEffect(() => {
-    fetchCourses();
-  }, []);
+    if (!authLoading && hasAccess) {
+      fetchCourses();
+    }
+  }, [authLoading, hasAccess]);
 
   const fetchCourses = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/courses');
+      // Use optimized endpoint that fetches all data at once
+      const response = await fetch('/api/admin/courses-full');
       if (!response.ok) throw new Error('Không tải được danh sách khóa học');
 
       const data = await response.json();
-      // API trả về { success: true, data: { courses: [], pagination: {...} } }
-      const coursesList = data.data?.courses || [];
-      
-      const coursesWithDetails = await Promise.all(
-        coursesList.map(async (course: any) => {
-          const chaptersResponse = await fetch(
-            `/api/courses/${course.slug}/chapters`
-          );
-          const chaptersData = await chaptersResponse.json();
-          // API trả về { success: true, data: { chapters: [], totalLessons } }
-          const chaptersList = chaptersData.data?.chapters || [];
-
-          const chaptersWithLessons = await Promise.all(
-            chaptersList.map(async (chapter: any) => {
-              const lessonsResponse = await fetch(
-                `/api/chapters/${chapter.id}/lessons`
-              );
-              const lessonsData = await lessonsResponse.json();
-              // API có thể trả về mảng trực tiếp hoặc object
-              const lessons = Array.isArray(lessonsData) ? lessonsData : (lessonsData?.data || []);
-              return { 
-                id: chapter.id,
-                title: chapter.title,
-                sort_order: chapter.order,
-                lessons 
-              };
-            })
-          );
-
-          return { 
-            id: course.id,
-            title: course.title,
-            slug: course.slug,
-            chapters: chaptersWithLessons 
-          };
-        })
-      );
-
-      setCourses(coursesWithDetails);
+      setCourses(data.data?.courses || []);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Lỗi không xác định');
     } finally {
@@ -120,6 +88,37 @@ export default function AdminCoursesPage() {
   };
 
   const hasContent = (lesson: Lesson) => lesson.content && lesson.content.trim().length > 0;
+
+  // Chờ auth check xong
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <Loader className="w-12 h-12 text-orange-500 animate-spin mx-auto mb-4" />
+          <p className="text-gray-300">Đang xác thực quyền truy cập...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Kiểm tra quyền access
+  if (!hasAccess) {
+    return (
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <Lock className="w-12 h-12 text-red-500 mx-auto mb-4" />
+          <p className="text-gray-300 mb-4">Bạn không có quyền truy cập trang này</p>
+          <p className="text-gray-400 text-sm mb-6">Chỉ admin hoặc teacher mới có thể chỉnh sửa nội dung</p>
+          <button
+            onClick={() => router.push('/')}
+            className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition"
+          >
+            Về trang chủ
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
@@ -156,7 +155,14 @@ export default function AdminCoursesPage() {
         <div className="max-w-6xl mx-auto px-6 py-4">
           <div className="flex items-center gap-3">
             <BookOpen className="w-8 h-8 text-orange-500" />
-            <h1 className="text-3xl font-bold text-white">Quản lý nội dung khóa học</h1>
+            <div>
+              <h1 className="text-3xl font-bold text-white">Quản lý nội dung khóa học</h1>
+              {user && (
+                <p className="text-gray-400 text-sm mt-1">
+                  Xin chào, {user.full_name} ({user.role})
+                </p>
+              )}
+            </div>
           </div>
           <p className="text-gray-400 mt-2">
             Chỉnh sửa markdown content cho từng bài học

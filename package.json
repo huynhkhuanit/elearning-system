@@ -5,7 +5,9 @@
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
-    "start": "next start"
+    "start": "next start",
+    "grant-role": "node scripts/grant-role.js",
+    "check-roles": "node scripts/check-roles.js"
   },
   "dependencies": {
     "@reduxjs/toolkit": "^2.9.0",

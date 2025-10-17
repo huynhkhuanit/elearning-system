@@ -1,0 +1,41 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { jwtVerify } from 'jose';
+
+const SECRET = process.env.JWT_SECRET || 'your-secret-key';
+const secret = new TextEncoder().encode(SECRET);
+
+export async function middleware(request: NextRequest) {
+  // Chỉ kiểm tra admin routes
+  if (!request.nextUrl.pathname.startsWith('/admin')) {
+    return NextResponse.next();
+  }
+
+  try {
+    // Lấy token từ cookie
+    const token = request.cookies.get('auth_token')?.value;
+
+    if (!token) {
+      return NextResponse.redirect(new URL('/auth/login', request.url));
+    }
+
+    // Verify token
+    const verified = await jwtVerify(token, secret);
+    const payload = verified.payload as any;
+
+    // Kiểm tra role: chỉ admin hoặc teacher mới được phép
+    const userRole = payload.role?.toLowerCase();
+    if (userRole !== 'admin' && userRole !== 'teacher') {
+      return NextResponse.redirect(new URL('/', request.url));
+    }
+
+    // Tiếp tục request
+    return NextResponse.next();
+  } catch (error) {
+    console.error('Auth middleware error:', error);
+    return NextResponse.redirect(new URL('/auth/login', request.url));
+  }
+}
+
+export const config = {
+  matcher: ['/admin/:path*'],
+};
