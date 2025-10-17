@@ -78,6 +78,15 @@
   color: #d1d5db;
 }
 
+.prose ul ul {
+  list-style-type: circle;
+  margin-left: 1.5rem;
+}
+
+.prose ul ul ul {
+  list-style-type: square;
+}
+
 .prose ol {
   list-style-type: decimal;
   margin-left: 1.25rem;
@@ -85,8 +94,18 @@
   color: #d1d5db;
 }
 
+.prose ol ol {
+  list-style-type: lower-alpha;
+  margin-left: 1.5rem;
+}
+
 .prose li {
   margin-bottom: 0.5rem;
+  line-height: 1.6;
+}
+
+.prose li > p {
+  margin-bottom: 0.25rem;
 }
 
 .prose blockquote {
@@ -163,4 +182,218 @@
 .prose sub,
 .prose sup {
   font-size: 0.875rem;
+}
+
+/* MDEditor Preview Styles - Fix list rendering */
+.w-md-editor-preview-no-html ul {
+  list-style-type: disc !important;
+  margin-left: 1.25rem !important;
+  margin-bottom: 1rem !important;
+  color: #d1d5db !important;
+  display: list-item !important;
+}
+
+.w-md-editor-preview-no-html ul ul {
+  list-style-type: circle !important;
+  margin-left: 1.5rem !important;
+}
+
+.w-md-editor-preview-no-html ul ul ul {
+  list-style-type: square !important;
+}
+
+.w-md-editor-preview-no-html ol {
+  list-style-type: decimal !important;
+  margin-left: 1.25rem !important;
+  margin-bottom: 1rem !important;
+  color: #d1d5db !important;
+}
+
+.w-md-editor-preview-no-html ol ol {
+  list-style-type: lower-alpha !important;
+  margin-left: 1.5rem !important;
+}
+
+.w-md-editor-preview-no-html li {
+  margin-bottom: 0.5rem !important;
+  line-height: 1.6 !important;
+  color: #d1d5db !important;
+  display: list-item !important;
+  margin-left: 1.25rem !important;
+}
+
+/* MDEditor specific dark theme */
+.w-md-editor {
+  background-color: #111827 !important;
+  color: #f1f5f9 !important;
+}
+
+.w-md-editor-toolbar {
+  background-color: #1f2937 !important;
+  border-bottom-color: #374151 !important;
+}
+
+.w-md-editor-toolbar button {
+  color: #d1d5db !important;
+}
+
+.w-md-editor-toolbar button:hover {
+  color: #f1f5f9 !important;
+  background-color: #374151 !important;
+}
+
+.w-md-editor-text-input,
+.w-md-editor-text-pre,
+.w-md-editor-input {
+  background-color: #111827 !important;
+  color: #f1f5f9 !important;
+  font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace !important;
+}
+
+.w-md-editor-preview {
+  background-color: #111827 !important;
+  color: #d1d5db !important;
+}
+
+.w-md-editor-preview-no-html {
+  background-color: #111827 !important;
+  color: #d1d5db !important;
+  padding: 1rem !important;
+}
+
+.w-md-editor-preview-no-html h1,
+.w-md-editor-preview-no-html h2,
+.w-md-editor-preview-no-html h3,
+.w-md-editor-preview-no-html h4,
+.w-md-editor-preview-no-html h5,
+.w-md-editor-preview-no-html h6 {
+  color: #ffffff !important;
+  font-weight: 700 !important;
+}
+
+.w-md-editor-preview-no-html h1 {
+  font-size: 1.875rem !important;
+  margin-bottom: 1rem !important;
+  margin-top: 1.5rem !important;
+}
+
+.w-md-editor-preview-no-html h2 {
+  font-size: 1.5rem !important;
+  color: #fb923c !important;
+  margin-bottom: 0.75rem !important;
+  margin-top: 1.25rem !important;
+}
+
+.w-md-editor-preview-no-html h3 {
+  font-size: 1.125rem !important;
+  color: #facc15 !important;
+  margin-bottom: 0.5rem !important;
+  margin-top: 1rem !important;
+}
+
+.w-md-editor-preview-no-html p {
+  color: #d1d5db !important;
+  margin-bottom: 0.75rem !important;
+  line-height: 1.6 !important;
+}
+
+.w-md-editor-preview-no-html code {
+  background-color: rgba(17, 24, 39, 0.5) !important;
+  color: #4ade80 !important;
+  padding: 0.25rem 0.5rem !important;
+  border-radius: 0.25rem !important;
+  font-size: 0.875rem !important;
+}
+
+.w-md-editor-preview-no-html pre {
+  background-color: rgba(17, 24, 39, 0.7) !important;
+  border: 1px solid #374151 !important;
+  border-radius: 0.5rem !important;
+  padding: 1rem !important;
+  margin-bottom: 1rem !important;
+  overflow-x: auto !important;
+}
+
+.w-md-editor-preview-no-html pre code {
+  background-color: transparent !important;
+  color: #86efac !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+}
+
+.w-md-editor-preview-no-html strong,
+.w-md-editor-preview-no-html b {
+  color: #ffffff !important;
+  font-weight: 700 !important;
+}
+
+.w-md-editor-preview-no-html em,
+.w-md-editor-preview-no-html i {
+  color: #e5e7eb !important;
+  font-style: italic !important;
+}
+
+.w-md-editor-preview-no-html blockquote {
+  border-left: 4px solid #f97316 !important;
+  padding-left: 1rem !important;
+  padding-top: 0.5rem !important;
+  padding-bottom: 0.5rem !important;
+  margin: 1rem 0 !important;
+  background-color: rgba(17, 24, 39, 0.3) !important;
+  color: #d1d5db !important;
+  font-style: italic !important;
+}
+
+.w-md-editor-preview-no-html a {
+  color: #fb923c !important;
+  text-decoration: underline !important;
+}
+
+.w-md-editor-preview-no-html a:hover {
+  color: #fbbf24 !important;
+}
+
+.w-md-editor-preview-no-html hr {
+  border-top-color: #374151 !important;
+  margin: 1.5rem 0 !important;
+}
+
+.w-md-editor-preview-no-html table {
+  border-color: #374151 !important;
+  margin-bottom: 1rem !important;
+}
+
+.w-md-editor-preview-no-html th {
+  background-color: rgba(17, 24, 39, 0.5) !important;
+  border-color: #374151 !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+}
+
+.w-md-editor-preview-no-html td {
+  border-color: #374151 !important;
+  color: #d1d5db !important;
+}
+
+.w-md-editor-preview-no-html tr:hover {
+  background-color: rgba(31, 41, 55, 0.3) !important;
+}
+
+/* Scrollbar styling for dark mode */
+.w-md-editor::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.w-md-editor::-webkit-scrollbar-track {
+  background: #1f2937;
+}
+
+.w-md-editor::-webkit-scrollbar-thumb {
+  background: #4b5563;
+  border-radius: 4px;
+}
+
+.w-md-editor::-webkit-scrollbar-thumb:hover {
+  background: #6b7280;
 }
