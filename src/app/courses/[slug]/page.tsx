@@ -112,7 +112,16 @@ export default function CourseDetailPage() {
           }, 1000);
         }
       } else {
-        toast.error(data.message || "Không thể đăng ký khóa học");
+        // Check if already enrolled
+        if (data.message && data.message.includes('đã đăng ký')) {
+          console.log(`[COURSE DETAIL] Already enrolled, navigating to learn page`);
+          // Nếu đã enrolled, navigate đến learn page thay vì show error
+          setTimeout(() => {
+            router.push(`/learn/${slug}`);
+          }, 800);
+        } else {
+          toast.error(data.message || "Không thể đăng ký khóa học");
+        }
       }
     } catch (error) {
       console.error("Error enrolling:", error);

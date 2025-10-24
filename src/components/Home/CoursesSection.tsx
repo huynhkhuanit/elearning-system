@@ -25,14 +25,22 @@ interface Course {
   gradient: string;
   featured?: boolean;
   totalLessons: number;
+  isEnrolled?: boolean;
 }
 
-const GRADIENTS = [
+// Gradients cho PRO courses (màu sắc đa dạng)
+const GRADIENTS_PRO = [
   "from-indigo-500 to-purple-600",
-  "from-emerald-500 to-teal-600",
   "from-blue-500 to-indigo-600",
   "from-purple-500 to-pink-600",
   "from-yellow-500 to-orange-600",
+];
+
+// Gradients cho FREE courses (sử dụng primary color Indigo)
+const GRADIENTS_FREE = [
+  "from-indigo-500 to-indigo-600",
+  "from-indigo-600 to-indigo-700",
+  "from-indigo-400 to-indigo-600",
 ];
 
 const LEVEL_MAP: Record<string, "Cơ bản" | "Trung cấp" | "Nâng cao"> = {
@@ -61,11 +69,20 @@ export default function CoursesSection() {
       const data = await response.json();
 
       if (data.success) {
-        const courses = data.data.courses.map((course: any, index: number) => ({
-          ...course,
-          gradient: GRADIENTS[index % GRADIENTS.length],
-          featured: index === 0 && !course.isFree,
-        }));
+        const courses = data.data.courses.map((course: any, index: number) => {
+          // Sử dụng gradient khác cho PRO và FREE courses
+          const gradients = course.isFree ? GRADIENTS_FREE : GRADIENTS_PRO;
+          const gradientIndex = course.isFree 
+            ? index % gradients.length
+            : index % gradients.length;
+          
+          return {
+            ...course,
+            gradient: gradients[gradientIndex],
+            featured: index === 0 && !course.isFree,
+            isEnrolled: false, // Sẽ cập nhật nếu người dùng đã đăng ký
+          };
+        });
 
         const pro = courses.filter((c: Course) => c.isPro);
         const free = courses.filter((c: Course) => c.isFree);
@@ -92,26 +109,80 @@ export default function CoursesSection() {
 
     try {
       setEnrollingCourse(course.id);
+      
+      if (course.isFree) {
+        console.log(`[FREE COURSE] Enrolling in: ${course.slug}`);
+      } else {
+        console.log(`[PRO COURSE] Enrolling in: ${course.slug}`);
+      }
+      
       const response = await fetch(`/api/courses/${course.slug}/enroll`, {
         method: "POST",
         credentials: "include",
       });
 
       const data = await response.json();
+      console.log(`[${course.isFree ? 'FREE' : 'PRO'} COURSE] Enroll response:`, data);
 
       if (data.success) {
-        toast.success(data.message);
-        if (data.data.upgradedToPro) {
-          setTimeout(() => {
-            window.location.reload();
-          }, 1500);
-        }
+        toast.success(data.message || "Đăng ký khóa học thành công!");
+        
+        // Chuyển hướng đến trang học sau một chút delay
+        setTimeout(() => {
+          console.log(`[${course.isFree ? 'FREE' : 'PRO'} COURSE] Navigating to: /learn/${course.slug}`);
+          router.push(`/learn/${course.slug}`);
+        }, 800);
       } else {
-        toast.error(data.message || "Không thể đăng ký khóa học");
+        // Check if already enrolled
+        if (data.message && data.message.includes('đã đăng ký')) {
+          console.log(`[${course.isFree ? 'FREE' : 'PRO'} COURSE] Already enrolled, navigating to learn page`);
+          // Nếu đã enrolled, navigate đến learn page thay vì show error
+          router.push(`/learn/${course.slug}`);
+        } else {
+          toast.error(data.message || "Không thể đăng ký khóa học");
+          setEnrollingCourse(null);
+        }
       }
     } catch (error) {
       console.error("Error enrolling:", error);
       toast.error("Đã có lỗi xảy ra khi đăng ký");
+      setEnrollingCourse(null);
+    }
+  };
+
+  const handleProCourseClick = async (course: Course) => {
+    if (!isAuthenticated) {
+      router.push("/auth/login");
+      return;
+    }
+
+    try {
+      setEnrollingCourse(course.id);
+      console.log(`[PRO COURSE] Checking enrollment status for: ${course.slug}`);
+      
+      const response = await fetch(`/api/courses/${course.slug}`, {
+        credentials: "include",
+      });
+      
+      const data = await response.json();
+      console.log(`[PRO COURSE] Course status:`, data);
+
+      if (data.success) {
+        // ✅ FIXED: Now we check the isEnrolled field from API
+        if (data.data.isEnrolled) {
+          console.log(`[PRO COURSE] User already enrolled, navigating to learn page`);
+          router.push(`/learn/${course.slug}`);
+        } else {
+          console.log(`[PRO COURSE] User not enrolled, navigating to course details`);
+          router.push(`/courses/${course.slug}`);
+        }
+      } else {
+        console.log(`[PRO COURSE] Error checking status, navigating to course details`);
+        router.push(`/courses/${course.slug}`);
+      }
+    } catch (error) {
+      console.error("Error checking PRO course:", error);
+      router.push(`/courses/${course.slug}`);
     } finally {
       setEnrollingCourse(null);
     }
@@ -158,7 +229,12 @@ export default function CoursesSection() {
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
               {proCourses.map((course, index) => (
                 <motion.div key={course.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: index * 0.1 }}>
-                  <CourseCard course={course} onEnroll={() => handleEnroll(course)} isEnrolling={enrollingCourse === course.id} />
+                  <CourseCard 
+                    course={course} 
+                    onEnroll={() => handleEnroll(course)} 
+                    onProClick={() => handleProCourseClick(course)}
+                    isEnrolling={enrollingCourse === course.id}
+                  />
                 </motion.div>
               ))}
             </div>
@@ -179,7 +255,11 @@ export default function CoursesSection() {
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
               {freeCourses.map((course, index) => (
                 <motion.div key={course.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: index * 0.05 }}>
-                  <CourseCard course={course} onEnroll={() => handleEnroll(course)} isEnrolling={enrollingCourse === course.id} />
+                  <CourseCard 
+                    course={course} 
+                    onEnroll={() => handleEnroll(course)} 
+                    isEnrolling={enrollingCourse === course.id}
+                  />
                 </motion.div>
               ))}
             </div>
@@ -190,56 +270,86 @@ export default function CoursesSection() {
   );
 }
 
-function CourseCard({ course, onEnroll, isEnrolling }: { course: Course; onEnroll: () => void; isEnrolling: boolean }) {
+function CourseCard({ 
+  course, 
+  onEnroll, 
+  onProClick,
+  isEnrolling 
+}: { 
+  course: Course; 
+  onEnroll: () => void; 
+  onProClick?: () => void;
+  isEnrolling: boolean 
+}) {
   const levelDisplay = LEVEL_MAP[course.level] || "Cơ bản";
+  const { isAuthenticated } = useAuth();
   const router = useRouter();
-  
-  const { isAuthenticated, user } = useAuth();
-  
-  const handleClick = async () => {
-    // Kiểm tra xem user đã đăng ký khóa học chưa
-    if (isAuthenticated && course.isPro) {
-      try {
-        const response = await fetch(`/api/users/me/courses`, {
-          credentials: "include",
-        });
-        const data = await response.json();
-        
-        if (data.success) {
-          const isEnrolled = data.data.courses.some((c: any) => c.slug === course.slug);
+
+  const handleCardClick = () => {
+    if (!isAuthenticated) {
+      router.push("/auth/login");
+      return;
+    }
+
+    // ✅ FIXED: Unified logic for both FREE and PRO courses
+    if (course.isFree) {
+      // For FREE courses: check enrollment status from API
+      console.log(`[FREE COURSE] Card clicked, checking enrollment: ${course.title}`);
+      // Call similar logic to PRO courses to check enrollment status
+      (async () => {
+        try {
+          const response = await fetch(`/api/courses/${course.slug}`, {
+            credentials: "include",
+          });
+          const data = await response.json();
           
-          if (isEnrolled) {
-            // Đã đăng ký -> Chuyển đến trang học
+          if (data.success && data.data.isEnrolled) {
+            console.log(`[FREE COURSE] Already enrolled, navigating to learn page`);
             router.push(`/learn/${course.slug}`);
-            return;
+          } else {
+            console.log(`[FREE COURSE] Not enrolled, enrolling now`);
+            onEnroll();
           }
+        } catch (error) {
+          console.error("Error checking free course:", error);
+          onEnroll();
         }
-      } catch (error) {
-        console.error("Error checking enrollment:", error);
+      })();
+    } else {
+      // For PRO courses: use existing logic
+      console.log(`[PRO COURSE] Card clicked, checking status: ${course.title}`);
+      if (onProClick) {
+        onProClick();
       }
     }
-    
-    // Chưa đăng ký hoặc khóa FREE -> Chuyển đến landing page hoặc enroll
-    if (course.isPro) {
-      router.push(`/courses/${course.slug}`);
-    } else {
-      onEnroll();
-    }
   };
-  
+
   return (
     <motion.div 
       whileHover={{ y: -4 }} 
       className="group rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 h-full flex flex-col hover:bg-[#f7f7f7] cursor-pointer" 
       style={{ backgroundColor: "#f7f7f7" }} 
-      onClick={handleClick}
+      onClick={handleCardClick}
     >
-      <div className={`relative h-32 bg-gradient-to-br ${course.gradient} flex items-center justify-center flex-shrink-0`}>
+      <div className={`relative h-32 bg-gradient-to-br ${course.gradient} flex items-center justify-center flex-shrink-0 ${isEnrolling ? 'opacity-50' : ''}`}>
         <div className="text-white text-center">
-          <Play className="w-8 h-8 mx-auto mb-2 opacity-80 group-hover:opacity-100 transition-opacity duration-200" />
-          <div className="text-xs font-semibold opacity-90">Preview</div>
+          {isEnrolling ? (
+            <>
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white mx-auto mb-2"></div>
+              <div className="text-xs font-semibold opacity-90">
+                {course.isFree ? "Đang đăng ký..." : "Đang kiểm tra..."}
+              </div>
+            </>
+          ) : (
+            <>
+              <Play className="w-8 h-8 mx-auto mb-2 opacity-80 group-hover:opacity-100 transition-opacity duration-200" />
+              <div className="text-xs font-semibold opacity-90">
+                {course.isFree ? "Miễn phí" : "Preview"}
+              </div>
+            </>
+          )}
         </div>
-        {course.featured && (
+        {course.featured && !isEnrolling && (
           <div className="absolute top-3 right-3">
             <div className="w-[26px] px-[6px] py-[6px] bg-[#0000004d] rounded-lg flex items-center justify-center">
               <span className="text-white text-xs">⭐</span>
@@ -280,15 +390,22 @@ function CourseCard({ course, onEnroll, isEnrolling }: { course: Course; onEnrol
               </div>
             ) : (
               <div className="flex flex-col">
-                <span className="text-base font-bold text-emerald-600">
+                <span className="text-base font-bold text-indigo-600">
                   {course.price}
                 </span>
               </div>
             )}
           </div>
-          <Badge variant={levelDisplay === "Nâng cao" ? "warning" : "success"} size="sm">
-            {levelDisplay}
-          </Badge>
+          <div className="flex items-center space-x-2">
+            <Badge variant={levelDisplay === "Nâng cao" ? "warning" : "success"} size="sm">
+              {levelDisplay}
+            </Badge>
+            {course.isFree && (
+              <div className="text-xs font-bold px-2 py-1 rounded-full bg-indigo-100 text-indigo-700">
+                Miễn phí
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </motion.div>

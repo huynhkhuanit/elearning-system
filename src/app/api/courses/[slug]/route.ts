@@ -8,6 +8,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { query } from '@/lib/db';
+import { verifyToken, extractTokenFromHeader } from '@/lib/auth';
 
 export async function GET(
   request: NextRequest,
@@ -15,6 +16,17 @@ export async function GET(
 ) {
   try {
     const { slug } = await params;
+
+    // Get auth token to check enrollment status
+    const cookieToken = request.cookies.get('auth_token')?.value;
+    const headerToken = extractTokenFromHeader(request.headers.get('Authorization'));
+    const token = cookieToken || headerToken;
+
+    let userId: string | null = null;
+    if (token) {
+      const payload = verifyToken(token);
+      userId = payload?.userId || null;
+    }
 
     // Query course details
     const sqlQuery = `
@@ -64,6 +76,16 @@ export async function GET(
 
     const course = (results as any[])[0];
 
+    // Check if user is enrolled (if authenticated)
+    let isEnrolled = false;
+    if (userId) {
+      const enrollmentResults = await query(
+        `SELECT id FROM enrollments WHERE user_id = ? AND course_id = ? LIMIT 1`,
+        [userId, course.id]
+      );
+      isEnrolled = enrollmentResults && (enrollmentResults as any[]).length > 0;
+    }
+
     // Format response
     const formattedCourse = {
       id: course.id,
@@ -82,6 +104,7 @@ export async function GET(
       rating: parseFloat(course.rating),
       students: course.total_students,
       totalLessons: course.total_lessons,
+      isEnrolled: isEnrolled,
       category: {
         id: course.category_id,
         name: course.category_name,

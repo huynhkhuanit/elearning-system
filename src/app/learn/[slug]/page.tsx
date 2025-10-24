@@ -62,6 +62,8 @@ export default function LearnCoursePage() {
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [lessonContent, setLessonContent] = useState<string>("");
+  const [isFreeCourseDetermined, setIsFreeCourseDetermined] = useState(false);
+  const [isFree, setIsFree] = useState(false);
   const { isAuthenticated } = useAuth();
   const toast = useToast();
   
@@ -108,6 +110,11 @@ export default function LearnCoursePage() {
       const progressData = await progressResponse.json();
 
       if (courseData.success && chaptersData.success && progressData.success) {
+        // Xác định xem có phải FREE course không
+        const isFreeFlag = courseData.data.isFree || false;
+        setIsFree(isFreeFlag);
+        setIsFreeCourseDetermined(true);
+
         const chapters = chaptersData.data.chapters;
         const completedLessons = progressData.data.completedLessons || [];
         
@@ -125,8 +132,8 @@ export default function LearnCoursePage() {
             isCompleted: completedLessons.includes(lesson.id),
             isFree: lesson.isPreview || false,
             order: lesson.order,
-            videoUrl: lesson.videoUrl, // Add video URL from API
-            videoDuration: lesson.videoDuration, // Add video duration from API
+            videoUrl: lesson.videoUrl,
+            videoDuration: lesson.videoDuration,
           }))
         }));
 
@@ -307,13 +314,13 @@ export default function LearnCoursePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-900">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-white">
         <div className="text-center">
           <div className="relative w-20 h-20 mx-auto mb-6">
-            <div className="absolute inset-0 border-4 border-gray-700 rounded-full"></div>
-            <div className="absolute inset-0 border-4 border-t-orange-500 border-r-yellow-500 rounded-full animate-spin"></div>
+            <div className="absolute inset-0 border-4 border-gray-300 rounded-full"></div>
+            <div className="absolute inset-0 border-4 border-t-indigo-600 border-r-indigo-400 rounded-full animate-spin"></div>
           </div>
-          <p className="text-lg font-medium text-gray-300 mb-2">Đang tải khóa học...</p>
+          <p className="text-lg font-medium text-gray-700 mb-2">Đang tải khóa học...</p>
           <p className="text-sm text-gray-500">Vui lòng đợi trong giây lát</p>
         </div>
       </div>
@@ -323,6 +330,21 @@ export default function LearnCoursePage() {
   if (!course) {
     return null;
   }
+
+  // Sử dụng dark theme cho PRO courses, light theme cho FREE courses
+  const isDarkTheme = !isFree;
+  const bgClass = isDarkTheme ? "bg-gray-900" : "bg-gradient-to-br from-gray-50 to-white";
+  const headerBgClass = isDarkTheme ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200";
+  const headerTextClass = isDarkTheme ? "text-gray-200" : "text-gray-900";
+  const sidebarBgClass = isDarkTheme ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200";
+  const buttonBgClass = isDarkTheme 
+    ? "text-orange-500 bg-transparent border-[2px] border-orange-500" 
+    : "text-indigo-600 bg-transparent border-[2px] border-indigo-600";
+  const buttonHoverClass = isDarkTheme
+    ? "hover:border-orange-500"
+    : "hover:border-indigo-600 hover:bg-indigo-50";
+  const contentBgClass = isDarkTheme ? "bg-gray-800" : "bg-white";
+  const textColorClass = isDarkTheme ? "text-gray-300" : "text-gray-700";
 
   const getLessonIcon = (type: string) => {
     switch (type) {
@@ -338,13 +360,13 @@ export default function LearnCoursePage() {
   };
 
   return (
-    <div className="h-screen bg-gray-900 flex flex-col overflow-hidden">
-      {/* Top Header Bar - Compact Dark */}
-      <div className="bg-gray-800 border-b border-gray-700 px-6 py-1.5 flex items-center justify-between flex-shrink-0">
+    <div className={`h-screen ${bgClass} flex flex-col overflow-hidden`}>
+      {/* Top Header Bar */}
+      <div className={`${headerBgClass} border-b px-6 py-1.5 flex items-center justify-between flex-shrink-0`}>
         <div className="flex items-center space-x-4 flex-1 min-w-0">
           <button
             onClick={() => router.push("/")}
-            className="flex items-center space-x-2 text-gray-300 hover:opacity-80 transition-opacity flex-shrink-0"
+            className={`flex items-center space-x-2 ${isDarkTheme ? 'text-gray-300 hover:opacity-80' : 'text-gray-600 hover:opacity-80'} transition-opacity flex-shrink-0`}
           >
             <img 
               src="/assets/img/logo.png" 
@@ -352,14 +374,14 @@ export default function LearnCoursePage() {
               className="h-8 w-8 rounded"
             />
           </button>
-          <div className="h-5 w-px bg-gray-600 flex-shrink-0"></div>
-          <div className="font-[900] text-gray-200 truncate" style={{ fontSize: '16px' }}>
+          <div className={`h-5 w-px ${isDarkTheme ? 'bg-gray-600' : 'bg-gray-300'} flex-shrink-0`}></div>
+          <div className={`font-[900] ${headerTextClass} truncate`} style={{ fontSize: '16px' }}>
             {course?.title}
           </div>
         </div>
 
         <div className="flex items-center space-x-4 flex-shrink-0">
-          {/* Circular Progress - Compact */}
+          {/* Circular Progress */}
           <div className="flex items-center space-x-2">
             <div className="relative w-10 h-10">
               <svg className="transform -rotate-90 w-10 h-10">
@@ -370,13 +392,13 @@ export default function LearnCoursePage() {
                   stroke="currentColor"
                   strokeWidth="3"
                   fill="none"
-                  className="text-gray-700"
+                  className={isDarkTheme ? "text-gray-700" : "text-gray-300"}
                 />
                 <circle
                   cx="20"
                   cy="20"
                   r="18"
-                  stroke="url(#gradient)"
+                  stroke={isDarkTheme ? "url(#gradient)" : "url(#gradientFree)"}
                   strokeWidth="3"
                   fill="none"
                   strokeDasharray={`${2 * Math.PI * 18}`}
@@ -389,31 +411,35 @@ export default function LearnCoursePage() {
                     <stop offset="0%" stopColor="#f97316" />
                     <stop offset="100%" stopColor="#facc15" />
                   </linearGradient>
+                  <linearGradient id="gradientFree" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#6366f1" />
+                    <stop offset="100%" stopColor="#8b5cf6" />
+                  </linearGradient>
                 </defs>
               </svg>
               <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-[10px] font-bold text-white">{course?.progress}%</span>
+                <span className="text-[10px] font-bold text-gray-600">{course?.progress}%</span>
               </div>
             </div>
             <div className="text-left hidden sm:block">
-              <p className="text-xs font-semibold text-gray-200">{course?.completedLessons}/{course?.totalLessons}</p>
-              <p className="text-[10px] text-gray-400">hoàn thành</p>
+              <p className={`text-xs font-semibold ${isDarkTheme ? 'text-gray-200' : 'text-gray-700'}`}>{course?.completedLessons}/{course?.totalLessons}</p>
+              <p className={`text-[10px] ${isDarkTheme ? 'text-gray-400' : 'text-gray-500'}`}>hoàn thành</p>
             </div>
           </div>
           
-          <button className="p-1.5 text-gray-400 hover:text-orange-400 hover:bg-gray-700 rounded-lg transition-colors flex-shrink-0">
+          <button className={`p-1.5 rounded-lg transition-colors flex-shrink-0 ${isDarkTheme ? 'text-gray-400 hover:text-orange-400 hover:bg-gray-700' : 'text-gray-500 hover:text-indigo-600 hover:bg-indigo-50'}`}>
             <Share2 className="w-4 h-4" />
           </button>
         </div>
       </div>
 
       <div className="flex-1 flex overflow-hidden">
-        {/* Main Content Area - Centered */}
-        <div className="flex-1 flex flex-col overflow-hidden bg-gray-900 justify-center items-center">
-          {/* Video and Lesson Content - Scrollable together */}
-          <div className="w-full flex-1 overflow-y-auto bg-gray-900 flex flex-col">
+        {/* Main Content Area */}
+        <div className="flex-1 flex flex-col overflow-hidden justify-center items-center">
+          {/* Video and Lesson Content */}
+          <div className={`w-full flex-1 overflow-y-auto ${isDarkTheme ? 'bg-gray-900' : 'bg-gradient-to-br from-gray-50 to-white'} flex flex-col`}>
             {/* Video Player Area */}
-            <div className="bg-black flex-shrink-0">
+            <div className={isDarkTheme ? "bg-black" : "bg-gray-100"}>
               <div className="max-w-6xl mx-auto px-4 py-4">
                 {currentLesson?.videoUrl ? (
                   <VideoPlayer
@@ -426,36 +452,35 @@ export default function LearnCoursePage() {
                       goToNextLesson();
                     }}
                     onProgress={(data) => {
-                      // Optional: Track progress in real-time
                       console.log(`Progress: ${data.currentTime}s / ${data.duration}s`);
                     }}
                     autoSave={true}
                   />
                 ) : (
                   // Placeholder when no video
-                  <div className="w-full aspect-video bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg flex items-center justify-center border border-gray-700">
+                  <div className={`w-full aspect-video ${isDarkTheme ? 'bg-gradient-to-br from-gray-800 to-gray-900 border-gray-700' : 'bg-gradient-to-br from-gray-200 to-gray-100 border-gray-300'} rounded-lg flex items-center justify-center border`}>
                     <div className="text-center">
-                      <PlayCircle className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-                      <p className="text-gray-400 text-lg font-medium">Chưa có video cho bài học này</p>
-                      <p className="text-gray-500 text-sm mt-2">Đây là bài học dạng đọc hoặc bài kiểm tra</p>
+                      <PlayCircle className={`w-16 h-16 mx-auto mb-4 ${isDarkTheme ? 'text-gray-600' : 'text-gray-400'}`} />
+                      <p className={`text-lg font-medium ${isDarkTheme ? 'text-gray-400' : 'text-gray-600'}`}>Chưa có video cho bài học này</p>
+                      <p className={`text-sm mt-2 ${isDarkTheme ? 'text-gray-500' : 'text-gray-500'}`}>Đây là bài học dạng đọc hoặc bài kiểm tra</p>
                     </div>
                   </div>
                 )}
               </div>
             </div>
 
-            {/* Lesson Content Section - Below Video */}
-            <div className="bg-gray-800 w-full">
+            {/* Lesson Content Section */}
+            <div className={contentBgClass}>
               <div className="max-w-4xl mx-auto p-6">
                 {/* Markdown Content */}
-                <div className="prose prose-invert max-w-none text-sm">
+                <div className={`prose ${isDarkTheme ? 'prose-invert' : 'prose'} max-w-none text-sm`}>
                   {markdownContent ? (
                     <ReactMarkdown remarkPlugins={[remarkGfm]}>
                       {markdownContent}
                     </ReactMarkdown>
                   ) : (
-                    <div className="bg-gray-700/30 rounded-lg p-6 border border-gray-600 text-gray-300">
-                      <p className="text-gray-400 italic">
+                    <div className={`rounded-lg p-6 border ${isDarkTheme ? 'bg-gray-700/30 border-gray-600 text-gray-300' : 'bg-indigo-50 border-indigo-200 text-gray-600'}`}>
+                      <p className={isDarkTheme ? "text-gray-400 italic" : "text-gray-600 italic"}>
                         Chọn một bài học để xem nội dung chi tiết.
                       </p>
                     </div>
@@ -465,15 +490,15 @@ export default function LearnCoursePage() {
             </div>
           </div>
 
-          {/* Bottom Control Bar - Centered Buttons */}
-          <div className="w-full bg-gray-800/70 backdrop-blur-sm border-t border-gray-700 px-6 py-4 flex items-center justify-between flex-shrink-0">
+          {/* Bottom Control Bar */}
+          <div className={`w-full ${isDarkTheme ? 'bg-gray-800/70 border-gray-700' : 'bg-white/70 border-gray-200'} backdrop-blur-sm border-t px-6 py-4 flex items-center justify-between flex-shrink-0`}>
             <div className="flex-1"></div>
 
             <div className="flex items-center gap-6">
               <button
                 onClick={goToPreviousLesson}
                 disabled={!course || !currentLesson || course.sections.flatMap(s => s.lessons)[0]?.id === currentLesson.id}
-                className="px-6 py-2 text-gray-200 bg-transparent border-[2px] border-gray-600 rounded-md transition-all font-medium text-sm flex items-center space-x-2 disabled:opacity-40 disabled:cursor-not-allowed hover:border-orange-500"
+                className={`px-6 py-2 ${isDarkTheme ? 'text-gray-200' : 'text-gray-700'} bg-transparent border-[2px] ${isDarkTheme ? 'border-gray-600 hover:border-orange-500' : 'border-gray-400 hover:border-indigo-600'} rounded-md transition-all font-medium text-sm flex items-center space-x-2 disabled:opacity-40 disabled:cursor-not-allowed`}
               >
                 <ChevronRight className="w-4 h-4 rotate-180" />
                 <span>Bài trước</span>
@@ -481,7 +506,10 @@ export default function LearnCoursePage() {
 
               <button
                 onClick={goToNextLesson}
-                className="px-6 py-2 text-orange-500 bg-transparent border-[2px] border-orange-500 rounded-md transition-all font-medium text-sm flex items-center space-x-2 hover:bg-gradient-to-r hover:from-orange-500 hover:to-yellow-500 hover:text-white hover:border-0"
+                className={`px-6 py-2 rounded-md transition-all font-medium text-sm flex items-center space-x-2 ${isDarkTheme 
+                  ? 'text-orange-500 bg-transparent border-[2px] border-orange-500 hover:bg-gradient-to-r hover:from-orange-500 hover:to-yellow-500 hover:text-white hover:border-0' 
+                  : 'text-white bg-gradient-to-r from-indigo-600 to-indigo-700 border-[2px] border-transparent hover:from-indigo-700 hover:to-indigo-800'
+                }`}
               >
                 <span>Bài tiếp theo</span>
                 <ChevronRight className="w-4 h-4" />
@@ -490,11 +518,11 @@ export default function LearnCoursePage() {
 
             <div className="flex-1 flex items-center justify-end gap-3">
               <div className="text-right">
-                <p className="text-sm font-medium text-gray-200 truncate max-w-xs">{currentLesson?.title}</p>
+                <p className={`text-sm font-medium truncate max-w-xs ${isDarkTheme ? 'text-gray-200' : 'text-gray-900'}`}>{currentLesson?.title}</p>
               </div>
               <button
                 onClick={() => setSidebarOpen(true)}
-                className="p-2 bg-gray-700/50 hover:bg-gray-600/70 text-white rounded-lg transition-colors z-10 backdrop-blur-sm"
+                className={`p-2 rounded-lg transition-colors z-10 backdrop-blur-sm ${isDarkTheme ? 'bg-gray-700/50 hover:bg-gray-600/70 text-white' : 'bg-indigo-100/50 hover:bg-indigo-200/70 text-indigo-600'}`}
               >
                 <Menu className="w-5 h-5" />
               </button>
@@ -502,7 +530,7 @@ export default function LearnCoursePage() {
           </div>
         </div>
 
-        {/* Sidebar - Course Content Modal (Right Side Overlay) */}
+        {/* Sidebar - Course Content Modal */}
         <>
           {/* Backdrop */}
           <div
@@ -515,23 +543,23 @@ export default function LearnCoursePage() {
           />
 
           {/* Modal Panel */}
-          <div className={`fixed right-0 top-0 h-screen w-96 bg-gray-800 border-l border-gray-700 flex flex-col overflow-hidden z-40 transition-all duration-300 ease-in-out ${
+          <div className={`fixed right-0 top-0 h-screen w-96 ${sidebarBgClass} border-l flex flex-col overflow-hidden z-40 transition-all duration-300 ease-in-out ${
             sidebarOpen
               ? 'translate-x-0 opacity-100 pointer-events-auto'
               : 'translate-x-full opacity-0 pointer-events-none'
           }`}>
-              <div className="p-5 border-b border-gray-700 flex-shrink-0">
+              <div className={`p-5 border-b ${isDarkTheme ? 'border-gray-700' : 'border-gray-200'} flex-shrink-0`}>
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-bold text-white">Nội dung khoá học</h2>
+                  <h2 className={`text-lg font-bold ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>Nội dung khoá học</h2>
                   <button
                     onClick={() => setSidebarOpen(false)}
-                    className="text-gray-400 hover:text-white transition-colors"
+                    className={`transition-colors ${isDarkTheme ? 'text-gray-400 hover:text-white' : 'text-gray-500 hover:text-gray-900'}`}
                   >
                     <X className="w-5 h-5" />
                   </button>
                 </div>
                 
-                <div className="flex items-center space-x-4 text-sm text-gray-400">
+                <div className={`flex items-center space-x-4 text-sm ${isDarkTheme ? 'text-gray-400' : 'text-gray-600'}`}>
                   <div className="flex items-center space-x-1">
                     <BookOpen className="w-4 h-4" />
                     <span>{course.totalLessons} bài học</span>
@@ -546,29 +574,29 @@ export default function LearnCoursePage() {
               {/* Sections & Lessons */}
               <div className="flex-1 overflow-y-auto custom-scrollbar">
                 {course.sections.map((section, sectionIndex) => (
-                  <div key={section.id} className="border-b border-gray-700">
+                  <div key={section.id} className={`border-b ${isDarkTheme ? 'border-gray-700' : 'border-gray-200'}`}>
                     <button
                       onClick={() => toggleSection(section.id)}
-                      className="w-full px-5 py-4 flex items-center justify-between hover:bg-gray-700/50 transition-colors"
+                      className={`w-full px-5 py-4 flex items-center justify-between transition-colors ${isDarkTheme ? 'hover:bg-gray-700/50' : 'hover:bg-gray-100'}`}
                     >
                       <div className="flex items-center space-x-3 flex-1">
-                        <span className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center text-sm font-bold text-orange-400">
+                        <span className={`flex-shrink-0 w-8 h-8 rounded-full ${isDarkTheme ? 'bg-gray-700 text-orange-400' : 'bg-indigo-100 text-indigo-600'} flex items-center justify-center text-sm font-bold`}>
                           {sectionIndex + 1}
                         </span>
                         <div className="text-left">
-                          <h3 className="font-semibold text-white text-sm">{section.title}</h3>
-                          <p className="text-xs text-gray-400">{section.lessons.length} bài học • {section.duration}</p>
+                          <h3 className={`font-semibold text-sm ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>{section.title}</h3>
+                          <p className={`text-xs ${isDarkTheme ? 'text-gray-400' : 'text-gray-500'}`}>{section.lessons.length} bài học • {section.duration}</p>
                         </div>
                       </div>
                       {expandedSections.has(section.id) ? (
-                        <ChevronDown className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                        <ChevronDown className={`w-5 h-5 flex-shrink-0 ${isDarkTheme ? 'text-gray-400' : 'text-gray-500'}`} />
                       ) : (
-                        <ChevronRight className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                        <ChevronRight className={`w-5 h-5 flex-shrink-0 ${isDarkTheme ? 'text-gray-400' : 'text-gray-500'}`} />
                       )}
                     </button>
 
                     {expandedSections.has(section.id) && (
-                      <div className="bg-gray-900/50">
+                      <div className={isDarkTheme ? "bg-gray-900/50" : "bg-gray-50"}>
                         {section.lessons.map((lesson, lessonIndex) => (
                           <button
                             key={lesson.id}
@@ -576,31 +604,39 @@ export default function LearnCoursePage() {
                               handleLessonClick(lesson);
                               setSidebarOpen(false);
                             }}
-                            className={`w-full px-5 py-3 flex items-center space-x-3 hover:bg-gray-700/30 transition-colors ${
-                              currentLesson?.id === lesson.id ? 'bg-orange-500/10 border-r-4 border-orange-500' : 'border-r-4 border-transparent'
+                            className={`w-full px-5 py-3 flex items-center space-x-3 transition-colors border-r-4 ${
+                              currentLesson?.id === lesson.id 
+                                ? isDarkTheme 
+                                  ? 'bg-orange-500/10 border-orange-500' 
+                                  : 'bg-indigo-50 border-indigo-600'
+                                : `${isDarkTheme ? 'hover:bg-gray-700/30 border-transparent' : 'hover:bg-gray-100 border-transparent'}`
                             }`}
                           >
-                            <span className="flex-shrink-0 text-xs font-medium text-gray-500 w-6">
+                            <span className={`flex-shrink-0 text-xs font-medium w-6 ${isDarkTheme ? 'text-gray-500' : 'text-gray-600'}`}>
                               {sectionIndex + 1}.{lessonIndex + 1}
                             </span>
                             <div className="flex-shrink-0">
                               {lesson.isCompleted ? (
-                                <CheckCircle className="w-5 h-5 text-green-400" />
+                                <CheckCircle className={`w-5 h-5 ${isDarkTheme ? 'text-green-400' : 'text-emerald-500'}`} />
                               ) : (
-                                <div className="w-5 h-5 rounded-full border-2 border-gray-600"></div>
+                                <div className={`w-5 h-5 rounded-full border-2 ${isDarkTheme ? 'border-gray-600' : 'border-gray-400'}`}></div>
                               )}
                             </div>
                             <div className="flex-1 text-left">
                               <p className={`text-sm font-medium ${
-                                currentLesson?.id === lesson.id ? 'text-orange-400' : 'text-gray-300'
+                                currentLesson?.id === lesson.id 
+                                  ? isDarkTheme 
+                                    ? 'text-orange-400' 
+                                    : 'text-indigo-600'
+                                  : isDarkTheme ? 'text-gray-300' : 'text-gray-700'
                               }`}>
                                 {lesson.title}
                               </p>
                               <div className="flex items-center space-x-2 mt-0.5">
-                                <div className="text-gray-500">
+                                <div className={isDarkTheme ? 'text-gray-500' : 'text-gray-500'}>
                                   {getLessonIcon(lesson.type)}
                                 </div>
-                                <span className="text-xs text-gray-500">{lesson.duration}</span>
+                                <span className={`text-xs ${isDarkTheme ? 'text-gray-500' : 'text-gray-600'}`}>{lesson.duration}</span>
                               </div>
                             </div>
                           </button>
