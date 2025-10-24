@@ -534,11 +534,11 @@ export default function LearnCoursePage() {
 
             <div className="flex-1 flex items-center justify-end gap-3">
               <div className="text-right">
-                <p className={`text-sm font-medium truncate max-w-xs ${isDarkTheme ? 'text-gray-200' : 'text-gray-900'}`}>{currentLesson?.title}</p>
+                <p className={`text-sm font-medium truncate max-w-xs ${isDarkTheme ? 'text-gray-300' : 'text-gray-900'}`}>{currentLesson?.title}</p>
               </div>
               <button
                 onClick={() => setSidebarOpen(true)}
-                className={`p-2 rounded-lg transition-colors z-10 backdrop-blur-sm ${isDarkTheme ? 'bg-gray-700/50 hover:bg-gray-600/70 text-white' : 'bg-indigo-100/50 hover:bg-indigo-200/70 text-indigo-600'}`}
+                className={`p-2 rounded-lg transition-colors z-10 backdrop-blur-sm ${isDarkTheme ? 'bg-gray-700/50 hover:bg-gray-600/70 text-gray-300' : 'bg-indigo-100/50 hover:bg-indigo-200/70 text-indigo-600'}`}
               >
                 <Menu className="w-5 h-5" />
               </button>
@@ -566,16 +566,16 @@ export default function LearnCoursePage() {
           }`}>
               <div className={`p-5 border-b ${isDarkTheme ? 'border-gray-700' : 'border-gray-200'} flex-shrink-0`}>
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className={`text-lg font-bold ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>Nội dung khoá học</h2>
+                  <h2 className={`text-lg font-bold ${isDarkTheme ? 'text-gray-200' : 'text-gray-900'}`}>Nội dung khoá học</h2>
                   <button
                     onClick={() => setSidebarOpen(false)}
-                    className={`transition-colors ${isDarkTheme ? 'text-gray-400 hover:text-white' : 'text-gray-500 hover:text-gray-900'}`}
+                    className={`transition-colors ${isDarkTheme ? 'text-gray-400 hover:text-gray-300' : 'text-gray-500 hover:text-gray-900'}`}
                   >
                     <X className="w-5 h-5" />
                   </button>
                 </div>
                 
-                <div className={`flex items-center space-x-4 text-sm ${isDarkTheme ? 'text-gray-400' : 'text-gray-600'}`}>
+                <div className={`flex items-center space-x-4 text-sm ${isDarkTheme ? 'text-gray-500' : 'text-gray-600'}`}>
                   <div className="flex items-center space-x-1">
                     <BookOpen className="w-4 h-4" />
                     <span>{course.totalLessons} bài học</span>
@@ -600,8 +600,8 @@ export default function LearnCoursePage() {
                           {sectionIndex + 1}
                         </span>
                         <div className="text-left">
-                          <h3 className={`font-semibold text-sm ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>{section.title}</h3>
-                          <p className={`text-xs ${isDarkTheme ? 'text-gray-400' : 'text-gray-500'}`}>{section.lessons.length} bài học • {section.duration}</p>
+                          <h3 className={`font-semibold text-sm ${isDarkTheme ? 'text-gray-200' : 'text-gray-900'}`}>{section.title}</h3>
+                          <p className={`text-xs ${isDarkTheme ? 'text-gray-500' : 'text-gray-500'}`}>{section.lessons.length} bài học • {section.duration}</p>
                         </div>
                       </div>
                       {expandedSections.has(section.id) ? (
@@ -644,15 +644,15 @@ export default function LearnCoursePage() {
                                   ? isDarkTheme 
                                     ? 'text-orange-400' 
                                     : 'text-indigo-600'
-                                  : isDarkTheme ? 'text-gray-300' : 'text-gray-700'
+                                  : isDarkTheme ? 'text-gray-400' : 'text-gray-700'
                               }`}>
                                 {lesson.title}
                               </p>
                               <div className="flex items-center space-x-2 mt-0.5">
-                                <div className={isDarkTheme ? 'text-gray-500' : 'text-gray-500'}>
+                                <div className={isDarkTheme ? 'text-gray-600' : 'text-gray-500'}>
                                   {getLessonIcon(lesson.type)}
                                 </div>
-                                <span className={`text-xs ${isDarkTheme ? 'text-gray-500' : 'text-gray-600'}`}>{lesson.duration}</span>
+                                <span className={`text-xs ${isDarkTheme ? 'text-gray-600' : 'text-gray-600'}`}>{lesson.duration}</span>
                               </div>
                             </div>
                           </button>
