@@ -13,6 +13,7 @@ import {
   Settings,
   Download,
   Share2,
+  AlertCircle,
 } from "lucide-react";
 
 interface VideoPlayerProps {
@@ -23,6 +24,61 @@ interface VideoPlayerProps {
   onProgress?: (data: { currentTime: number; duration: number }) => void;
   onComplete?: () => void;
   autoSave?: boolean; // Auto-save progress every 10 seconds
+}
+/**
+ * Convert YouTube URL to embed format
+ */
+function getYouTubeEmbedUrl(url: string): string {
+  let videoId = '';
+  
+  if (url.includes('youtu.be/')) {
+    videoId = url.split('youtu.be/')[1]?.split('?')[0];
+  } else if (url.includes('watch?v=')) {
+    videoId = url.split('v=')[1]?.split('&')[0];
+  }
+  
+  if (!videoId) return '';
+  return `https://www.youtube.com/embed/${videoId}`;
+}
+
+/**
+ * Detect video URL type and validate it
+ */
+function getVideoType(url: string | null): 'youtube' | 'vimeo' | 'file' | 'mock' | 'unknown' {
+  if (!url) return 'unknown';
+  if (url.startsWith('MOCK_PLACEHOLDER:')) return 'mock';
+  if (url.includes('youtube.com') || url.includes('youtu.be')) return 'youtube';
+  if (url.includes('vimeo.com')) return 'vimeo';
+  if (url.startsWith('data:') || url.startsWith('blob:')) return 'file';
+  if (url.startsWith('http://') || url.startsWith('https://')) return 'file';
+  return 'unknown';
+}
+
+/**
+ * Generate mock video placeholder (SVG-based, no actual recording needed)
+ * Used for FREE courses that don't have real videos yet
+ */
+function generateMockVideoDataUrl(title: string = "Bài học mẫu"): string {
+  // Create SVG-based placeholder that can be used as video background
+  const svg = `<svg width="1920" height="1080" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" style="stop-color:#1a1a1a;stop-opacity:1" />
+        <stop offset="100%" style="stop-color:#333333;stop-opacity:1" />
+      </linearGradient>
+    </defs>
+    <rect width="1920" height="1080" fill="url(#grad)"/>
+    <circle cx="960" cy="540" r="80" fill="#ff6b35" opacity="0.8"/>
+    <polygon points="920,500 920,580 1000,540" fill="#ffffff"/>
+    <text x="960" y="750" font-family="Arial" font-size="48" fill="#ffffff" text-anchor="middle" font-weight="bold">
+      ${title}
+    </text>
+    <text x="960" y="820" font-family="Arial" font-size="24" fill="#ff6b35" text-anchor="middle">
+      Placeholder Video
+    </text>
+  </svg>`;
+
+  return `data:image/svg+xml;base64,${btoa(svg)}`;
 }
 
 export default function VideoPlayer({
@@ -50,18 +106,96 @@ export default function VideoPlayer({
   const [bufferedPercent, setBufferedPercent] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [showAutoHideControls, setShowAutoHideControls] = useState(false);
-  const [isDraggingProgress, setIsDraggingProgress] = useState(false); // ✅ NEW
-  const [hoverTime, setHoverTime] = useState<number | null>(null); // ✅ Preview time
-  const [hoverPosition, setHoverPosition] = useState<number>(0); // ✅ Tooltip position
+  const [isDraggingProgress, setIsDraggingProgress] = useState(false);
+  const [hoverTime, setHoverTime] = useState<number | null>(null);
+  const [hoverPosition, setHoverPosition] = useState<number>(0);
+  const [videoError, setVideoError] = useState(false);
+  const [isMockVideo, setIsMockVideo] = useState(false);
+  const [processedVideoUrl, setProcessedVideoUrl] = useState<string | null>(videoUrl);
+  const [isYouTubeVideo, setIsYouTubeVideo] = useState(false);
+  const [youtubeEmbedUrl, setYoutubeEmbedUrl] = useState<string | null>(null);
 
   // Control hide timeout
   const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const progressBarRef = useRef<HTMLDivElement>(null); // ✅ Progress bar ref
+  const progressBarRef = useRef<HTMLDivElement>(null);
 
   // Auto-save progress
   const lastSaveTimeRef = useRef(0);
 
-  if (!videoUrl) {
+  // ✅ Process video URL: Handle MOCK_PLACEHOLDER, YouTube, convert to playable format
+  useEffect(() => {
+    if (!videoUrl) {
+      setProcessedVideoUrl(null);
+      setIsMockVideo(false);
+      setIsYouTubeVideo(false);
+      setYoutubeEmbedUrl(null);
+      setVideoError(false);
+      return;
+    }
+
+    const videoType = getVideoType(videoUrl);
+    setVideoError(false); // Reset error state when URL changes
+
+    // Handle mock video placeholder
+    if (videoType === 'mock') {
+      const title = videoUrl.replace("MOCK_PLACEHOLDER:", "");
+      const mockDataUrl = generateMockVideoDataUrl(title);
+      setProcessedVideoUrl(mockDataUrl);
+      setIsMockVideo(true);
+      setIsYouTubeVideo(false);
+      setYoutubeEmbedUrl(null);
+      console.log('📺 [VideoPlayer] Mock video:', title);
+      return;
+    }
+
+    // Handle YouTube URLs - use iframe embed instead of video element
+    if (videoType === 'youtube') {
+      const embedUrl = getYouTubeEmbedUrl(videoUrl);
+      if (embedUrl) {
+        setIsYouTubeVideo(true);
+        setYoutubeEmbedUrl(embedUrl);
+        setProcessedVideoUrl(null); // Don't use video element for YouTube
+        setIsMockVideo(false);
+        console.log('📺 [VideoPlayer] YouTube video (embed):', embedUrl);
+        setIsLoading(false);
+        return;
+      } else {
+        console.error('❌ [VideoPlayer] Invalid YouTube URL:', videoUrl);
+        setVideoError(true);
+        setIsYouTubeVideo(false);
+        return;
+      }
+    }
+
+    // Handle Vimeo URLs
+    if (videoType === 'vimeo') {
+      setProcessedVideoUrl(videoUrl);
+      setIsMockVideo(false);
+      setIsYouTubeVideo(false);
+      setYoutubeEmbedUrl(null);
+      console.log('📺 [VideoPlayer] Vimeo video:', videoUrl);
+      return;
+    }
+
+    // Handle file URLs or data URLs
+    if (videoType === 'file') {
+      setProcessedVideoUrl(videoUrl);
+      setIsMockVideo(false);
+      setIsYouTubeVideo(false);
+      setYoutubeEmbedUrl(null);
+      console.log('📺 [VideoPlayer] File video:', videoUrl);
+      return;
+    }
+
+    // Fallback: try to use as-is
+    console.warn('⚠️ [VideoPlayer] Unknown video type, attempting to play:', videoUrl);
+    setProcessedVideoUrl(videoUrl);
+    setIsMockVideo(false);
+    setIsYouTubeVideo(false);
+    setYoutubeEmbedUrl(null);
+  }, [videoUrl]);
+
+  if (!processedVideoUrl && !youtubeEmbedUrl) {
     return (
       <div className="w-full aspect-video bg-gray-900 rounded-lg flex items-center justify-center">
         <div className="text-center">
@@ -397,27 +531,105 @@ export default function VideoPlayer({
         }}
         onClick={handleVideoContainerClick}
       >
-        {/* Video Element */}
-        <video
-        ref={videoRef}
-        src={videoUrl}
-        className="w-full h-full block"
-        onPlay={() => setIsPlaying(true)}
-        onPause={() => setIsPlaying(false)}
-        onTimeUpdate={handleTimeUpdate}
-        onLoadedMetadata={handleLoadedMetadata}
-        onEnded={handleEnded}
-        onProgress={handleProgress}
-        onLoadStart={() => setIsLoading(true)}
-        onCanPlay={() => setIsLoading(false)}
-        crossOrigin="anonymous"
-        onMouseMove={(e) => e.stopPropagation()}
-      />
+      {/* YouTube Embed (instead of video element) */}
+      {isYouTubeVideo && youtubeEmbedUrl && (
+        <iframe
+          width="100%"
+          height="100%"
+          src={youtubeEmbedUrl}
+          title={title || 'Video'}
+          className="w-full h-full"
+          frameBorder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowFullScreen
+          onMouseMove={(e: any) => e.stopPropagation()}
+        />
+      )}
 
-      {/* Loading Indicator */}
-      {isLoading && (
+      {/* Video Element (for file, vimeo, mock videos) */}
+      {!isYouTubeVideo && processedVideoUrl && (
+        <video
+          ref={videoRef}
+          src={processedVideoUrl || undefined}
+          className="w-full h-full block"
+          onPlay={() => {
+            setIsPlaying(true);
+            console.log('▶️ [VideoPlayer] Video playing');
+          }}
+          onPause={() => {
+            setIsPlaying(false);
+            console.log('⏸️ [VideoPlayer] Video paused');
+          }}
+          onTimeUpdate={handleTimeUpdate}
+          onLoadedMetadata={handleLoadedMetadata}
+          onEnded={handleEnded}
+          onProgress={handleProgress}
+          onLoadStart={() => {
+            setIsLoading(true);
+            console.log('⏳ [VideoPlayer] Loading started');
+          }}
+          onCanPlay={() => {
+            setIsLoading(false);
+            console.log('✅ [VideoPlayer] Video ready to play');
+          }}
+          onError={(e: any) => {
+            setVideoError(true);
+            setIsLoading(false);
+            const error = videoRef.current?.error;
+            console.error('❌ [VideoPlayer] Error loading video:', {
+              code: error?.code,
+              message: error?.message,
+              url: processedVideoUrl,
+              videoType: getVideoType(videoUrl)
+            });
+          }}
+          crossOrigin="anonymous"
+          onMouseMove={(e: any) => e.stopPropagation()}
+        />
+      )}
+
+      {/* Loading Indicator - only for non-YouTube videos */}
+      {isLoading && !isYouTubeVideo && (
         <div className="absolute inset-0 flex items-center justify-center bg-black/50">
           <div className="w-8 h-8 border-4 border-gray-600 border-t-orange-500 rounded-full animate-spin"></div>
+        </div>
+      )}
+
+      {/* Video Error Indicator */}
+      {videoError && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black/70">
+          <div className="text-center">
+            <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
+            <p className="text-white text-lg font-semibold">Video failed to load</p>
+            <p className="text-gray-400 text-sm mt-2 max-w-md">
+              {videoUrl ? (
+                <>
+                  The video URL may be invalid or inaccessible.
+                  <br />
+                  <span className="text-xs text-gray-500 break-all mt-2 block">{videoUrl}</span>
+                </>
+              ) : (
+                'No video URL provided'
+              )}
+            </p>
+            <button
+              onClick={() => {
+                setVideoError(false);
+                setIsLoading(false);
+              }}
+              className="mt-4 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded transition-colors"
+            >
+              Retry
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Mock Video Badge */}
+      {isMockVideo && (
+        <div className="absolute top-4 left-4 bg-yellow-500/80 text-black px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-2 z-30">
+          <div className="w-2 h-2 bg-black rounded-full animate-pulse"></div>
+          Demo Video
         </div>
       )}
 
@@ -486,7 +698,8 @@ export default function VideoPlayer({
         )}
       </div>
 
-      {/* Controls Bar - Always visible */}
+      {/* Controls Bar - Always visible (hidden for YouTube) */}
+      {!isYouTubeVideo && (
       <div
         className={`controls-bar absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black via-black/80 to-transparent pt-8 pb-4 px-4 transition-opacity duration-200 ${
           showControls ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
@@ -594,8 +807,9 @@ export default function VideoPlayer({
             {/* Download */}
             <button
               onClick={() => {
+                if (!processedVideoUrl) return;
                 const link = document.createElement("a");
-                link.href = videoUrl;
+                link.href = processedVideoUrl;
                 link.download = title || "video.mp4";
                 link.click();
               }}
@@ -639,6 +853,15 @@ export default function VideoPlayer({
           </div>
         </div>
       </div>
+      )}
+
+      {/* YouTube Info - show when YouTube video active */}
+      {isYouTubeVideo && (
+        <div className="absolute top-4 left-4 bg-red-600/90 text-white px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-2 z-30">
+          <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+          YouTube Video (Use YouTube controls)
+        </div>
+      )}
       </div>
     </div>
   );
