@@ -457,12 +457,28 @@ export default function LearnCoursePage() {
                     autoSave={true}
                   />
                 ) : (
-                  // Placeholder when no video
+                  // Show message for non-video lessons (reading materials, quizzes)
                   <div className={`w-full aspect-video ${isDarkTheme ? 'bg-gradient-to-br from-gray-800 to-gray-900 border-gray-700' : 'bg-gradient-to-br from-gray-200 to-gray-100 border-gray-300'} rounded-lg flex items-center justify-center border`}>
                     <div className="text-center">
-                      <PlayCircle className={`w-16 h-16 mx-auto mb-4 ${isDarkTheme ? 'text-gray-600' : 'text-gray-400'}`} />
-                      <p className={`text-lg font-medium ${isDarkTheme ? 'text-gray-400' : 'text-gray-600'}`}>Chưa có video cho bài học này</p>
-                      <p className={`text-sm mt-2 ${isDarkTheme ? 'text-gray-500' : 'text-gray-500'}`}>Đây là bài học dạng đọc hoặc bài kiểm tra</p>
+                      {currentLesson?.type === 'reading' ? (
+                        <>
+                          <FileText className={`w-16 h-16 mx-auto mb-4 ${isDarkTheme ? 'text-gray-600' : 'text-gray-400'}`} />
+                          <p className={`text-lg font-medium ${isDarkTheme ? 'text-gray-400' : 'text-gray-600'}`}>Bài học dạng đọc</p>
+                          <p className={`text-sm mt-2 ${isDarkTheme ? 'text-gray-500' : 'text-gray-500'}`}>Xem nội dung bên dưới</p>
+                        </>
+                      ) : currentLesson?.type === 'quiz' ? (
+                        <>
+                          <Flag className={`w-16 h-16 mx-auto mb-4 ${isDarkTheme ? 'text-gray-600' : 'text-gray-400'}`} />
+                          <p className={`text-lg font-medium ${isDarkTheme ? 'text-gray-400' : 'text-gray-600'}`}>Bài kiểm tra</p>
+                          <p className={`text-sm mt-2 ${isDarkTheme ? 'text-gray-500' : 'text-gray-500'}`}>Xem câu hỏi bên dưới</p>
+                        </>
+                      ) : (
+                        <>
+                          <PlayCircle className={`w-16 h-16 mx-auto mb-4 ${isDarkTheme ? 'text-gray-600' : 'text-gray-400'}`} />
+                          <p className={`text-lg font-medium ${isDarkTheme ? 'text-gray-400' : 'text-gray-600'}`}>Đang cập nhật video</p>
+                          <p className={`text-sm mt-2 ${isDarkTheme ? 'text-gray-500' : 'text-gray-500'}`}>Video sẽ được thêm sớm</p>
+                        </>
+                      )}
                     </div>
                   </div>
                 )}

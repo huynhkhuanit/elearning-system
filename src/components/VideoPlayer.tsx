@@ -195,7 +195,8 @@ export default function VideoPlayer({
     setYoutubeEmbedUrl(null);
   }, [videoUrl]);
 
-  if (!processedVideoUrl && !youtubeEmbedUrl) {
+  // Show error if no video URL is available at all
+  if (!processedVideoUrl && !youtubeEmbedUrl && !videoUrl) {
     return (
       <div className="w-full aspect-video bg-gray-900 rounded-lg flex items-center justify-center">
         <div className="text-center">
@@ -533,17 +534,24 @@ export default function VideoPlayer({
       >
       {/* YouTube Embed (instead of video element) */}
       {isYouTubeVideo && youtubeEmbedUrl && (
-        <iframe
-          width="100%"
-          height="100%"
-          src={youtubeEmbedUrl}
-          title={title || 'Video'}
-          className="w-full h-full"
-          frameBorder="0"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowFullScreen
-          onMouseMove={(e: any) => e.stopPropagation()}
-        />
+        <div className="relative w-full h-full">
+          <iframe
+            width="100%"
+            height="100%"
+            src={youtubeEmbedUrl}
+            title={title || 'Video'}
+            className="w-full h-full"
+            frameBorder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowFullScreen
+            onMouseMove={(e: any) => e.stopPropagation()}
+          />
+          {/* YouTube Badge */}
+          <div className="absolute top-4 left-4 bg-red-600/90 text-white px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-2 z-30 pointer-events-none">
+            <div className="w-2 h-2 bg-white rounded-full"></div>
+            YouTube Video
+          </div>
+        </div>
       )}
 
       {/* Video Element (for file, vimeo, mock videos) */}
@@ -626,21 +634,22 @@ export default function VideoPlayer({
       )}
 
       {/* Mock Video Badge */}
-      {isMockVideo && (
+      {isMockVideo && !isYouTubeVideo && (
         <div className="absolute top-4 left-4 bg-yellow-500/80 text-black px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-2 z-30">
           <div className="w-2 h-2 bg-black rounded-full animate-pulse"></div>
           Demo Video
         </div>
       )}
 
-      {/* Play Button Overlay - visible when paused, clickable */}
-      {!isPlaying && (
+      {/* Play Button Overlay - visible when paused, clickable (only for non-YouTube videos) */}
+      {!isPlaying && !isYouTubeVideo && (
         <div className="absolute inset-0 flex items-center justify-center bg-black/20 pointer-events-none group-hover:bg-black/30 transition-colors">
           <Play className="w-16 h-16 text-white fill-white opacity-80" />
         </div>
       )}
 
-      {/* Progress Bar (always visible) */}
+      {/* Progress Bar (always visible, hidden for YouTube) */}
+      {!isYouTubeVideo && (
       <div
         ref={progressBarRef}
         data-progress-bar
@@ -697,6 +706,7 @@ export default function VideoPlayer({
           </div>
         )}
       </div>
+      )}
 
       {/* Controls Bar - Always visible (hidden for YouTube) */}
       {!isYouTubeVideo && (
@@ -853,14 +863,6 @@ export default function VideoPlayer({
           </div>
         </div>
       </div>
-      )}
-
-      {/* YouTube Info - show when YouTube video active */}
-      {isYouTubeVideo && (
-        <div className="absolute top-4 left-4 bg-red-600/90 text-white px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-2 z-30">
-          <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
-          YouTube Video (Use YouTube controls)
-        </div>
       )}
       </div>
     </div>
