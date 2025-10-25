@@ -147,7 +147,7 @@ export default function LessonQAModal({ isOpen, onClose, lessonId, lessonTitle, 
       <div className="fixed inset-0 bg-black/60 z-40 transition-opacity backdrop-blur-sm" onClick={onClose} />
 
       {/* Modal Panel - Left Side Full Screen Dark Theme */}
-      <div className="fixed left-0 top-0 bottom-0 z-50 w-full md:w-[640px] bg-slate-900 flex flex-col shadow-2xl animate-in slide-in-from-left duration-300 overflow-hidden">
+      <div className="fixed left-0 top-0 bottom-0 z-50 w-full md:w-[45%] bg-slate-900 flex flex-col shadow-2xl animate-in slide-in-from-left duration-300 overflow-hidden">
           {/* Header - Dark Theme */}
           <div className="bg-slate-800/50 border-b border-slate-700/50 px-6 py-4 flex-shrink-0">
             <div className="flex items-center justify-between mb-4">

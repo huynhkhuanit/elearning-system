@@ -260,7 +260,7 @@ export default function QuestionDetailModal({ isOpen, onClose, onBack, questionI
       <div className="fixed inset-0 bg-black/60 z-50 transition-opacity backdrop-blur-sm" onClick={onClose} />
 
       {/* Modal - Left Side */}
-      <div className="fixed left-0 top-0 bottom-0 z-50 w-full md:w-[640px] bg-slate-900 flex flex-col shadow-2xl animate-in slide-in-from-left duration-300 overflow-hidden"
+      <div className="fixed left-0 top-0 bottom-0 z-50 w-full md:w-[45%] bg-slate-900 flex flex-col shadow-2xl animate-in slide-in-from-left duration-300 overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
           {/* Header - Dark Theme */}
