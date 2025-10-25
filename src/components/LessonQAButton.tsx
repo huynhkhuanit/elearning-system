@@ -1,6 +1,6 @@
 "use client"
 
-import { MessageCircleQuestion } from "lucide-react"
+import { MessageSquare } from "lucide-react"
 import { useState } from "react"
 
 interface LessonQAButtonProps {
@@ -16,11 +16,11 @@ export default function LessonQAButton({ onClick, unreadCount = 0 }: LessonQABut
       onClick={onClick}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className="fixed left-6 bottom-6 z-50 bg-gradient-to-br from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white rounded-full p-4 shadow-2xl shadow-indigo-500/30 transition-all duration-300 transform hover:scale-110 group"
+      className="fixed left-6 bottom-6 z-50 bg-[#292D35] hover:bg-[#323840] text-indigo-400 hover:text-indigo-300 rounded-full p-3 shadow-lg transition-all duration-300 transform hover:scale-105 group"
       aria-label="Mở hỏi đáp"
     >
       <div className="relative">
-        <MessageCircleQuestion className="w-6 h-6" />
+        <MessageSquare className="w-5 h-5" />
         {unreadCount > 0 && (
           <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold animate-pulse">
             {unreadCount > 9 ? "9+" : unreadCount}
