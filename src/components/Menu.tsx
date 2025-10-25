@@ -61,7 +61,7 @@ export default function Menu() {
       style={{
         backgroundColor: '#ffffff',
         width: '96px',
-        zIndex: 40,
+        zIndex: 9999,
       }}
     >
       {/* Navigation Menu */}
