@@ -93,45 +93,62 @@ export default function CourseDetailPage() {
       return;
     }
 
+    // Prevent multiple enrollment attempts
+    if (enrolling) {
+      console.log("[COURSE DETAIL] Already enrolling, ignore");
+      return;
+    }
+
     try {
       setEnrolling(true);
+      console.log(`[COURSE DETAIL] Starting enrollment for: ${slug}`);
+      
       const response = await fetch(`/api/courses/${slug}/enroll`, {
         method: "POST",
         credentials: "include",
       });
 
+      // Parse response regardless of status
       const data = await response.json();
+      console.log(`[COURSE DETAIL] Enroll response status: ${response.status}`, data);
 
+      // Check if enrollment was successful
       if (data.success) {
-        toast.success(data.message);
-        if (data.data.upgradedToPro) {
-          // ✅ FIX: Better UX - wait a moment then reload for PRO upgrade
+        toast.success(data.message || "Đăng ký khóa học thành công!");
+        
+        // Handle PRO course upgrade
+        if (data.data?.upgradedToPro) {
+          console.log("[COURSE DETAIL] User upgraded to PRO, reloading page...");
           setTimeout(() => {
             window.location.reload();
           }, 1500);
         } else {
-          // Redirect to learning page
+          // Normal enrollment - redirect to learn page
+          console.log(`[COURSE DETAIL] Enrollment successful, redirecting to /learn/${slug}`);
           setTimeout(() => {
             router.push(`/learn/${slug}`);
           }, 1000);
         }
       } else {
-        // Check if already enrolled
+        // Handle error cases
         if (data.message && data.message.includes('đã đăng ký')) {
-          console.log(`[COURSE DETAIL] Already enrolled, navigating to learn page`);
-          // ✅ FIX: If already enrolled, navigate to learn page directly without error
+          // Already enrolled
+          console.log("[COURSE DETAIL] User already enrolled");
           toast.info("Bạn đã đăng ký khóa học này. Đang chuyển hướng...");
           setTimeout(() => {
             router.push(`/learn/${slug}`);
           }, 800);
         } else {
-          toast.error(data.message || "Không thể đăng ký khóa học");
+          // Other errors
+          console.error("[COURSE DETAIL] Enrollment failed:", data.message);
+          toast.error(data.message || "Không thể đăng ký khóa học. Vui lòng thử lại");
         }
       }
     } catch (error) {
-      console.error("Error enrolling:", error);
-      toast.error("Đã có lỗi xảy ra khi đăng ký");
+      console.error("[COURSE DETAIL] Exception during enrollment:", error);
+      toast.error("Đã có lỗi xảy ra khi đăng ký. Vui lòng thử lại");
     } finally {
+      // ✅ IMPORTANT: Always clear the enrolling state
       setEnrolling(false);
     }
   };

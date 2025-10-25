@@ -102,11 +102,14 @@ export default function CoursesSection() {
 
   const handleEnroll = async (course: Course) => {
     if (!isAuthenticated) {
-      // ✅ FIX: Show toast before redirect to make sure user sees the message
+      // ✅ FIX: Just show error message, don't auto-redirect (let user click to login)
       toast.error("Vui lòng đăng nhập để đăng ký khóa học");
-      setTimeout(() => {
-        router.push("/auth/login");
-      }, 500);
+      return;
+    }
+
+    // Prevent multiple enrollments
+    if (enrollingCourse) {
+      console.log("[COURSE] Already enrolling, ignore");
       return;
     }
 
@@ -114,7 +117,7 @@ export default function CoursesSection() {
       setEnrollingCourse(course.id);
       
       const courseType = course.isFree ? 'FREE' : 'PRO';
-      console.log(`[${courseType} COURSE] Enrolling in: ${course.slug}`);
+      console.log(`[${courseType} COURSE] Starting enrollment: ${course.slug}`);
       
       const response = await fetch(`/api/courses/${course.slug}/enroll`, {
         method: "POST",
@@ -128,44 +131,51 @@ export default function CoursesSection() {
         toast.success(data.message || "Đăng ký khóa học thành công!");
         
         // ✅ FIX: Handle PRO course upgrade
-        if (data.data.upgradedToPro) {
+        if (data.data?.upgradedToPro) {
+          console.log(`[${courseType} COURSE] User upgraded to PRO`);
+          // Reload page after delay to show new PRO status
           setTimeout(() => {
             window.location.reload();
           }, 1500);
         } else {
-          // Navigate to learning page
+          // Navigate to learn page after short delay
+          console.log(`[${courseType} COURSE] Enrollment successful, navigating to: /learn/${course.slug}`);
           setTimeout(() => {
-            console.log(`[${courseType} COURSE] Navigating to: /learn/${course.slug}`);
             router.push(`/learn/${course.slug}`);
           }, 800);
         }
       } else {
-        // ✅ FIX: Check if already enrolled and handle gracefully
+        // Handle specific error cases
         if (data.message && data.message.includes('đã đăng ký')) {
-          console.log(`[${courseType} COURSE] Already enrolled, navigating to learn page`);
+          console.log(`[${courseType} COURSE] Already enrolled`);
           toast.info("Bạn đã đăng ký khóa học này. Đang chuyển hướng...");
           setTimeout(() => {
             router.push(`/learn/${course.slug}`);
           }, 800);
         } else {
+          console.error(`[${courseType} COURSE] Enrollment failed:`, data.message);
           toast.error(data.message || "Không thể đăng ký khóa học");
-          setEnrollingCourse(null);
         }
       }
     } catch (error) {
-      console.error("[COURSE] Error enrolling:", error);
-      toast.error("Đã có lỗi xảy ra khi đăng ký");
+      console.error("[COURSE] Error during enrollment:", error);
+      toast.error("Đã có lỗi xảy ra khi đăng ký. Vui lòng thử lại");
+    } finally {
+      // ✅ IMPORTANT: Always clear the enrolling state
       setEnrollingCourse(null);
     }
   };
 
   const handleProCourseClick = async (course: Course) => {
     if (!isAuthenticated) {
-      // ✅ FIX: Show toast before redirect for consistency
+      // ✅ FIX: Just show error message, don't auto-redirect (let user handle login)
       toast.error("Vui lòng đăng nhập để tiếp tục");
-      setTimeout(() => {
-        router.push("/auth/login");
-      }, 500);
+      return;
+    }
+
+    // Prevent multiple checks
+    if (enrollingCourse) {
+      console.log("[PRO COURSE] Already checking, ignore");
       return;
     }
 
@@ -177,11 +187,15 @@ export default function CoursesSection() {
         credentials: "include",
       });
       
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+
       const data = await response.json();
       console.log(`[PRO COURSE] Course status:`, data);
 
       if (data.success) {
-        // ✅ FIXED: Now we check the isEnrolled field from API
+        // ✅ Check the isEnrolled field from API
         if (data.data.isEnrolled) {
           console.log(`[PRO COURSE] User already enrolled, navigating to learn page`);
           router.push(`/learn/${course.slug}`);
@@ -194,9 +208,11 @@ export default function CoursesSection() {
         router.push(`/courses/${course.slug}`);
       }
     } catch (error) {
-      console.error("[PRO COURSE] Error checking PRO course:", error);
+      console.error("[PRO COURSE] Error checking enrollment:", error);
+      // Fallback to course details page
       router.push(`/courses/${course.slug}`);
     } finally {
+      // ✅ IMPORTANT: Always clear the enrolling state
       setEnrollingCourse(null);
     }
   };
@@ -300,18 +316,25 @@ function CourseCard({
   const router = useRouter();
 
   const handleCardClick = () => {
+    // ✅ FIRST: Check authentication IMMEDIATELY (prevent navigation and API calls)
     if (!isAuthenticated) {
-      // ✅ FIX: Show toast before redirect to make it clear to user
+      console.log("[COURSE CARD] User not authenticated, showing error");
       toast.error("Vui lòng đăng nhập để tiếp tục");
-      router.push("/auth/login");
+      // Don't navigate - let user dismiss the toast
       return;
     }
 
-    // ✅ FIXED: Unified logic for both FREE and PRO courses
+    // ✅ SECOND: If authenticated, handle course type
     if (course.isFree) {
       // For FREE courses: check enrollment status from API
       console.log(`[FREE COURSE] Card clicked, checking enrollment: ${course.title}`);
-      // Call similar logic to PRO courses to check enrollment status
+      
+      // Prevent multiple clicks while checking
+      if (isEnrolling) {
+        console.log(`[FREE COURSE] Already processing, ignoring click`);
+        return;
+      }
+
       (async () => {
         try {
           const response = await fetch(`/api/courses/${course.slug}`, {
@@ -327,8 +350,8 @@ function CourseCard({
             onEnroll();
           }
         } catch (error) {
-          console.error("Error checking free course:", error);
-          onEnroll();
+          console.error("[FREE COURSE] Error checking enrollment:", error);
+          toast.error("Có lỗi xảy ra. Vui lòng thử lại");
         }
       })();
     } else {

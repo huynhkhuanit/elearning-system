@@ -64,7 +64,7 @@ export default function LearnCoursePage() {
   const [lessonContent, setLessonContent] = useState<string>("");
   const [isFreeCourseDetermined, setIsFreeCourseDetermined] = useState(false);
   const [isFree, setIsFree] = useState(false);
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
   const toast = useToast();
   
   // Update page title when course changes
@@ -74,22 +74,33 @@ export default function LearnCoursePage() {
   const markdownContent = useLessonContent(currentLesson?.id || "");
 
   useEffect(() => {
-    // Chỉ fetch data khi có slug, không kiểm tra auth ở đây
+    // ✅ FIX: Wait for auth check to complete before deciding what to do
+    if (authLoading) {
+      console.log("[LEARN PAGE] Auth is loading, waiting...");
+      return;
+    }
+
+    // ✅ FIX: Check authentication IMMEDIATELY before making any API calls
+    if (!isAuthenticated) {
+      console.log("[LEARN PAGE] User not authenticated, redirecting to login");
+      toast.error("Vui lòng đăng nhập để tiếp tục học");
+      router.push("/auth/login");
+      setLoading(false);
+      return;
+    }
+
+    // Only fetch data when slug exists and user is authenticated
     if (slug) {
       fetchCourseData();
     }
-  }, [slug]);
+  }, [slug, isAuthenticated, authLoading]);
 
   const fetchCourseData = async () => {
     try {
       setLoading(true);
       
-      // ✅ FIX: Check authentication FIRST before making protected API calls
-      if (!isAuthenticated) {
-        toast.error("Vui lòng đăng nhập để tiếp tục học");
-        router.push("/auth/login");
-        return;
-      }
+      // ✅ FIX: No need to check authentication here anymore
+      // Authentication is already checked in useEffect
 
       // Fetch course details, chapters, and progress
       const [courseResponse, chaptersResponse, progressResponse] = await Promise.all([
