@@ -82,7 +82,8 @@ export default function Modal({
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         transition={{ duration: 0.2 }}
-        className="fixed inset-0 z-[5000] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 pointer-events-auto"
+        className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 pointer-events-auto"
+        style={{ position: 'fixed', zIndex: 9999, isolation: 'isolate' }}
         onClick={handleBackdropClick}
         role="dialog"
         aria-modal="true"

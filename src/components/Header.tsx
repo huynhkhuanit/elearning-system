@@ -66,7 +66,7 @@ export default function Header() {
   };
 
   return (
-    <header className="border-b border-border sticky top-0 z-50" style={{ backgroundColor: '#ffffff' }}>
+    <header className="sticky top-0 z-30 w-full bg-white border-b border-gray-200">
       <div className="mx-auto px-[28px] h-[66px] flex items-center justify-between" style={{ backgroundColor: '#ffffff' }}>
         {/* Logo Section */}
         <div className="flex items-center gap-3">
@@ -136,12 +136,12 @@ export default function Header() {
                   className="flex items-center gap-2 px-4 py-2 rounded-full hover:bg-gray-100 transition-all duration-200"
                 >
                   <AvatarWithProBadge
-                    avatarUrl={user.avatar_url}
-                    fullName={user.full_name}
-                    isPro={user.membership_type === 'PRO'}
+                    avatarUrl={user?.avatar_url}
+                    fullName={user?.full_name}
+                    isPro={user?.membership_type === 'PRO'}
                     size="xs"
                   />
-                  <span className="text-sm font-medium text-gray-700">{user.username}</span>
+                  <span className="text-sm font-medium text-gray-700">{user?.username}</span>
                 </button>
 
                 <AnimatePresence>
@@ -159,17 +159,17 @@ export default function Header() {
                           {/* Avatar Column */}
                           <div className="flex-shrink-0">
                             <AvatarWithProBadge
-                              avatarUrl={user.avatar_url}
-                              fullName={user.full_name}
-                              isPro={user.membership_type === 'PRO'}
+                              avatarUrl={user?.avatar_url}
+                              fullName={user?.full_name}
+                              isPro={user?.membership_type === 'PRO'}
                               size="md"
                             />
                           </div>
 
                           {/* Info Column */}
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm font-semibold text-gray-900 truncate">{user.full_name}</p>
-                            <p style={{ fontSize: '14px' }} className="text-gray-500 truncate">@{user.username}</p>
+                            <p className="text-sm font-semibold text-gray-900 truncate">{user?.full_name}</p>
+                            <p style={{ fontSize: '14px' }} className="text-gray-500 truncate">@{user?.username}</p>
                           </div>
                         </div>
                       </div>
@@ -177,7 +177,7 @@ export default function Header() {
                       {/* Main Menu Items */}
                       <div className="py-1">
                         <Link
-                          href={`/${user.username}`}
+                          href={`/${user?.username}`}
                           className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                           onClick={() => setShowUserMenu(false)}
                         >

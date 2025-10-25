@@ -61,7 +61,8 @@ export default function Menu() {
       style={{
         backgroundColor: '#ffffff',
         width: '96px',
-        zIndex: 9999,
+        zIndex: 10,
+        pointerEvents: 'auto',
       }}
     >
       {/* Navigation Menu */}
@@ -79,7 +80,7 @@ export default function Menu() {
               href={item.href}
               className={`
                 group flex flex-col items-center justify-center w-full py-3 px-2 rounded-lg
-                transition-all duration-200 cursor-pointer
+                transition-all duration-200 cursor-pointer pointer-events-auto
                 ${isActive
                   ? isAdminItem 
                     ? 'bg-purple-500/15 text-purple-600'

@@ -33,9 +33,15 @@ const socialLinks = [
 
 export default function Footer() {
   return (
-    <footer className="bg-gray-900 text-white relative z-[3000]">
-      {/* ✅ Footer z-[3000]: Menu (9999) > Modal (5000) > Footer (3000) > Content */}
-      <div className="max-w-7xl mx-auto px-6 py-8">
+    <footer 
+      className="bg-gray-900 text-white pointer-events-none"
+      style={{
+        position: 'static',
+        zIndex: 30,
+      }}
+    >
+      {/* ✅ Footer z-30: Modal (9999) > Header (30) = Footer (30) > Menu (10) */}
+      <div className="max-w-7xl mx-auto px-6 py-8 pointer-events-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {/* Company Info */}
           <div className="space-y-4">
@@ -134,7 +140,7 @@ export default function Footer() {
         </div>
 
         {/* Bottom Section */}
-        <div className="border-t border-gray-800 mt-8 pt-6 flex flex-col md:flex-row items-center justify-between">
+        <div className="border-t border-gray-800 mt-8 pt-6 flex flex-col md:flex-row items-center justify-between pointer-events-auto">
           <div className="text-gray-400 text-xs mb-3 md:mb-0">
             © 2026 DHV LearnX. All rights reserved.
           </div>

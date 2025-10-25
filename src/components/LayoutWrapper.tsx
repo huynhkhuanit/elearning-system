@@ -31,7 +31,10 @@ export default function LayoutWrapper({ children }: { children: ReactNode }) {
     <div style={{ backgroundColor: '#ffffff', minHeight: '100vh' }}>
       <Header />
       <Menu />
-      <main style={{ backgroundColor: '#ffffff', marginLeft: '96px' }}>
+      <main style={{ 
+        backgroundColor: '#ffffff', 
+        marginLeft: '96px',
+      }}>
         {children}
       </main>
       <Footer />
