@@ -14,6 +14,10 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/contexts/ToastContext";
 import { usePageTitle, useLessonContent } from "@/lib/hooks";
 import VideoPlayer from "@/components/VideoPlayer";
+import LessonQAButton from "@/components/LessonQAButton";
+import LessonQAModal from "@/components/LessonQAModal";
+import AskQuestionModal from "@/components/AskQuestionModal";
+import QuestionDetailModal from "@/components/QuestionDetailModal";
 import "@/app/markdown.css";
 
 interface Lesson {
@@ -64,6 +68,9 @@ export default function LearnCoursePage() {
   const [lessonContent, setLessonContent] = useState<string>("");
   const [isFreeCourseDetermined, setIsFreeCourseDetermined] = useState(false);
   const [isFree, setIsFree] = useState(false);
+  const [isQAModalOpen, setIsQAModalOpen] = useState(false);
+  const [isAskQuestionModalOpen, setIsAskQuestionModalOpen] = useState(false);
+  const [selectedQuestionId, setSelectedQuestionId] = useState<string | null>(null);
   const { isAuthenticated, isLoading: authLoading } = useAuth();
   const toast = useToast();
   
@@ -72,6 +79,23 @@ export default function LearnCoursePage() {
   
   // Load markdown content when current lesson changes
   const markdownContent = useLessonContent(currentLesson?.id || "");
+
+  // Handle hash changes for question navigation
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash;
+      if (hash.startsWith("#question-")) {
+        const questionId = hash.replace("#question-", "");
+        setSelectedQuestionId(questionId);
+        setIsQAModalOpen(false);
+      }
+    };
+
+    window.addEventListener("hashchange", handleHashChange);
+    handleHashChange(); // Check initial hash
+
+    return () => window.removeEventListener("hashchange", handleHashChange);
+  }, []);
 
   useEffect(() => {
     // ✅ FIX: Wait for auth check to complete before deciding what to do
@@ -696,6 +720,59 @@ export default function LearnCoursePage() {
             </div>
         </>
       </div>
+
+      {/* Q&A Button - Fixed on bottom left */}
+      {currentLesson && (
+        <LessonQAButton onClick={() => setIsQAModalOpen(true)} />
+      )}
+
+      {/* Q&A Modal */}
+      {currentLesson && (
+        <LessonQAModal
+          isOpen={isQAModalOpen}
+          onClose={() => setIsQAModalOpen(false)}
+          lessonId={currentLesson.id}
+          lessonTitle={currentLesson.title}
+          onAskQuestion={() => {
+            setIsQAModalOpen(false);
+            setIsAskQuestionModalOpen(true);
+          }}
+        />
+      )}
+
+      {/* Ask Question Modal */}
+      {currentLesson && (
+        <AskQuestionModal
+          isOpen={isAskQuestionModalOpen}
+          onClose={() => setIsAskQuestionModalOpen(false)}
+          lessonId={currentLesson.id}
+          lessonTitle={currentLesson.title}
+          onQuestionCreated={() => {
+            setIsAskQuestionModalOpen(false);
+            setIsQAModalOpen(true);
+          }}
+        />
+      )}
+
+      {/* Question Detail Modal */}
+      {selectedQuestionId && (
+        <QuestionDetailModal
+          isOpen={!!selectedQuestionId}
+          onClose={() => {
+            setSelectedQuestionId(null);
+            window.location.hash = "";
+          }}
+          questionId={selectedQuestionId}
+          onUpdate={() => {
+            // Refresh questions list if modal is open
+            if (isQAModalOpen) {
+              // This will trigger a re-fetch in LessonQAModal
+              setIsQAModalOpen(false);
+              setTimeout(() => setIsQAModalOpen(true), 100);
+            }
+          }}
+        />
+      )}
     </div>
   );
 }
