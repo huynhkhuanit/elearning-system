@@ -84,6 +84,13 @@ export default function LearnCoursePage() {
     try {
       setLoading(true);
       
+      // ✅ FIX: Check authentication FIRST before making protected API calls
+      if (!isAuthenticated) {
+        toast.error("Vui lòng đăng nhập để tiếp tục học");
+        router.push("/auth/login");
+        return;
+      }
+
       // Fetch course details, chapters, and progress
       const [courseResponse, chaptersResponse, progressResponse] = await Promise.all([
         fetch(`/api/courses/${slug}`, { credentials: "include" }),
@@ -91,90 +98,103 @@ export default function LearnCoursePage() {
         fetch(`/api/courses/${slug}/progress`, { credentials: "include" })
       ]);
 
-      // Kiểm tra authentication status
+      // ✅ FIX: Handle authentication error (401)
       if (progressResponse.status === 401) {
-        toast.error("Vui lòng đăng nhập để tiếp tục");
+        console.log("[LEARN PAGE] User not authenticated (401)");
+        toast.error("Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại");
         router.push("/auth/login");
         return;
       }
 
-      // Kiểm tra enrollment status
+      // ✅ FIX: Handle enrollment error (403) - user is authenticated but not enrolled
       if (progressResponse.status === 403) {
-        toast.error("Bạn chưa đăng ký khóa học này");
+        console.log("[LEARN PAGE] User not enrolled in course (403)");
+        toast.error("Bạn chưa đăng ký khóa học này. Vui lòng đăng ký để tiếp tục");
         router.push(`/courses/${slug}`);
         return;
       }
 
+      // Parse responses
       const courseData = await courseResponse.json();
       const chaptersData = await chaptersResponse.json();
       const progressData = await progressResponse.json();
 
-      if (courseData.success && chaptersData.success && progressData.success) {
-        // Xác định xem có phải FREE course không
-        const isFreeFlag = courseData.data.isFree || false;
-        setIsFree(isFreeFlag);
-        setIsFreeCourseDetermined(true);
+      // ✅ FIX: Validate all responses are successful
+      if (!courseData.success || !chaptersData.success || !progressData.success) {
+        console.error("[LEARN PAGE] API response not successful:", {
+          courseSuccess: courseData.success,
+          chaptersSuccess: chaptersData.success,
+          progressSuccess: progressData.success
+        });
+        toast.error("Không thể tải khóa học. Vui lòng thử lại");
+        return;
+      }
 
-        const chapters = chaptersData.data.chapters;
-        const completedLessons = progressData.data.completedLessons || [];
-        
-        // Transform chapters data to match UI structure
-        const sections: Section[] = chapters.map((chapter: any) => ({
-          id: chapter.id,
-          title: chapter.title,
-          duration: chapter.duration,
-          order: chapter.order,
-          lessons: chapter.lessons.map((lesson: any) => ({
-            id: lesson.id,
-            title: lesson.title,
-            duration: lesson.duration,
-            type: lesson.type as "video" | "reading" | "quiz",
-            isCompleted: completedLessons.includes(lesson.id),
-            isFree: lesson.isPreview || false,
-            order: lesson.order,
-            videoUrl: lesson.videoUrl,
-            videoDuration: lesson.videoDuration,
-          }))
-        }));
+      // Determine if it's a FREE course
+      const isFreeFlag = courseData.data.isFree || false;
+      setIsFree(isFreeFlag);
+      setIsFreeCourseDetermined(true);
 
-        // Calculate totals
-        const totalLessons = sections.reduce((acc, section) => acc + section.lessons.length, 0);
-        const completedCount = sections.reduce((acc, section) => 
-          acc + section.lessons.filter(l => l.isCompleted).length, 0
-        );
+      const chapters = chaptersData.data.chapters;
+      const completedLessons = progressData.data.completedLessons || [];
+      
+      // Transform chapters data to match UI structure
+      const sections: Section[] = chapters.map((chapter: any) => ({
+        id: chapter.id,
+        title: chapter.title,
+        duration: chapter.duration,
+        order: chapter.order,
+        lessons: chapter.lessons.map((lesson: any) => ({
+          id: lesson.id,
+          title: lesson.title,
+          duration: lesson.duration,
+          type: lesson.type as "video" | "reading" | "quiz",
+          isCompleted: completedLessons.includes(lesson.id),
+          isFree: lesson.isPreview || false,
+          order: lesson.order,
+          videoUrl: lesson.videoUrl,
+          videoDuration: lesson.videoDuration,
+        }))
+      }));
 
-        const courseWithProgress: CourseData = {
-          id: courseData.data.id,
-          title: courseData.data.title,
-          subtitle: courseData.data.subtitle,
-          slug: courseData.data.slug,
-          instructor: courseData.data.instructor,
-          progress: progressData.data.progress || 0,
-          sections: sections,
-          totalLessons,
-          completedLessons: completedCount,
-          totalDuration: courseData.data.duration
-        };
+      // Calculate totals
+      const totalLessons = sections.reduce((acc, section) => acc + section.lessons.length, 0);
+      const completedCount = sections.reduce((acc, section) => 
+        acc + section.lessons.filter(l => l.isCompleted).length, 0
+      );
 
-        setCourse(courseWithProgress);
-        
-        // Set first uncompleted lesson or first lesson as current
-        const firstUncompletedLesson = sections
-          .flatMap(s => s.lessons)
-          .find(l => !l.isCompleted) || sections[0]?.lessons[0];
-        
-        if (firstUncompletedLesson) {
-          setCurrentLesson(firstUncompletedLesson);
-        }
-        
-        // Expand first section by default
-        if (sections.length > 0) {
-          setExpandedSections(new Set([sections[0].id]));
-        }
+      const courseWithProgress: CourseData = {
+        id: courseData.data.id,
+        title: courseData.data.title,
+        subtitle: courseData.data.subtitle,
+        slug: courseData.data.slug,
+        instructor: courseData.data.instructor,
+        progress: progressData.data.progress || 0,
+        sections: sections,
+        totalLessons,
+        completedLessons: completedCount,
+        totalDuration: courseData.data.duration
+      };
+
+      setCourse(courseWithProgress);
+      
+      // Set first uncompleted lesson or first lesson as current
+      const firstUncompletedLesson = sections
+        .flatMap(s => s.lessons)
+        .find(l => !l.isCompleted) || sections[0]?.lessons[0];
+      
+      if (firstUncompletedLesson) {
+        setCurrentLesson(firstUncompletedLesson);
+      }
+      
+      // Expand first section by default
+      if (sections.length > 0) {
+        setExpandedSections(new Set([sections[0].id]));
       }
     } catch (error) {
-      console.error("Error fetching course:", error);
-      toast.error("Không thể tải khóa học");
+      console.error("[LEARN PAGE] Error fetching course:", error);
+      toast.error("Đã có lỗi xảy ra khi tải khóa học. Vui lòng thử lại");
+      // ✅ FIX: Redirect to home instead of courses page when there's an error
       router.push("/");
     } finally {
       setLoading(false);

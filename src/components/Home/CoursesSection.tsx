@@ -102,19 +102,19 @@ export default function CoursesSection() {
 
   const handleEnroll = async (course: Course) => {
     if (!isAuthenticated) {
+      // ✅ FIX: Show toast before redirect to make sure user sees the message
       toast.error("Vui lòng đăng nhập để đăng ký khóa học");
-      router.push("/auth/login");
+      setTimeout(() => {
+        router.push("/auth/login");
+      }, 500);
       return;
     }
 
     try {
       setEnrollingCourse(course.id);
       
-      if (course.isFree) {
-        console.log(`[FREE COURSE] Enrolling in: ${course.slug}`);
-      } else {
-        console.log(`[PRO COURSE] Enrolling in: ${course.slug}`);
-      }
+      const courseType = course.isFree ? 'FREE' : 'PRO';
+      console.log(`[${courseType} COURSE] Enrolling in: ${course.slug}`);
       
       const response = await fetch(`/api/courses/${course.slug}/enroll`, {
         method: "POST",
@@ -122,29 +122,38 @@ export default function CoursesSection() {
       });
 
       const data = await response.json();
-      console.log(`[${course.isFree ? 'FREE' : 'PRO'} COURSE] Enroll response:`, data);
+      console.log(`[${courseType} COURSE] Enroll response:`, data);
 
       if (data.success) {
         toast.success(data.message || "Đăng ký khóa học thành công!");
         
-        // Chuyển hướng đến trang học sau một chút delay
-        setTimeout(() => {
-          console.log(`[${course.isFree ? 'FREE' : 'PRO'} COURSE] Navigating to: /learn/${course.slug}`);
-          router.push(`/learn/${course.slug}`);
-        }, 800);
+        // ✅ FIX: Handle PRO course upgrade
+        if (data.data.upgradedToPro) {
+          setTimeout(() => {
+            window.location.reload();
+          }, 1500);
+        } else {
+          // Navigate to learning page
+          setTimeout(() => {
+            console.log(`[${courseType} COURSE] Navigating to: /learn/${course.slug}`);
+            router.push(`/learn/${course.slug}`);
+          }, 800);
+        }
       } else {
-        // Check if already enrolled
+        // ✅ FIX: Check if already enrolled and handle gracefully
         if (data.message && data.message.includes('đã đăng ký')) {
-          console.log(`[${course.isFree ? 'FREE' : 'PRO'} COURSE] Already enrolled, navigating to learn page`);
-          // Nếu đã enrolled, navigate đến learn page thay vì show error
-          router.push(`/learn/${course.slug}`);
+          console.log(`[${courseType} COURSE] Already enrolled, navigating to learn page`);
+          toast.info("Bạn đã đăng ký khóa học này. Đang chuyển hướng...");
+          setTimeout(() => {
+            router.push(`/learn/${course.slug}`);
+          }, 800);
         } else {
           toast.error(data.message || "Không thể đăng ký khóa học");
           setEnrollingCourse(null);
         }
       }
     } catch (error) {
-      console.error("Error enrolling:", error);
+      console.error("[COURSE] Error enrolling:", error);
       toast.error("Đã có lỗi xảy ra khi đăng ký");
       setEnrollingCourse(null);
     }
@@ -152,7 +161,11 @@ export default function CoursesSection() {
 
   const handleProCourseClick = async (course: Course) => {
     if (!isAuthenticated) {
-      router.push("/auth/login");
+      // ✅ FIX: Show toast before redirect for consistency
+      toast.error("Vui lòng đăng nhập để tiếp tục");
+      setTimeout(() => {
+        router.push("/auth/login");
+      }, 500);
       return;
     }
 
@@ -177,11 +190,11 @@ export default function CoursesSection() {
           router.push(`/courses/${course.slug}`);
         }
       } else {
-        console.log(`[PRO COURSE] Error checking status, navigating to course details`);
+        console.log(`[PRO COURSE] Error checking status, navigating to course details as fallback`);
         router.push(`/courses/${course.slug}`);
       }
     } catch (error) {
-      console.error("Error checking PRO course:", error);
+      console.error("[PRO COURSE] Error checking PRO course:", error);
       router.push(`/courses/${course.slug}`);
     } finally {
       setEnrollingCourse(null);
@@ -283,10 +296,13 @@ function CourseCard({
 }) {
   const levelDisplay = LEVEL_MAP[course.level] || "Cơ bản";
   const { isAuthenticated } = useAuth();
+  const toast = useToast();
   const router = useRouter();
 
   const handleCardClick = () => {
     if (!isAuthenticated) {
+      // ✅ FIX: Show toast before redirect to make it clear to user
+      toast.error("Vui lòng đăng nhập để tiếp tục");
       router.push("/auth/login");
       return;
     }

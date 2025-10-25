@@ -85,8 +85,11 @@ export default function CourseDetailPage() {
 
   const handleEnroll = async () => {
     if (!isAuthenticated) {
+      // ✅ FIX: Show toast BEFORE redirect so user sees the message
       toast.error("Vui lòng đăng nhập để đăng ký khóa học");
-      router.push("/auth/login");
+      setTimeout(() => {
+        router.push("/auth/login");
+      }, 500);
       return;
     }
 
@@ -102,6 +105,7 @@ export default function CourseDetailPage() {
       if (data.success) {
         toast.success(data.message);
         if (data.data.upgradedToPro) {
+          // ✅ FIX: Better UX - wait a moment then reload for PRO upgrade
           setTimeout(() => {
             window.location.reload();
           }, 1500);
@@ -115,7 +119,8 @@ export default function CourseDetailPage() {
         // Check if already enrolled
         if (data.message && data.message.includes('đã đăng ký')) {
           console.log(`[COURSE DETAIL] Already enrolled, navigating to learn page`);
-          // Nếu đã enrolled, navigate đến learn page thay vì show error
+          // ✅ FIX: If already enrolled, navigate to learn page directly without error
+          toast.info("Bạn đã đăng ký khóa học này. Đang chuyển hướng...");
           setTimeout(() => {
             router.push(`/learn/${slug}`);
           }, 800);
