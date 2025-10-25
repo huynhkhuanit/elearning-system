@@ -737,6 +737,10 @@ export default function LearnCoursePage() {
             setIsQAModalOpen(false);
             setIsAskQuestionModalOpen(true);
           }}
+          onQuestionClick={(questionId) => {
+            setSelectedQuestionId(questionId);
+            setIsQAModalOpen(false);
+          }}
         />
       )}
 
@@ -745,6 +749,10 @@ export default function LearnCoursePage() {
         <AskQuestionModal
           isOpen={isAskQuestionModalOpen}
           onClose={() => setIsAskQuestionModalOpen(false)}
+          onBack={() => {
+            setIsAskQuestionModalOpen(false);
+            setIsQAModalOpen(true);
+          }}
           lessonId={currentLesson.id}
           lessonTitle={currentLesson.title}
           onQuestionCreated={() => {
@@ -761,6 +769,11 @@ export default function LearnCoursePage() {
           onClose={() => {
             setSelectedQuestionId(null);
             window.location.hash = "";
+          }}
+          onBack={() => {
+            setSelectedQuestionId(null);
+            window.location.hash = "";
+            setIsQAModalOpen(true);
           }}
           questionId={selectedQuestionId}
           onUpdate={() => {
