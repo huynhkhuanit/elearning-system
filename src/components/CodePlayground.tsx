@@ -190,21 +190,25 @@ export default function CodePlayground({ isOpen, onClose, lessonId, initialLangu
     `
   }, [code, activeLanguage])
 
+  // Single unified effect for live code execution (like Live Server)
   useEffect(() => {
-    if (iframeRef.current && showPreview && activeLanguage !== "cpp") {
-      const iframe = iframeRef.current
+    if (!isOpen || activeLanguage === "cpp" || !showPreview) return
 
-      // Clear console logs if preserve log is off
+    // Debounce for smooth typing experience
+    const timer = setTimeout(() => {
+      // Clear console logs before each code run if preserve log is OFF
       if (!preserveLog) {
         setConsoleLogs([])
       }
-
-      // Update iframe content smoothly
-      if (iframe.contentWindow) {
-        iframe.srcdoc = previewHTML
+      
+      // Execute code
+      if (iframeRef.current?.contentWindow) {
+        iframeRef.current.srcdoc = previewHTML
       }
-    }
-  }, [previewHTML, showPreview, activeLanguage])
+    }, 300) // 300ms debounce - fast enough for real-time feel
+
+    return () => clearTimeout(timer)
+  }, [code, previewHTML, isOpen, activeLanguage, showPreview, preserveLog])
 
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
@@ -215,17 +219,12 @@ export default function CodePlayground({ isOpen, onClose, lessonId, initialLangu
           timestamp: Date.now(),
         }
         setConsoleLogs((prev) => [...prev, newLog])
-
-        // Auto-switch to Console tab when JavaScript code produces logs
-        if (activeLanguage === "javascript") {
-          setPreviewTab("console")
-        }
       }
     }
 
     window.addEventListener("message", handleMessage)
     return () => window.removeEventListener("message", handleMessage)
-  }, [activeLanguage])
+  }, [])
 
   // Calculate line numbers
   const lineNumbers = useMemo(() => {
