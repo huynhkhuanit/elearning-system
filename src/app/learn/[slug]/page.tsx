@@ -8,7 +8,7 @@ import {
   Play, PlayCircle, CheckCircle, Lock, Clock, FileText, 
   ChevronDown, ChevronRight, BookOpen, Award, Star, 
   Menu, X, MessageSquare, Code, Download, Share2,
-  BarChart, Users, TrendingUp, Flag, Home
+  BarChart, Users, TrendingUp, Flag, Home, Code2
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/contexts/ToastContext";
@@ -18,6 +18,8 @@ import LessonQAButton from "@/components/LessonQAButton";
 import LessonQAModal from "@/components/LessonQAModal";
 import AskQuestionModal from "@/components/AskQuestionModal";
 import QuestionDetailModal from "@/components/QuestionDetailModal";
+import CodePlayground from "@/components/CodePlayground";
+import "@/app/markdown.css";
 import "@/app/markdown.css";
 
 interface Lesson {
@@ -71,6 +73,7 @@ export default function LearnCoursePage() {
   const [isQAModalOpen, setIsQAModalOpen] = useState(false);
   const [isAskQuestionModalOpen, setIsAskQuestionModalOpen] = useState(false);
   const [selectedQuestionId, setSelectedQuestionId] = useState<string | null>(null);
+  const [isCodePlaygroundOpen, setIsCodePlaygroundOpen] = useState(false);
   const { isAuthenticated, isLoading: authLoading } = useAuth();
   const toast = useToast();
   
@@ -436,6 +439,20 @@ export default function LearnCoursePage() {
         </div>
 
         <div className="flex items-center space-x-4 flex-shrink-0">
+          {/* Code Editor Button */}
+          <button
+            onClick={() => setIsCodePlaygroundOpen(true)}
+            className={`flex items-center space-x-2 px-3 py-1.5 rounded-lg transition-all font-medium text-sm ${
+              isDarkTheme 
+                ? 'bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600 text-white shadow-lg' 
+                : 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white shadow-lg'
+            }`}
+            title="Open Code Editor"
+          >
+            <Code className="w-4 h-4" />
+            <span className="hidden sm:inline">Code Editor</span>
+          </button>
+          
           {/* Circular Progress */}
           <div className="flex items-center space-x-2">
             <div className="relative w-10 h-10">
@@ -784,6 +801,16 @@ export default function LearnCoursePage() {
               setTimeout(() => setIsQAModalOpen(true), 100);
             }
           }}
+        />
+      )}
+
+      {/* Code Playground Modal */}
+      {currentLesson && (
+        <CodePlayground
+          isOpen={isCodePlaygroundOpen}
+          onClose={() => setIsCodePlaygroundOpen(false)}
+          lessonId={currentLesson.id}
+          initialLanguage="html"
         />
       )}
     </div>
