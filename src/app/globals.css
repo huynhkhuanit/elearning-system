@@ -730,3 +730,24 @@ button, .button-text {
 .w-md-editor-preview-content ol > li::before {
   color: #f1f5f9 !important;
 }
+
+/* ========== HIDE DEFAULT PASSWORD REVEAL ICON ========== */
+
+/* Hide password reveal icon in Edge, Chrome, Safari */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+  display: none;
+}
+
+input[type="password"]::-webkit-reveal,
+input[type="password"]::-webkit-clear-button {
+  display: none;
+}
+
+/* Hide password reveal button in Webkit browsers */
+input[type="password"]::-webkit-credentials-auto-fill-button {
+  visibility: hidden;
+  pointer-events: none;
+  position: absolute;
+  right: 0;
+}
