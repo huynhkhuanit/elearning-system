@@ -59,6 +59,7 @@ export default function CodePlayground({ isOpen, onClose, lessonId, initialLangu
   const [showAIReview, setShowAIReview] = useState(false)
   const [aiReviewData, setAiReviewData] = useState<AIReviewData | null>(null)
   const [isLoadingReview, setIsLoadingReview] = useState(false)
+  const [showEmptyCodeModal, setShowEmptyCodeModal] = useState(false)
 
   const codeEditorRef = useRef<HTMLTextAreaElement>(null)
   const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null)
@@ -450,7 +451,7 @@ export default function CodePlayground({ isOpen, onClose, lessonId, initialLangu
     const currentCode = code[activeLanguage]
 
     if (!currentCode.trim()) {
-      alert("Vui lòng viết code trước khi yêu cầu AI nhận xét!")
+      setShowEmptyCodeModal(true)
       return
     }
 
@@ -1041,6 +1042,93 @@ export default function CodePlayground({ isOpen, onClose, lessonId, initialLangu
                   </div>
                 </div>
               ) : null}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Empty Code Warning Modal */}
+      {showEmptyCodeModal && (
+        <div className="fixed inset-0 z-[60] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div
+            className={`${bgPrimary} rounded-lg shadow-2xl w-full max-w-md overflow-hidden border ${borderColor} animate-in zoom-in-95 duration-200`}
+          >
+            <div className={`flex items-center justify-between px-6 py-4 ${bgSecondary} border-b ${borderColor}`}>
+              <div className="flex items-center space-x-3">
+                <div className="p-2 rounded-lg bg-gradient-to-r from-orange-500 to-red-500">
+                  <svg
+                    className="w-5 h-5 text-white"
+                    fill="none"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className={`text-lg font-semibold ${textPrimary}`}>Code trống</h3>
+                  <p className={`text-xs ${textSecondary}`}>Không có nội dung để đánh giá</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowEmptyCodeModal(false)}
+                className={`p-2 ${hoverBg} rounded transition-colors ${textSecondary} hover:text-red-500`}
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4">
+              <div className={`${bgSecondary} rounded-lg p-4 border-l-4 border-orange-500`}>
+                <p className={`${textPrimary} text-sm leading-relaxed`}>
+                  Bạn chưa viết code gì trong tab <strong>{LANGUAGE_LABELS[activeLanguage]}</strong> hiện tại.
+                </p>
+              </div>
+
+              <div className={`${bgSecondary} rounded-lg p-4`}>
+                <h4 className={`text-sm font-semibold ${textPrimary} mb-3 flex items-center space-x-2`}>
+                  <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
+                  <span>Hướng dẫn sử dụng AI Review</span>
+                </h4>
+                <ul className={`space-y-2 ${textSecondary} text-sm`}>
+                  <li className="flex items-start space-x-2">
+                    <span className="text-blue-500 mt-0.5">✦</span>
+                    <span>Viết code {LANGUAGE_LABELS[activeLanguage]} của bạn trong editor bên trái</span>
+                  </li>
+                  <li className="flex items-start space-x-2">
+                    <span className="text-blue-500 mt-0.5">✦</span>
+                    <span>Click nút <strong className="text-purple-400">"Nhận xét AI"</strong> để nhận đánh giá từ AI</span>
+                  </li>
+                  <li className="flex items-start space-x-2">
+                    <span className="text-blue-500 mt-0.5">✦</span>
+                    <span>AI sẽ phân tích và đưa ra gợi ý cải thiện code của bạn</span>
+                  </li>
+                </ul>
+              </div>
+
+              <div className="flex justify-end space-x-3">
+                <button
+                  onClick={() => setShowEmptyCodeModal(false)}
+                  className={`px-4 py-2 ${bgSecondary} ${textPrimary} rounded-lg font-medium text-sm transition-colors ${hoverBg}`}
+                >
+                  Đã hiểu
+                </button>
+                <button
+                  onClick={() => {
+                    setShowEmptyCodeModal(false)
+                    // Focus on code editor
+                    setTimeout(() => {
+                      codeEditorRef.current?.focus()
+                    }, 100)
+                  }}
+                  className="px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-lg font-medium text-sm transition-all shadow-lg hover:shadow-purple-500/50"
+                >
+                  Bắt đầu viết code
+                </button>
+              </div>
             </div>
           </div>
         </div>
