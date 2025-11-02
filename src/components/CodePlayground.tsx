@@ -191,7 +191,7 @@ export default function CodePlayground({ isOpen, onClose, lessonId, initialLangu
 
   // Single unified effect for live code execution (like Live Server)
   useEffect(() => {
-    if (!isOpen || activeLanguage === "cpp" || !showPreview) return
+    if (!isOpen || activeLanguage === "cpp") return
 
     // Debounce for smooth typing experience
     const timer = setTimeout(() => {
@@ -200,14 +200,14 @@ export default function CodePlayground({ isOpen, onClose, lessonId, initialLangu
         setConsoleLogs([])
       }
       
-      // Execute code
+      // Execute code regardless of which tab is active (browser or console)
       if (iframeRef.current?.contentWindow) {
         iframeRef.current.srcdoc = previewHTML
       }
     }, 300) // 300ms debounce - fast enough for real-time feel
 
     return () => clearTimeout(timer)
-  }, [code, previewHTML, isOpen, activeLanguage, showPreview, preserveLog])
+  }, [code, previewHTML, isOpen, activeLanguage, preserveLog])
 
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
@@ -551,33 +551,43 @@ export default function CodePlayground({ isOpen, onClose, lessonId, initialLangu
                     </div>
                   )}
 
+                  {/* Hidden iframe for console logs - Always render to capture console output */}
                   {previewTab === "console" && (
-                    <div className={`flex-1 overflow-auto ${theme === "dark" ? "bg-[#1e1e1e]" : "bg-gray-900"} p-2`}>
-                      {consoleLogs.length === 0 ? (
-                        <div className="text-gray-500 text-sm font-mono p-2">
-                          Console is empty. Run JavaScript code to see output here.
-                        </div>
-                      ) : (
-                        <div className="space-y-0.5">
-                          {consoleLogs.map((log, index) => (
-                            <div
-                              key={index}
-                              className={`font-mono text-sm px-2 py-1 rounded ${
-                                log.type === "error"
-                                  ? "text-red-400 bg-red-950/20"
-                                  : log.type === "warn"
-                                    ? "text-yellow-400 bg-yellow-950/20"
-                                    : log.type === "info"
-                                      ? "text-blue-400 bg-blue-950/20"
-                                      : "text-gray-100"
-                              }`}
-                            >
-                              {log.message}
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
+                    <>
+                      <iframe
+                        ref={iframeRef}
+                        srcDoc={previewHTML}
+                        className="hidden"
+                        title="Console Preview"
+                        sandbox="allow-scripts allow-modals allow-forms allow-same-origin"
+                      />
+                      <div className={`flex-1 overflow-auto ${theme === "dark" ? "bg-[#1e1e1e]" : "bg-gray-900"} p-2`}>
+                        {consoleLogs.length === 0 ? (
+                          <div className="text-gray-500 text-sm font-mono p-2">
+                            Console is empty. Run JavaScript code to see output here.
+                          </div>
+                        ) : (
+                          <div className="space-y-0.5">
+                            {consoleLogs.map((log, index) => (
+                              <div
+                                key={index}
+                                className={`font-mono text-sm px-2 py-1 rounded ${
+                                  log.type === "error"
+                                    ? "text-red-400 bg-red-950/20"
+                                    : log.type === "warn"
+                                      ? "text-yellow-400 bg-yellow-950/20"
+                                      : log.type === "info"
+                                        ? "text-blue-400 bg-blue-950/20"
+                                        : "text-gray-100"
+                                }`}
+                              >
+                                {log.message}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </>
                   )}
                 </div>
               )}
