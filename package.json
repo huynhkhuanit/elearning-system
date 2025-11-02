@@ -10,11 +10,13 @@
     "check-roles": "node scripts/check-roles.js"
   },
   "dependencies": {
+    "@ai-sdk/openai": "^2.0.59",
     "@reduxjs/toolkit": "^2.9.0",
     "@tanstack/react-query": "^5.90.2",
     "@types/prismjs": "^1.26.5",
     "@uiw/react-markdown-preview": "^5.1.5",
     "@uiw/react-md-editor": "^4.0.8",
+    "ai": "^5.0.86",
     "axios": "^1.12.2",
     "bcryptjs": "^3.0.2",
     "cloudinary": "^2.7.0",

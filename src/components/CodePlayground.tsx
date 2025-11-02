@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef, useMemo } from "react"
-import { X, Play, Copy, Download, RotateCcw, Code2, Eye, EyeOff, Sun, Moon } from "lucide-react"
+import { X, Play, Copy, Download, RotateCcw, Code2, Eye, EyeOff, Sun, Moon, Sparkles } from "lucide-react"
 
 interface CodePlaygroundProps {
   isOpen: boolean
@@ -37,6 +37,13 @@ interface ConsoleLog {
   timestamp: number
 }
 
+interface AIReviewData {
+  score: number
+  pros: string[]
+  cons: string[]
+  suggestions: string[]
+}
+
 export default function CodePlayground({ isOpen, onClose, lessonId, initialLanguage = "html" }: CodePlaygroundProps) {
   const [activeLanguage, setActiveLanguage] = useState<keyof CodeState>(initialLanguage)
   const [code, setCode] = useState<CodeState>(DEFAULT_CODE)
@@ -49,6 +56,9 @@ export default function CodePlayground({ isOpen, onClose, lessonId, initialLangu
   const [consoleLogs, setConsoleLogs] = useState<ConsoleLog[]>([])
   const [preserveLog, setPreserveLog] = useState(true) // Default to true to prevent flicker
   const [isCodeExecuting, setIsCodeExecuting] = useState(false) // Track if code is currently executing
+  const [showAIReview, setShowAIReview] = useState(false)
+  const [aiReviewData, setAiReviewData] = useState<AIReviewData | null>(null)
+  const [isLoadingReview, setIsLoadingReview] = useState(false)
 
   const codeEditorRef = useRef<HTMLTextAreaElement>(null)
   const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null)
@@ -431,6 +441,47 @@ export default function CodePlayground({ isOpen, onClose, lessonId, initialLangu
       setCppOutput("")
       setConsoleLogs([])
       executionIdRef.current = 0 // Reset execution ID
+      setAiReviewData(null)
+      setShowAIReview(false)
+    }
+  }
+
+  const handleAIReview = async () => {
+    const currentCode = code[activeLanguage]
+
+    if (!currentCode.trim()) {
+      alert("Please write some code first before requesting a review!")
+      return
+    }
+
+    setShowAIReview(true)
+    setIsLoadingReview(true)
+    setAiReviewData(null)
+
+    try {
+      const response = await fetch("/api/ai/review", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          code: currentCode,
+          language: LANGUAGE_LABELS[activeLanguage],
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error("Failed to generate review")
+      }
+
+      const reviewData = await response.json()
+      setAiReviewData(reviewData)
+    } catch (error) {
+      console.error("AI Review Error:", error)
+      alert("Failed to generate AI review. Please try again.")
+      setShowAIReview(false)
+    } finally {
+      setIsLoadingReview(false)
     }
   }
 
@@ -591,6 +642,19 @@ export default function CodePlayground({ isOpen, onClose, lessonId, initialLangu
               title="Reset Code"
             >
               <RotateCcw className="w-4 h-4" />
+            </button>
+
+            <button
+              onClick={handleAIReview}
+              className={`px-3 py-1.5 rounded text-xs font-medium flex items-center space-x-1.5 transition-all ${
+                theme === "dark"
+                  ? "bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white shadow-lg hover:shadow-purple-500/50"
+                  : "bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white shadow-lg hover:shadow-purple-400/50"
+              }`}
+              title="Get AI Code Review"
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">AI Review</span>
             </button>
           </div>
         </div>
@@ -830,6 +894,150 @@ export default function CodePlayground({ isOpen, onClose, lessonId, initialLangu
           </div>
         </div>
       </div>
+
+      {/* AI Review Modal */}
+      {showAIReview && (
+        <div className="fixed inset-0 z-[60] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div
+            className={`${bgPrimary} rounded-lg shadow-2xl w-full max-w-2xl max-h-[80vh] overflow-hidden border ${borderColor} animate-in zoom-in-95 duration-200`}
+          >
+            <div className={`flex items-center justify-between px-6 py-4 ${bgSecondary} border-b ${borderColor}`}>
+              <div className="flex items-center space-x-3">
+                <div className="p-2 rounded-lg bg-gradient-to-r from-purple-600 to-pink-600">
+                  <Sparkles className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h3 className={`text-lg font-semibold ${textPrimary}`}>AI Code Review</h3>
+                  <p className={`text-xs ${textSecondary}`}>{LANGUAGE_LABELS[activeLanguage]} Analysis</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowAIReview(false)}
+                className={`p-2 ${hoverBg} rounded transition-colors ${textSecondary} hover:text-red-500`}
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="overflow-y-auto max-h-[calc(80vh-80px)] p-6">
+              {isLoadingReview ? (
+                <div className="flex flex-col items-center justify-center py-12 space-y-4">
+                  <div className="relative">
+                    <div className="w-16 h-16 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin"></div>
+                    <Sparkles className="w-6 h-6 text-purple-600 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-pulse" />
+                  </div>
+                  <p className={`text-sm ${textSecondary} animate-pulse`}>Analyzing your code...</p>
+                </div>
+              ) : aiReviewData ? (
+                <div className="space-y-6">
+                  <div className={`${bgSecondary} rounded-lg p-6 border ${borderColor}`}>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className={`text-sm font-medium ${textSecondary} mb-1`}>Overall Score</h4>
+                        <div className="flex items-baseline space-x-2">
+                          <span
+                            className={`text-4xl font-bold ${
+                              aiReviewData.score >= 8
+                                ? "text-green-500"
+                                : aiReviewData.score >= 6
+                                  ? "text-yellow-500"
+                                  : "text-red-500"
+                            }`}
+                          >
+                            {aiReviewData.score.toFixed(1)}
+                          </span>
+                          <span className={`text-2xl ${textSecondary}`}>/10</span>
+                        </div>
+                      </div>
+                      <div className="relative w-24 h-24">
+                        <svg className="w-24 h-24 transform -rotate-90">
+                          <circle
+                            cx="48"
+                            cy="48"
+                            r="40"
+                            stroke="currentColor"
+                            strokeWidth="8"
+                            fill="none"
+                            className={theme === "dark" ? "text-gray-700" : "text-gray-200"}
+                          />
+                          <circle
+                            cx="48"
+                            cy="48"
+                            r="40"
+                            stroke="currentColor"
+                            strokeWidth="8"
+                            fill="none"
+                            strokeDasharray={`${(aiReviewData.score / 10) * 251.2} 251.2`}
+                            className={
+                              aiReviewData.score >= 8
+                                ? "text-green-500"
+                                : aiReviewData.score >= 6
+                                  ? "text-yellow-500"
+                                  : "text-red-500"
+                            }
+                            strokeLinecap="round"
+                          />
+                        </svg>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h4 className={`text-sm font-semibold ${textPrimary} mb-3 flex items-center space-x-2`}>
+                      <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                      <span>Strengths</span>
+                    </h4>
+                    <ul className="space-y-2">
+                      {aiReviewData.pros.map((pro, index) => (
+                        <li
+                          key={index}
+                          className={`${bgSecondary} rounded-lg p-3 border-l-4 border-green-500 ${textPrimary} text-sm`}
+                        >
+                          {pro}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <div>
+                    <h4 className={`text-sm font-semibold ${textPrimary} mb-3 flex items-center space-x-2`}>
+                      <span className="w-2 h-2 bg-red-500 rounded-full"></span>
+                      <span>Areas for Improvement</span>
+                    </h4>
+                    <ul className="space-y-2">
+                      {aiReviewData.cons.map((con, index) => (
+                        <li
+                          key={index}
+                          className={`${bgSecondary} rounded-lg p-3 border-l-4 border-red-500 ${textPrimary} text-sm`}
+                        >
+                          {con}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <div>
+                    <h4 className={`text-sm font-semibold ${textPrimary} mb-3 flex items-center space-x-2`}>
+                      <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
+                      <span>Suggestions</span>
+                    </h4>
+                    <ul className="space-y-2">
+                      {aiReviewData.suggestions.map((suggestion, index) => (
+                        <li
+                          key={index}
+                          className={`${bgSecondary} rounded-lg p-3 border-l-4 border-blue-500 ${textPrimary} text-sm`}
+                        >
+                          {suggestion}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              ) : null}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
