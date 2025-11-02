@@ -47,11 +47,13 @@ export default function CodePlayground({ isOpen, onClose, lessonId, initialLangu
   const [theme, setTheme] = useState<"light" | "dark">("dark")
   const [previewTab, setPreviewTab] = useState<"browser" | "console">("browser")
   const [consoleLogs, setConsoleLogs] = useState<ConsoleLog[]>([])
-  const [preserveLog, setPreserveLog] = useState(false)
+  const [preserveLog, setPreserveLog] = useState(true) // Default to true to prevent flicker
+  const [isCodeExecuting, setIsCodeExecuting] = useState(false) // Track if code is currently executing
 
   const codeEditorRef = useRef<HTMLTextAreaElement>(null)
   const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null)
   const iframeRef = useRef<HTMLIFrameElement>(null)
+  const executionTimerRef = useRef<NodeJS.Timeout | null>(null)
 
   // Load saved code and theme from localStorage on mount
   useEffect(() => {
@@ -193,37 +195,64 @@ export default function CodePlayground({ isOpen, onClose, lessonId, initialLangu
   useEffect(() => {
     if (!isOpen || activeLanguage === "cpp") return
 
-    // Debounce for smooth typing experience
-    const timer = setTimeout(() => {
-      // Clear console logs before each code run if preserve log is OFF
+    // Clear any pending execution
+    if (executionTimerRef.current) {
+      clearTimeout(executionTimerRef.current)
+    }
+
+    // Debounce for smooth typing experience - wait until user stops typing
+    executionTimerRef.current = setTimeout(() => {
+      // Clear console only if preserve log is OFF
       if (!preserveLog) {
         setConsoleLogs([])
       }
+      
+      // Mark that we're executing code
+      setIsCodeExecuting(true)
       
       // Execute code regardless of which tab is active (browser or console)
       if (iframeRef.current?.contentWindow) {
         iframeRef.current.srcdoc = previewHTML
       }
-    }, 300) // 300ms debounce - fast enough for real-time feel
+      
+      // Reset executing flag after a short delay
+      setTimeout(() => {
+        setIsCodeExecuting(false)
+      }, 100)
+    }, 800) // Increased to 800ms - only execute when user stops typing
 
-    return () => clearTimeout(timer)
+    return () => {
+      if (executionTimerRef.current) {
+        clearTimeout(executionTimerRef.current)
+      }
+    }
   }, [code, previewHTML, isOpen, activeLanguage, preserveLog])
+
+  // Handle preserve log toggle - clear immediately when turned off
+  useEffect(() => {
+    if (!preserveLog) {
+      setConsoleLogs([])
+    }
+  }, [preserveLog])
 
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
       if (event.data.type === "console") {
-        const newLog: ConsoleLog = {
-          type: event.data.level,
-          message: event.data.message,
-          timestamp: Date.now(),
+        // Only add log if we're not in the middle of clearing
+        if (preserveLog || isCodeExecuting) {
+          const newLog: ConsoleLog = {
+            type: event.data.level,
+            message: event.data.message,
+            timestamp: Date.now(),
+          }
+          setConsoleLogs((prev) => [...prev, newLog])
         }
-        setConsoleLogs((prev) => [...prev, newLog])
       }
     }
 
     window.addEventListener("message", handleMessage)
     return () => window.removeEventListener("message", handleMessage)
-  }, [])
+  }, [preserveLog, isCodeExecuting])
 
   // Calculate line numbers
   const lineNumbers = useMemo(() => {
@@ -338,6 +367,14 @@ export default function CodePlayground({ isOpen, onClose, lessonId, initialLangu
                     <span className="text-green-500">Saved</span>
                   </>
                 )}
+              </div>
+            )}
+            
+            {/* Execution status */}
+            {isCodeExecuting && (
+              <div className="flex items-center space-x-1.5 text-xs">
+                <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse"></div>
+                <span className="text-blue-500">Running...</span>
               </div>
             )}
           </div>
