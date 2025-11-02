@@ -52,6 +52,7 @@ export default function CodePlayground({ isOpen, onClose, lessonId, initialLangu
 
   const codeEditorRef = useRef<HTMLTextAreaElement>(null)
   const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null)
+  const autoSaveStatusTimerRef = useRef<NodeJS.Timeout | null>(null) // Track status display timer
   const iframeRef = useRef<HTMLIFrameElement>(null)
   const executionTimerRef = useRef<NodeJS.Timeout | null>(null)
   const executionIdRef = useRef<number>(0) // Track unique execution ID
@@ -91,7 +92,13 @@ export default function CodePlayground({ isOpen, onClose, lessonId, initialLangu
         localStorage.setItem(`code_playground_${lessonId}`, JSON.stringify(code))
         setAutoSaveStatus("saved")
 
-        setTimeout(() => setAutoSaveStatus(""), 2000)
+        // Clear previous status timer
+        if (autoSaveStatusTimerRef.current) {
+          clearTimeout(autoSaveStatusTimerRef.current)
+        }
+        
+        // Hide status after 2 seconds
+        autoSaveStatusTimerRef.current = setTimeout(() => setAutoSaveStatus(""), 2000)
       } catch (error) {
         console.error("Failed to save code:", error)
         setAutoSaveStatus("")
@@ -101,6 +108,9 @@ export default function CodePlayground({ isOpen, onClose, lessonId, initialLangu
     return () => {
       if (autoSaveTimerRef.current) {
         clearTimeout(autoSaveTimerRef.current)
+      }
+      if (autoSaveStatusTimerRef.current) {
+        clearTimeout(autoSaveStatusTimerRef.current)
       }
     }
   }, [code, lessonId, isOpen])
@@ -191,6 +201,13 @@ export default function CodePlayground({ isOpen, onClose, lessonId, initialLangu
       </html>
     `
   }, [code, activeLanguage])
+
+  // Reset execution ID when playground opens/closes
+  useEffect(() => {
+    if (isOpen) {
+      executionIdRef.current = 0
+    }
+  }, [isOpen])
 
   // Single unified effect for live code execution (like Live Server)
   useEffect(() => {
@@ -413,6 +430,7 @@ export default function CodePlayground({ isOpen, onClose, lessonId, initialLangu
       setCode(DEFAULT_CODE)
       setCppOutput("")
       setConsoleLogs([])
+      executionIdRef.current = 0 // Reset execution ID
     }
   }
 
@@ -507,6 +525,10 @@ export default function CodePlayground({ isOpen, onClose, lessonId, initialLangu
                 onClick={() => {
                   setActiveLanguage(lang)
                   setCppOutput("")
+                  // Clear console when switching away from JavaScript
+                  if (lang !== "javascript") {
+                    setConsoleLogs([])
+                  }
                 }}
                 className={`px-4 py-2 text-sm font-medium transition-all border-r ${borderColor} relative ${
                   activeLanguage === lang
