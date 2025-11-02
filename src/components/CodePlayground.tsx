@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef, useMemo } from "react"
-import { X, Play, Copy, Download, RotateCcw, Code2, Eye, EyeOff, Sun, Moon, Maximize2, Minimize2 } from "lucide-react"
+import { X, Play, Copy, Download, RotateCcw, Code2, Eye, EyeOff, Sun, Moon } from "lucide-react"
 
 interface CodePlaygroundProps {
   isOpen: boolean
@@ -45,7 +45,6 @@ export default function CodePlayground({ isOpen, onClose, lessonId, initialLangu
   const [cppOutput, setCppOutput] = useState<string>("")
   const [autoSaveStatus, setAutoSaveStatus] = useState<"saved" | "saving" | "">("")
   const [theme, setTheme] = useState<"light" | "dark">("dark")
-  const [isFullscreen, setIsFullscreen] = useState(false)
   const [previewTab, setPreviewTab] = useState<"browser" | "console">("browser")
   const [consoleLogs, setConsoleLogs] = useState<ConsoleLog[]>([])
   const [preserveLog, setPreserveLog] = useState(false)
@@ -311,9 +310,13 @@ export default function CodePlayground({ isOpen, onClose, lessonId, initialLangu
   const lineNumberText = theme === "dark" ? "text-gray-600" : "text-gray-400"
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
+    <div className={`fixed top-0 right-0 h-screen z-50 transition-all duration-300 ease-in-out ${
+      isOpen ? 'w-[50vw]' : 'w-0'
+    } ${isOpen ? 'pointer-events-auto' : 'pointer-events-none'}`}>
       <div
-        className={`${bgPrimary} rounded-lg shadow-2xl w-full h-full ${isFullscreen ? "max-w-full max-h-full" : "max-w-7xl max-h-[90vh]"} flex flex-col overflow-hidden border ${borderColor} transition-all duration-300`}
+        className={`${bgPrimary} h-full shadow-2xl flex flex-col overflow-hidden border-l ${borderColor} transition-all duration-300 transform ${
+          isOpen ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'
+        }`}
       >
         {/* Header - VS Code Style */}
         <div className={`flex items-center justify-between px-4 py-2 ${bgSecondary} border-b ${borderColor}`}>
@@ -346,14 +349,6 @@ export default function CodePlayground({ isOpen, onClose, lessonId, initialLangu
               title={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
             >
               {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-            </button>
-
-            <button
-              onClick={() => setIsFullscreen(!isFullscreen)}
-              className={`p-2 ${hoverBg} rounded transition-colors ${textSecondary}`}
-              title={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
-            >
-              {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
             </button>
 
             <button
