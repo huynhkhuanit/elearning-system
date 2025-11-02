@@ -585,7 +585,7 @@ export default function LearnCoursePage() {
       <div className="flex-1 flex overflow-hidden">
         {/* Main Content Area */}
         <div className={`flex-1 flex flex-col overflow-hidden justify-center items-center transition-all duration-300 ${
-          isCodePlaygroundOpen ? 'mr-[50vw]' : 'mr-0'
+          isCodePlaygroundOpen ? 'mr-[40vw]' : 'mr-0'
         }`}>
           {/* Video and Lesson Content */}
           <div className={`w-full flex-1 overflow-y-auto ${isDarkTheme ? 'bg-gray-900' : 'bg-gradient-to-br from-gray-50 to-white'} flex flex-col`}>

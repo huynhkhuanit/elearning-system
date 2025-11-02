@@ -311,7 +311,7 @@ export default function CodePlayground({ isOpen, onClose, lessonId, initialLangu
 
   return (
     <div className={`fixed top-0 right-0 h-screen z-50 transition-all duration-300 ease-in-out ${
-      isOpen ? 'w-[50vw]' : 'w-0'
+      isOpen ? 'w-[40vw]' : 'w-0'
     } ${isOpen ? 'pointer-events-auto' : 'pointer-events-none'}`}>
       <div
         className={`${bgPrimary} h-full shadow-2xl flex flex-col overflow-hidden border-l ${borderColor} transition-all duration-300 transform ${
@@ -436,11 +436,11 @@ export default function CodePlayground({ isOpen, onClose, lessonId, initialLangu
         </div>
 
         {/* Content Area */}
-        <div className="flex-1 flex overflow-hidden">
+        <div className="flex-1 flex flex-col overflow-hidden">
           {showSplitView ? (
             <>
-              {/* Code Editor with Line Numbers */}
-              <div className={`flex-1 flex flex-col border-r ${borderColor} overflow-hidden`}>
+              {/* Code Editor with Line Numbers - TOP */}
+              <div className={`flex-1 flex flex-col border-b ${borderColor} overflow-hidden`}>
                 <div
                   className={`px-3 py-1.5 ${bgTertiary} border-b ${borderColor} text-xs ${textTertiary} font-mono flex items-center justify-between`}
                 >
@@ -483,9 +483,9 @@ export default function CodePlayground({ isOpen, onClose, lessonId, initialLangu
                 </div>
               </div>
 
-              {/* Preview with Browser/Console Tabs */}
+              {/* Preview with Browser/Console Tabs - BOTTOM */}
               {showPreview && (
-                <div className="flex-1 flex flex-col overflow-hidden">
+                <div className="h-[35vh] flex flex-col overflow-hidden">
                   <div
                     className={`flex items-center ${theme === "dark" ? "bg-[#252526]" : "bg-gray-100"} border-b ${borderColor}`}
                   >
@@ -583,67 +583,65 @@ export default function CodePlayground({ isOpen, onClose, lessonId, initialLangu
               )}
             </>
           ) : (
-            // C++ Single View
+            // C++ Single View - TOP (Editor) / BOTTOM (Output)
             <div className="flex-1 flex flex-col overflow-hidden">
-              <div className="flex-1 flex">
-                {/* Code Editor with Line Numbers */}
-                <div className={`flex-1 flex flex-col border-r ${borderColor} overflow-hidden`}>
+              {/* Code Editor with Line Numbers - TOP */}
+              <div className={`flex-1 flex flex-col border-b ${borderColor} overflow-hidden`}>
+                <div
+                  className={`px-3 py-1.5 ${bgTertiary} border-b ${borderColor} text-xs ${textTertiary} font-mono flex items-center justify-between`}
+                >
+                  <span>main.cpp</span>
+                  <span>{code.cpp.split("\n").length} lines</span>
+                </div>
+                <div className="flex-1 overflow-auto flex">
+                  {/* Line Numbers */}
                   <div
-                    className={`px-3 py-1.5 ${bgTertiary} border-b ${borderColor} text-xs ${textTertiary} font-mono flex items-center justify-between`}
+                    className={`${lineNumberBg} ${lineNumberText} text-right py-4 px-3 font-mono text-sm select-none border-r ${borderColor} min-w-[50px]`}
                   >
-                    <span>main.cpp</span>
-                    <span>{code.cpp.split("\n").length} lines</span>
+                    {lineNumbers.map((num) => (
+                      <div key={num} className="leading-6">
+                        {num}
+                      </div>
+                    ))}
                   </div>
-                  <div className="flex-1 overflow-auto flex">
-                    {/* Line Numbers */}
-                    <div
-                      className={`${lineNumberBg} ${lineNumberText} text-right py-4 px-3 font-mono text-sm select-none border-r ${borderColor} min-w-[50px]`}
-                    >
-                      {lineNumbers.map((num) => (
-                        <div key={num} className="leading-6">
-                          {num}
-                        </div>
-                      ))}
-                    </div>
 
-                    {/* Code Editor */}
-                    <div className="flex-1 overflow-auto">
-                      <textarea
-                        ref={codeEditorRef}
-                        value={code.cpp}
-                        onChange={(e) => handleCodeChange(e.target.value)}
-                        className={`w-full h-full p-4 ${bgPrimary} ${textPrimary} font-mono text-sm resize-none focus:outline-none`}
-                        style={{
-                          fontFamily: "'Fira Code', 'Consolas', 'Monaco', monospace",
-                          lineHeight: "1.5",
-                          tabSize: 2,
-                        }}
-                        spellCheck={false}
-                        autoComplete="off"
-                      />
-                    </div>
+                  {/* Code Editor */}
+                  <div className="flex-1 overflow-auto">
+                    <textarea
+                      ref={codeEditorRef}
+                      value={code.cpp}
+                      onChange={(e) => handleCodeChange(e.target.value)}
+                      className={`w-full h-full p-4 ${bgPrimary} ${textPrimary} font-mono text-sm resize-none focus:outline-none`}
+                      style={{
+                        fontFamily: "'Fira Code', 'Consolas', 'Monaco', monospace",
+                        lineHeight: "1.5",
+                        tabSize: 2,
+                      }}
+                      spellCheck={false}
+                      autoComplete="off"
+                    />
                   </div>
                 </div>
+              </div>
 
-                {/* Output Terminal */}
+              {/* Output Terminal - BOTTOM */}
+              <div
+                className={`h-[35vh] flex flex-col overflow-hidden ${theme === "dark" ? "bg-[#1e1e1e]" : "bg-gray-900"}`}
+              >
                 <div
-                  className={`flex-1 flex flex-col overflow-hidden ${theme === "dark" ? "bg-[#1e1e1e]" : "bg-gray-900"}`}
+                  className={`px-3 py-1.5 ${theme === "dark" ? "bg-[#252526]" : "bg-gray-800"} border-b ${theme === "dark" ? "border-gray-700" : "border-gray-700"} text-xs text-gray-400 font-mono flex items-center justify-between`}
                 >
-                  <div
-                    className={`px-3 py-1.5 ${theme === "dark" ? "bg-[#252526]" : "bg-gray-800"} border-b ${theme === "dark" ? "border-gray-700" : "border-gray-700"} text-xs text-gray-400 font-mono flex items-center justify-between`}
-                  >
-                    <span>⚡ output</span>
-                    {cppOutput && (
-                      <button onClick={() => setCppOutput("")} className="text-xs hover:text-white transition-colors">
-                        Clear
-                      </button>
-                    )}
-                  </div>
-                  <div className="flex-1 overflow-auto p-4">
-                    <pre className="text-gray-100 font-mono text-sm whitespace-pre-wrap leading-relaxed">
-                      {cppOutput || "Click 'Run' to execute your C++ code..."}
-                    </pre>
-                  </div>
+                  <span>⚡ output</span>
+                  {cppOutput && (
+                    <button onClick={() => setCppOutput("")} className="text-xs hover:text-white transition-colors">
+                      Clear
+                    </button>
+                  )}
+                </div>
+                <div className="flex-1 overflow-auto p-4">
+                  <pre className="text-gray-100 font-mono text-sm whitespace-pre-wrap leading-relaxed">
+                    {cppOutput || "Click 'Run' to execute your C++ code..."}
+                  </pre>
                 </div>
               </div>
             </div>
