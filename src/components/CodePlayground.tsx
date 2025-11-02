@@ -54,6 +54,7 @@ export default function CodePlayground({ isOpen, onClose, lessonId, initialLangu
   const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null)
   const iframeRef = useRef<HTMLIFrameElement>(null)
   const executionTimerRef = useRef<NodeJS.Timeout | null>(null)
+  const executionIdRef = useRef<number>(0) // Track unique execution ID
 
   // Load saved code and theme from localStorage on mount
   useEffect(() => {
@@ -202,6 +203,10 @@ export default function CodePlayground({ isOpen, onClose, lessonId, initialLangu
 
     // Debounce for smooth typing experience - wait until user stops typing
     executionTimerRef.current = setTimeout(() => {
+      // Increment execution ID to invalidate previous executions
+      executionIdRef.current += 1
+      const currentExecutionId = executionIdRef.current
+      
       // Clear console only if preserve log is OFF
       if (!preserveLog) {
         setConsoleLogs([])
@@ -212,7 +217,100 @@ export default function CodePlayground({ isOpen, onClose, lessonId, initialLangu
       
       // Execute code regardless of which tab is active (browser or console)
       if (iframeRef.current?.contentWindow) {
-        iframeRef.current.srcdoc = previewHTML
+        // Calculate previewHTML here to avoid double dependency trigger
+        const htmlCode = activeLanguage === "html" ? code.html : ""
+        const cssCode = code.css
+        const jsCode = code.javascript
+
+        const html = `
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <style>
+              /* No default styles - render exactly as browser would */
+              ${cssCode}
+            </style>
+          </head>
+          <body>
+            ${htmlCode}
+            <script>
+              // Send execution ID with each message
+              const EXECUTION_ID = ${currentExecutionId};
+              
+              // Capture console logs and send to parent
+              (function() {
+                const originalLog = console.log;
+                const originalError = console.error;
+                const originalWarn = console.warn;
+                const originalInfo = console.info;
+                
+                console.log = function(...args) {
+                  originalLog.apply(console, args);
+                  window.parent.postMessage({
+                    type: 'console',
+                    level: 'log',
+                    executionId: EXECUTION_ID,
+                    message: args.map(arg => {
+                      if (typeof arg === 'object') {
+                        try {
+                          return JSON.stringify(arg, null, 2);
+                        } catch (e) {
+                          return String(arg);
+                        }
+                      }
+                      return String(arg);
+                    }).join(' ')
+                  }, '*');
+                };
+                
+                console.error = function(...args) {
+                  originalError.apply(console, args);
+                  window.parent.postMessage({
+                    type: 'console',
+                    level: 'error',
+                    executionId: EXECUTION_ID,
+                    message: args.map(arg => String(arg)).join(' ')
+                  }, '*');
+                };
+                
+                console.warn = function(...args) {
+                  originalWarn.apply(console, args);
+                  window.parent.postMessage({
+                    type: 'console',
+                    level: 'warn',
+                    executionId: EXECUTION_ID,
+                    message: args.map(arg => String(arg)).join(' ')
+                  }, '*');
+                };
+                
+                console.info = function(...args) {
+                  originalInfo.apply(console, args);
+                  window.parent.postMessage({
+                    type: 'console',
+                    level: 'info',
+                    executionId: EXECUTION_ID,
+                    message: args.map(arg => String(arg)).join(' ')
+                  }, '*');
+                };
+                
+                window.addEventListener('error', function(e) {
+                  console.error('Error:', e.message);
+                });
+              })();
+              
+              try {
+                ${jsCode}
+              } catch (error) {
+                console.error('JavaScript Error:', error.message);
+              }
+            </script>
+          </body>
+          </html>
+        `
+        
+        iframeRef.current.srcdoc = html
       }
       
       // Reset executing flag after a short delay
@@ -226,7 +324,7 @@ export default function CodePlayground({ isOpen, onClose, lessonId, initialLangu
         clearTimeout(executionTimerRef.current)
       }
     }
-  }, [code, previewHTML, isOpen, activeLanguage, preserveLog])
+  }, [code, isOpen, activeLanguage, preserveLog])
 
   // Handle preserve log toggle - clear immediately when turned off
   useEffect(() => {
@@ -238,14 +336,17 @@ export default function CodePlayground({ isOpen, onClose, lessonId, initialLangu
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
       if (event.data.type === "console") {
-        // Only add log if we're not in the middle of clearing
-        if (preserveLog || isCodeExecuting) {
-          const newLog: ConsoleLog = {
-            type: event.data.level,
-            message: event.data.message,
-            timestamp: Date.now(),
+        // Only accept messages from current execution ID
+        if (event.data.executionId === executionIdRef.current) {
+          // Only add log if we're not in the middle of clearing
+          if (preserveLog || isCodeExecuting) {
+            const newLog: ConsoleLog = {
+              type: event.data.level,
+              message: event.data.message,
+              timestamp: Date.now(),
+            }
+            setConsoleLogs((prev) => [...prev, newLog])
           }
-          setConsoleLogs((prev) => [...prev, newLog])
         }
       }
     }
@@ -576,55 +677,45 @@ export default function CodePlayground({ isOpen, onClose, lessonId, initialLangu
                     )}
                   </div>
 
-                  {previewTab === "browser" && (
-                    <div className="flex-1 overflow-auto bg-white">
-                      <iframe
-                        ref={iframeRef}
-                        srcDoc={previewHTML}
-                        className="w-full h-full border-0 bg-white"
-                        title="Preview"
-                        sandbox="allow-scripts allow-modals allow-forms allow-same-origin"
-                      />
-                    </div>
-                  )}
+                  {/* Single iframe for both Browser and Console - Always rendered */}
+                  <div className={`flex-1 overflow-auto ${previewTab === "browser" ? "bg-white" : "hidden"}`}>
+                    <iframe
+                      ref={iframeRef}
+                      srcDoc={previewHTML}
+                      className="w-full h-full border-0 bg-white"
+                      title="Preview"
+                      sandbox="allow-scripts allow-modals allow-forms allow-same-origin"
+                    />
+                  </div>
 
-                  {/* Hidden iframe for console logs - Always render to capture console output */}
+                  {/* Console Output Display */}
                   {previewTab === "console" && (
-                    <>
-                      <iframe
-                        ref={iframeRef}
-                        srcDoc={previewHTML}
-                        className="hidden"
-                        title="Console Preview"
-                        sandbox="allow-scripts allow-modals allow-forms allow-same-origin"
-                      />
-                      <div className={`flex-1 overflow-auto ${theme === "dark" ? "bg-[#1e1e1e]" : "bg-gray-900"} p-2`}>
-                        {consoleLogs.length === 0 ? (
-                          <div className="text-gray-500 text-sm font-mono p-2">
-                            Console is empty. Run JavaScript code to see output here.
-                          </div>
-                        ) : (
-                          <div className="space-y-0.5">
-                            {consoleLogs.map((log, index) => (
-                              <div
-                                key={index}
-                                className={`font-mono text-sm px-2 py-1 rounded ${
-                                  log.type === "error"
-                                    ? "text-red-400 bg-red-950/20"
-                                    : log.type === "warn"
-                                      ? "text-yellow-400 bg-yellow-950/20"
-                                      : log.type === "info"
-                                        ? "text-blue-400 bg-blue-950/20"
-                                        : "text-gray-100"
-                                }`}
-                              >
-                                {log.message}
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    </>
+                    <div className={`flex-1 overflow-auto ${theme === "dark" ? "bg-[#1e1e1e]" : "bg-gray-900"} p-2`}>
+                      {consoleLogs.length === 0 ? (
+                        <div className="text-gray-500 text-sm font-mono p-2">
+                          Console is empty. Run JavaScript code to see output here.
+                        </div>
+                      ) : (
+                        <div className="space-y-0.5">
+                          {consoleLogs.map((log, index) => (
+                            <div
+                              key={index}
+                              className={`font-mono text-sm px-2 py-1 rounded ${
+                                log.type === "error"
+                                  ? "text-red-400 bg-red-950/20"
+                                  : log.type === "warn"
+                                    ? "text-yellow-400 bg-yellow-950/20"
+                                    : log.type === "info"
+                                      ? "text-blue-400 bg-blue-950/20"
+                                      : "text-gray-100"
+                              }`}
+                            >
+                              {log.message}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   )}
                 </div>
               )}
