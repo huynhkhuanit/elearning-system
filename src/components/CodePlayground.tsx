@@ -450,7 +450,7 @@ export default function CodePlayground({ isOpen, onClose, lessonId, initialLangu
     const currentCode = code[activeLanguage]
 
     if (!currentCode.trim()) {
-      alert("Please write some code first before requesting a review!")
+      alert("Vui lòng viết code trước khi yêu cầu AI nhận xét!")
       return
     }
 
@@ -476,7 +476,7 @@ export default function CodePlayground({ isOpen, onClose, lessonId, initialLangu
         // Show detailed error message
         const errorMsg = data.details 
           ? `${data.error}\n\n${data.details}` 
-          : data.error || "Failed to generate review"
+          : data.error || "Không thể tạo nhận xét AI"
         
         throw new Error(errorMsg)
       }
@@ -484,7 +484,7 @@ export default function CodePlayground({ isOpen, onClose, lessonId, initialLangu
       setAiReviewData(data)
     } catch (error) {
       console.error("AI Review Error:", error)
-      const errorMessage = error instanceof Error ? error.message : "Failed to generate AI review. Please try again."
+      const errorMessage = error instanceof Error ? error.message : "Không thể tạo nhận xét AI. Vui lòng thử lại."
       alert(errorMessage)
       setShowAIReview(false)
     } finally {
@@ -658,10 +658,10 @@ export default function CodePlayground({ isOpen, onClose, lessonId, initialLangu
                   ? "bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white shadow-lg hover:shadow-purple-500/50"
                   : "bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white shadow-lg hover:shadow-purple-400/50"
               }`}
-              title="Get AI Code Review"
+              title="Nhận xét của AI"
             >
               <Sparkles className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">AI Review</span>
+              <span className="hidden sm:inline">Nhận xét AI</span>
             </button>
           </div>
         </div>
@@ -914,8 +914,8 @@ export default function CodePlayground({ isOpen, onClose, lessonId, initialLangu
                   <Sparkles className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <h3 className={`text-lg font-semibold ${textPrimary}`}>AI Code Review</h3>
-                  <p className={`text-xs ${textSecondary}`}>{LANGUAGE_LABELS[activeLanguage]} Analysis</p>
+                  <h3 className={`text-lg font-semibold ${textPrimary}`}>Nhận xét của AI</h3>
+                  <p className={`text-xs ${textSecondary}`}>Đánh giá chuyên sâu về code {LANGUAGE_LABELS[activeLanguage]}</p>
                 </div>
               </div>
               <button
@@ -933,14 +933,14 @@ export default function CodePlayground({ isOpen, onClose, lessonId, initialLangu
                     <div className="w-16 h-16 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin"></div>
                     <Sparkles className="w-6 h-6 text-purple-600 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-pulse" />
                   </div>
-                  <p className={`text-sm ${textSecondary} animate-pulse`}>Analyzing your code...</p>
+                  <p className={`text-sm ${textSecondary} animate-pulse`}>AI đang phân tích code của bạn...</p>
                 </div>
               ) : aiReviewData ? (
                 <div className="space-y-6">
                   <div className={`${bgSecondary} rounded-lg p-6 border ${borderColor}`}>
                     <div className="flex items-center justify-between">
                       <div>
-                        <h4 className={`text-sm font-medium ${textSecondary} mb-1`}>Overall Score</h4>
+                        <h4 className={`text-sm font-medium ${textSecondary} mb-1`}>Điểm tổng quan</h4>
                         <div className="flex items-baseline space-x-2">
                           <span
                             className={`text-4xl font-bold ${
@@ -992,7 +992,7 @@ export default function CodePlayground({ isOpen, onClose, lessonId, initialLangu
                   <div>
                     <h4 className={`text-sm font-semibold ${textPrimary} mb-3 flex items-center space-x-2`}>
                       <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-                      <span>Strengths</span>
+                      <span>Điểm mạnh</span>
                     </h4>
                     <ul className="space-y-2">
                       {aiReviewData.pros.map((pro, index) => (
@@ -1009,7 +1009,7 @@ export default function CodePlayground({ isOpen, onClose, lessonId, initialLangu
                   <div>
                     <h4 className={`text-sm font-semibold ${textPrimary} mb-3 flex items-center space-x-2`}>
                       <span className="w-2 h-2 bg-red-500 rounded-full"></span>
-                      <span>Areas for Improvement</span>
+                      <span>Cần cải thiện</span>
                     </h4>
                     <ul className="space-y-2">
                       {aiReviewData.cons.map((con, index) => (
@@ -1026,7 +1026,7 @@ export default function CodePlayground({ isOpen, onClose, lessonId, initialLangu
                   <div>
                     <h4 className={`text-sm font-semibold ${textPrimary} mb-3 flex items-center space-x-2`}>
                       <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
-                      <span>Suggestions</span>
+                      <span>Gợi ý cải thiện</span>
                     </h4>
                     <ul className="space-y-2">
                       {aiReviewData.suggestions.map((suggestion, index) => (
