@@ -470,15 +470,22 @@ export default function CodePlayground({ isOpen, onClose, lessonId, initialLangu
         }),
       })
 
+      const data = await response.json()
+
       if (!response.ok) {
-        throw new Error("Failed to generate review")
+        // Show detailed error message
+        const errorMsg = data.details 
+          ? `${data.error}\n\n${data.details}` 
+          : data.error || "Failed to generate review"
+        
+        throw new Error(errorMsg)
       }
 
-      const reviewData = await response.json()
-      setAiReviewData(reviewData)
+      setAiReviewData(data)
     } catch (error) {
       console.error("AI Review Error:", error)
-      alert("Failed to generate AI review. Please try again.")
+      const errorMessage = error instanceof Error ? error.message : "Failed to generate AI review. Please try again."
+      alert(errorMessage)
       setShowAIReview(false)
     } finally {
       setIsLoadingReview(false)

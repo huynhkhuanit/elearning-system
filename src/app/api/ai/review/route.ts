@@ -4,6 +4,17 @@ import { openai } from "@ai-sdk/openai"
 
 export async function POST(request: NextRequest) {
   try {
+    // Check if API key is configured
+    if (!process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY === "your-openai-api-key-here") {
+      return NextResponse.json(
+        { 
+          error: "OpenAI API key is not configured. Please add OPENAI_API_KEY to your .env.local file.",
+          details: "Get your API key from: https://platform.openai.com/api-keys"
+        },
+        { status: 500 }
+      )
+    }
+
     const { code, language } = await request.json()
 
     if (!code || !code.trim()) {
@@ -58,6 +69,26 @@ Be specific and constructive in your feedback.`,
     return NextResponse.json(reviewData)
   } catch (error) {
     console.error("AI Review Error:", error)
-    return NextResponse.json({ error: "Failed to generate AI review" }, { status: 500 })
+    
+    // Provide more helpful error messages
+    if (error instanceof Error) {
+      if (error.message.includes("API key")) {
+        return NextResponse.json(
+          { 
+            error: "OpenAI API key issue",
+            details: "Please check your OPENAI_API_KEY in .env.local file"
+          },
+          { status: 500 }
+        )
+      }
+    }
+    
+    return NextResponse.json(
+      { 
+        error: "Failed to generate AI review",
+        details: error instanceof Error ? error.message : "Unknown error"
+      },
+      { status: 500 }
+    )
   }
 }
