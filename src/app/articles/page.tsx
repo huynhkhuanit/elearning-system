@@ -277,14 +277,14 @@ export default function ArticlesPage() {
                 >
                   <Link href={`/articles/${article.slug}`}>
                     {viewMode === "grid" ? (
-                      <div className="bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all overflow-hidden h-full flex flex-col group cursor-pointer">
+                      <div className="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow duration-200 overflow-hidden h-full flex flex-col cursor-pointer">
                         <div className="h-48 bg-gradient-to-r from-indigo-500 to-purple-600 relative overflow-hidden">
                           {article.cover_image ? (
                             <Image
                               src={article.cover_image}
                               alt={article.title}
                               fill
-                              className="object-cover group-hover:scale-110 transition-transform duration-300"
+                              className="object-cover"
                             />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center">
@@ -304,13 +304,13 @@ export default function ArticlesPage() {
                             </div>
                           )}
 
-                          <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-indigo-600 transition">
+                          <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-2">
                             {article.title}
                           </h3>
 
                           <p className="text-gray-600 text-sm mb-4 line-clamp-3 flex-1">{article.excerpt}</p>
 
-                          <div className="flex items-center justify-between text-sm text-gray-500 mb-3 pb-3 border-b">
+                          <div className="flex items-center justify-between text-sm text-gray-500 mb-3 pb-3 border-b border-gray-200">
                             <div className="flex items-center gap-2">
                               {article.avatar_url ? (
                                 <Image
@@ -357,14 +357,14 @@ export default function ArticlesPage() {
                         </div>
                       </div>
                     ) : (
-                      <div className="bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all overflow-hidden flex flex-col sm:flex-row group cursor-pointer">
+                      <div className="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow duration-200 overflow-hidden flex flex-col sm:flex-row cursor-pointer">
                         <div className="sm:w-64 h-48 sm:h-auto bg-gradient-to-r from-indigo-500 to-purple-600 relative overflow-hidden flex-shrink-0">
                           {article.cover_image ? (
                             <Image
                               src={article.cover_image}
                               alt={article.title}
                               fill
-                              className="object-cover group-hover:scale-110 transition-transform duration-300"
+                              className="object-cover"
                             />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center">
@@ -386,13 +386,13 @@ export default function ArticlesPage() {
                             )}
                           </div>
 
-                          <h3 className="text-xl font-bold text-gray-900 mb-3 line-clamp-2 group-hover:text-indigo-600 transition">
+                          <h3 className="text-xl font-bold text-gray-900 mb-3 line-clamp-2">
                             {article.title}
                           </h3>
 
                           <p className="text-gray-600 text-base mb-4 line-clamp-2 flex-1">{article.excerpt}</p>
 
-                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-sm text-gray-500 mb-3 pb-3 border-b">
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-sm text-gray-500 mb-3 pb-3 border-b border-gray-200">
                             <div className="flex items-center gap-2">
                               {article.avatar_url ? (
                                 <Image
