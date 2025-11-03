@@ -18,6 +18,11 @@ const nextConfig: NextConfig = {
         hostname: 'images.unsplash.com',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'caodangvietmyhanoi.edu.vn',
+        pathname: '/**',
+      },
     ],
   },
   // Increase max duration for video uploads
