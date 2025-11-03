@@ -91,6 +91,7 @@ export default function WriteBlogPage() {
       const res = await fetch("/api/blog/posts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include", // Important: Send cookies including auth token
         body: JSON.stringify({
           title,
           content,
@@ -103,14 +104,14 @@ export default function WriteBlogPage() {
 
       const data = await res.json()
 
-      if (res.ok) {
+      if (res.ok && data.success) {
         setAutoSaveStatus("saved")
         setLastSaved(new Date())
         if (!silent) {
-          toast.success("Đã lưu bản nháp")
+          toast.success(data.message || "Đã lưu bản nháp")
           // Redirect to edit page if this is a new post
-          if (data.slug) {
-            router.push(`/write/${data.slug}`)
+          if (data.data?.slug) {
+            router.push(`/write/${data.data.slug}`)
           }
         }
       } else {
@@ -151,6 +152,7 @@ export default function WriteBlogPage() {
       const res = await fetch("/api/blog/posts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include", // Important: Send cookies including auth token
         body: JSON.stringify({
           title,
           content,
@@ -163,9 +165,9 @@ export default function WriteBlogPage() {
 
       const data = await res.json()
 
-      if (res.ok) {
-        toast.success("Đã đăng bài viết thành công!")
-        router.push(`/articles/${data.slug}`)
+      if (res.ok && data.success) {
+        toast.success(data.message || "Đã đăng bài viết thành công!")
+        router.push(`/articles/${data.data?.slug}`)
       } else {
         throw new Error(data.error || "Không thể đăng bài viết")
       }

@@ -8,6 +8,11 @@ const nextConfig: NextConfig = {
         hostname: 'res.cloudinary.com',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'cdn2.fptshop.com.vn',
+        pathname: '/**',
+      },
     ],
   },
   // Increase max duration for video uploads
