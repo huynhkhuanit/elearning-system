@@ -13,6 +13,11 @@ const nextConfig: NextConfig = {
         hostname: 'cdn2.fptshop.com.vn',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+        pathname: '/**',
+      },
     ],
   },
   // Increase max duration for video uploads
