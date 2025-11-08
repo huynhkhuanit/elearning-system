@@ -22,6 +22,8 @@ export default function UserProfilePage() {
   const [activeTab, setActiveTab] = useState<string>('enrolled');
   const [articles, setArticles] = useState<any[]>([]);
   const [articlesLoading, setArticlesLoading] = useState(false);
+  const [enrolledCourses, setEnrolledCourses] = useState<any[]>([]);
+  const [coursesLoading, setCoursesLoading] = useState(false);
 
   const tabs: ProfileTab[] = [
     { id: 'enrolled', label: 'Khóa học đã đăng ký', count: profile?.total_courses_enrolled },
@@ -86,6 +88,29 @@ export default function UserProfilePage() {
 
     fetchArticles();
   }, [activeTab, profile]);
+
+  // Fetch enrolled courses when enrolled tab is selected
+  useEffect(() => {
+    const fetchEnrolledCourses = async () => {
+      if (activeTab !== 'enrolled' || !username) return;
+      
+      try {
+        setCoursesLoading(true);
+        const res = await fetch(`/api/users/${username}/courses`);
+        const data = await res.json();
+        
+        if (data.success && data.data?.courses) {
+          setEnrolledCourses(data.data.courses);
+        }
+      } catch (err) {
+        console.error('Failed to fetch enrolled courses:', err);
+      } finally {
+        setCoursesLoading(false);
+      }
+    };
+
+    fetchEnrolledCourses();
+  }, [activeTab, username]);
 
   if (loading) {
     return (
@@ -372,11 +397,109 @@ export default function UserProfilePage() {
           {/* Tab Content */}
           <div className="p-6">
             {activeTab === "enrolled" && (
-              <div className="text-center py-12">
-                <BookOpen className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Chưa có khóa học nào</h3>
-                <p className="text-gray-600">Người dùng này chưa đăng ký khóa học nào</p>
-              </div>
+              <>
+                {coursesLoading ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {[1, 2, 3].map((i) => (
+                      <div key={i} className="bg-white rounded-xl border border-gray-200 overflow-hidden animate-pulse">
+                        <div className="h-48 bg-gray-200"></div>
+                        <div className="p-6 space-y-3">
+                          <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                          <div className="h-4 bg-gray-200 rounded"></div>
+                          <div className="h-2 bg-gray-100 rounded-full"></div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : enrolledCourses.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {enrolledCourses.map((course) => {
+                      const progressPercentage = Math.round(course.progress_percentage || 0);
+                      
+                      return (
+                        <Link key={course.id} href={`/learn/${course.slug}`}>
+                          <div className="bg-white rounded-xl border border-gray-200 shadow-md hover:shadow-lg transition-shadow duration-200 overflow-hidden h-full flex flex-col cursor-pointer group">
+                            {/* Thumbnail */}
+                            <div className="h-48 bg-gradient-to-r from-primary to-purple-600 relative overflow-hidden">
+                              {course.thumbnail_url ? (
+                                <Image
+                                  src={course.thumbnail_url}
+                                  alt={course.title}
+                                  fill
+                                  className="object-cover group-hover:scale-105 transition-transform duration-300"
+                                />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center">
+                                  <BookOpen className="w-16 h-16 text-white opacity-50" />
+                                </div>
+                              )}
+                              {/* Progress Badge */}
+                              {course.is_completed ? (
+                                <div className="absolute top-3 right-3 bg-emerald-500 text-white px-3 py-1 rounded-full text-xs font-semibold">
+                                  ✓ Hoàn thành
+                                </div>
+                              ) : progressPercentage > 0 ? (
+                                <div className="absolute top-3 right-3 bg-primary text-white px-3 py-1 rounded-full text-xs font-semibold">
+                                  {progressPercentage}%
+                                </div>
+                              ) : null}
+                            </div>
+
+                            {/* Content */}
+                            <div className="p-6 flex-1 flex flex-col">
+                              {/* Title */}
+                              <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-primary transition-colors">
+                                {course.title}
+                              </h3>
+
+                              {/* Description */}
+                              {course.description && (
+                                <p className="text-gray-600 text-sm mb-4 line-clamp-2 flex-1">
+                                  {course.description}
+                                </p>
+                              )}
+
+                              {/* Progress Bar */}
+                              {!course.is_completed && progressPercentage > 0 && (
+                                <div className="mb-4">
+                                  <div className="flex items-center justify-between text-xs text-gray-600 mb-1">
+                                    <span>Tiến độ</span>
+                                    <span>{progressPercentage}%</span>
+                                  </div>
+                                  <div className="w-full bg-gray-200 rounded-full h-2">
+                                    <div
+                                      className="bg-primary h-2 rounded-full transition-all duration-300"
+                                      style={{ width: `${progressPercentage}%` }}
+                                    ></div>
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* Enrolled Date */}
+                              <div className="flex items-center gap-2 text-sm text-gray-500 mt-auto pt-3 border-t border-gray-200">
+                                <Calendar className="w-4 h-4" />
+                                <span>
+                                  Đăng ký: {new Date(course.enrolled_at).toLocaleDateString('vi-VN', {
+                                    day: '2-digit',
+                                    month: '2-digit',
+                                    year: 'numeric'
+                                  })}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        </Link>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <BookOpen className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">Chưa có khóa học nào</h3>
+                    <p className="text-gray-600">Người dùng này chưa đăng ký khóa học nào</p>
+                  </div>
+                )}
+              </>
             )}
 
             {activeTab === "completed" && (

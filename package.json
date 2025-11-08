@@ -7,7 +7,8 @@
     "build": "next build --turbopack",
     "start": "next start",
     "grant-role": "node scripts/grant-role.js",
-    "check-roles": "node scripts/check-roles.js"
+    "check-roles": "node scripts/check-roles.js",
+    "inspect-supabase": "node scripts/inspect-supabase-simple.js"
   },
   "dependencies": {
     "@ai-sdk/openai": "^2.0.59",
