@@ -59,13 +59,13 @@ export default function MyPostsPage() {
       }
       fetchPosts();
     }
-  }, [isAuthenticated, authLoading, filterStatus]);
+  }, [isAuthenticated, authLoading]);
 
   const fetchPosts = async () => {
     try {
       setLoading(true);
-      const status = filterStatus === "all" ? null : filterStatus;
-      const response = await fetch(`/api/users/my-posts?status=${status || ""}&limit=50&offset=0`);
+      // Fetch all posts without status filter to get complete list
+      const response = await fetch(`/api/users/my-posts?limit=100&offset=0`);
       const data = await response.json();
 
       if (data.success) {
@@ -260,86 +260,106 @@ export default function MyPostsPage() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.4, delay: index * 0.05 }}
-                  className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-300"
+                  className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:border-primary/20 transition-all duration-300 cursor-pointer"
                 >
-                  <div className="flex flex-col md:flex-row">
-                    {/* Thumbnail */}
-                    {post.cover_image && (
-                      <div className="md:w-64 md:h-48 w-full h-48 relative flex-shrink-0">
-                        <Image
-                          src={post.cover_image}
-                          alt={post.title}
-                          fill
-                          className="object-cover"
-                        />
-                      </div>
-                    )}
-
-                    {/* Content */}
-                    <div className="flex-1 p-6 flex flex-col">
-                      <div className="flex items-start justify-between gap-4 mb-3">
-                        <div className="flex-1 min-w-0">
-                          <h3 className="text-xl font-bold text-gray-900 mb-2 line-clamp-2 hover:text-primary transition-colors">
-                            <Link href={`/articles/${post.slug}`}>
-                              {post.title}
-                            </Link>
-                          </h3>
-                          {post.excerpt && (
-                            <p className="text-gray-600 text-sm line-clamp-2 mb-3">
-                              {post.excerpt}
-                            </p>
-                          )}
+                  <Link 
+                    href={`/articles/${post.slug}`}
+                    className="flex flex-col md:flex-row group"
+                  >
+                    {/* Thumbnail - Modern Design */}
+                    <div className={`relative ${post.cover_image ? 'md:w-64 md:h-48' : 'md:w-32'} w-full h-48 md:h-auto flex-shrink-0 overflow-hidden`}>
+                      {post.cover_image ? (
+                        <>
+                          <Image
+                            src={post.cover_image}
+                            alt={post.title}
+                            fill
+                            className="object-cover transition-transform duration-300 group-hover:scale-105"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                        </>
+                      ) : (
+                        <div className="w-full h-full bg-gradient-to-br from-primary/10 to-purple-100 flex items-center justify-center">
+                          <FileText className="w-12 h-12 text-primary/40" />
                         </div>
+                      )}
+                      {/* Status Badge on Image */}
+                      <div className="absolute top-3 right-3">
                         {getStatusBadge(post.status)}
                       </div>
+                    </div>
 
-                      {/* Meta Info */}
-                      <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500 mb-4">
-                        <div className="flex items-center gap-1.5">
-                          <Calendar className="w-4 h-4" />
-                          <span>
+                    {/* Content - Modern Card Design */}
+                    <div className="flex-1 p-6 flex flex-col bg-white">
+                      {/* Header */}
+                      <div className="mb-4">
+                        <div className="flex items-start justify-between gap-3 mb-2">
+                          <h3 className="text-xl font-bold text-gray-900 line-clamp-2 group-hover:text-primary transition-colors flex-1">
+                            {post.title}
+                          </h3>
+                        </div>
+                        {post.excerpt && (
+                          <p className="text-gray-600 text-sm line-clamp-2 leading-relaxed">
+                            {post.excerpt}
+                          </p>
+                        )}
+                      </div>
+
+                      {/* Meta Info - Modern Layout */}
+                      <div className="flex flex-wrap items-center gap-3 text-xs text-gray-500 mb-4">
+                        <div className="flex items-center gap-1.5 px-2 py-1 bg-gray-50 rounded-lg">
+                          <Calendar className="w-3.5 h-3.5" />
+                          <span className="font-medium">
                             {post.published_at
                               ? formatDate(post.published_at)
                               : formatDate(post.created_at)}
                           </span>
                         </div>
-                        <div className="flex items-center gap-1.5">
-                          <Eye className="w-4 h-4" />
-                          <span>{post.views_count || 0}</span>
+                        <div className="flex items-center gap-1.5 px-2 py-1 bg-gray-50 rounded-lg">
+                          <Eye className="w-3.5 h-3.5" />
+                          <span className="font-medium">{post.views_count || 0}</span>
                         </div>
-                        <div className="flex items-center gap-1.5">
-                          <Heart className="w-4 h-4" />
-                          <span>{post.likes_count || 0}</span>
+                        <div className="flex items-center gap-1.5 px-2 py-1 bg-gray-50 rounded-lg">
+                          <Heart className="w-3.5 h-3.5" />
+                          <span className="font-medium">{post.likes_count || 0}</span>
                         </div>
                         {post.category_name && (
-                          <div className="px-2 py-1 bg-gray-100 rounded-full text-xs">
+                          <div className="px-2 py-1 bg-primary/10 text-primary rounded-lg text-xs font-medium">
                             {post.category_name}
                           </div>
                         )}
                       </div>
 
-                      {/* Actions */}
-                      <div className="flex items-center gap-3 mt-auto pt-4 border-t border-gray-100">
-                        {post.status === "published" ? (
+                      {/* Actions - Modern Button Design */}
+                      <div 
+                        className="flex items-center gap-2 mt-auto pt-4 border-t border-gray-100"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        {post.status === "published" && (
                           <Link
                             href={`/articles/${post.slug}`}
-                            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-primary hover:bg-primary/10 rounded-lg transition-colors"
+                            onClick={(e) => e.stopPropagation()}
+                            className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-primary hover:bg-primary/10 rounded-lg transition-all duration-200 hover:scale-105"
                           >
                             <Eye className="w-4 h-4" />
-                            <span>Xem bài viết</span>
+                            <span>Xem</span>
                           </Link>
-                        ) : null}
+                        )}
                         <Link
                           href={`/write?edit=${post.slug}`}
-                          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                          onClick={(e) => e.stopPropagation()}
+                          className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-all duration-200 hover:scale-105"
                         >
                           <Edit className="w-4 h-4" />
                           <span>Chỉnh sửa</span>
                         </Link>
                         <button
-                          onClick={() => handleDelete(post.slug, post.title)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDelete(post.slug, post.title);
+                          }}
                           disabled={deletingId === post.slug}
-                          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 ml-auto"
                         >
                           {deletingId === post.slug ? (
                             <Loader2 className="w-4 h-4 animate-spin" />
@@ -350,7 +370,7 @@ export default function MyPostsPage() {
                         </button>
                       </div>
                     </div>
-                  </div>
+                  </Link>
                 </motion.div>
               ))}
             </motion.div>
