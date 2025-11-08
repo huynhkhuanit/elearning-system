@@ -29,27 +29,21 @@ export async function GET(
     const search = searchParams.get("search") || "";
 
     // Build query with Supabase
+    // Note: Only select columns that exist in Supabase
+    // Available columns: id, lesson_id, user_id, title, content, is_resolved, likes_count, created_at, updated_at
     let questionsQuery = supabaseAdmin!
       .from("lesson_questions")
       .select(`
         id,
         title,
         content,
-        status,
-        answers_count,
+        is_resolved,
         likes_count,
-        views_count,
         created_at,
         updated_at,
-        is_pinned,
         users!inner(id, username, full_name, avatar_url)
       `)
       .eq("lesson_id", lessonId);
-
-    // Filter by status
-    if (status !== "ALL") {
-      questionsQuery = questionsQuery.eq("status", status);
-    }
 
     // Search
     if (search) {
@@ -61,8 +55,8 @@ export async function GET(
       questionsQuery = questionsQuery.order("likes_count", { ascending: false })
         .order("created_at", { ascending: false });
     } else {
-      questionsQuery = questionsQuery.order("is_pinned", { ascending: false })
-        .order("created_at", { ascending: false });
+      // Sort by created_at descending (most recent first)
+      questionsQuery = questionsQuery.order("created_at", { ascending: false });
     }
 
     const { data: questionsData, error: questionsError } = await questionsQuery;
@@ -71,33 +65,77 @@ export async function GET(
       throw questionsError;
     }
 
+    if (!questionsData || questionsData.length === 0) {
+      return NextResponse.json({
+        success: true,
+        data: { questions: [] },
+      });
+    }
+
+    // Get answers count for each question
+    const questionIds = questionsData.map((q: any) => q.id);
+    const { data: answersData } = await supabaseAdmin!
+      .from("lesson_answers")
+      .select("question_id")
+      .in("question_id", questionIds);
+
+    // Count answers per question
+    const answersCountMap = new Map<string, number>();
+    (answersData || []).forEach((answer: any) => {
+      const count = answersCountMap.get(answer.question_id) || 0;
+      answersCountMap.set(answer.question_id, count + 1);
+    });
+
     // Get likes for current user
     const { data: userLikes } = await supabaseAdmin!
       .from("lesson_question_likes")
       .select("question_id")
       .eq("user_id", userId)
-      .in("question_id", (questionsData || []).map((q: any) => q.id));
+      .in("question_id", questionIds);
 
     const likedQuestionIds = new Set((userLikes || []).map((l: any) => l.question_id));
 
-    const questions = (questionsData || []).map((row: any) => ({
-      id: row.id,
-      title: row.title,
-      content: row.content,
-      status: row.status,
-      answersCount: row.answers_count,
-      likesCount: row.likes_count,
-      viewsCount: row.views_count,
-      createdAt: row.created_at,
-      updatedAt: row.updated_at,
-      user: {
-        id: row.users.id,
-        username: row.users.username,
-        fullName: row.users.full_name,
-        avatarUrl: row.users.avatar_url,
-      },
-      isLiked: likedQuestionIds.has(row.id),
-    }));
+    const questions = (questionsData || []).map((row: any) => {
+      // Calculate answers_count from lesson_answers table
+      const answersCount = answersCountMap.get(row.id) || 0;
+      
+      // Calculate status based on answers_count and is_resolved
+      // RESOLVED = is_resolved is true
+      // ANSWERED = has answers but not resolved
+      // OPEN = no answers
+      let calculatedStatus: string;
+      if (row.is_resolved) {
+        calculatedStatus = "RESOLVED";
+      } else if (answersCount > 0) {
+        calculatedStatus = "ANSWERED";
+      } else {
+        calculatedStatus = "OPEN";
+      }
+      
+      // Filter by status if needed
+      if (status !== "ALL" && status !== calculatedStatus) {
+        return null;
+      }
+      
+      return {
+        id: row.id,
+        title: row.title,
+        content: row.content,
+        status: calculatedStatus,
+        answersCount: answersCount,
+        likesCount: row.likes_count || 0,
+        viewsCount: 0, // views_count column doesn't exist, default to 0
+        createdAt: row.created_at,
+        updatedAt: row.updated_at,
+        user: {
+          id: row.users.id,
+          username: row.users.username,
+          fullName: row.users.full_name,
+          avatarUrl: row.users.avatar_url,
+        },
+        isLiked: likedQuestionIds.has(row.id),
+      };
+    }).filter((q: any) => q !== null);
 
     return NextResponse.json({
       success: true,
@@ -190,14 +228,14 @@ export async function POST(
     }
 
     // Create question
+    // Note: status column doesn't exist, it will be calculated from answers_count
     const [newQuestion] = await insert<{ id: string }>(
       "lesson_questions",
       {
         lesson_id: lessonId,
         user_id: userId,
         title,
-        content,
-        status: "OPEN"
+        content
       }
     );
 

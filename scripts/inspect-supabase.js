@@ -138,7 +138,9 @@ async function main() {
     'blog_categories',
     'blog_tags',
     'blog_post_categories',
-    'blog_post_tags'
+    'blog_post_tags',
+    'lesson_questions',
+    'lesson_question_answers'
   ];
 
   console.log('\n\n🔍 Inspecting Key Tables...\n');

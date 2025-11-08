@@ -102,7 +102,6 @@ export default function CoursesSection() {
 
   const handleEnroll = async (course: Course) => {
     if (!isAuthenticated) {
-      // ✅ FIX: Just show error message, don't auto-redirect (let user click to login)
       toast.error("Vui lòng đăng nhập để đăng ký khóa học");
       return;
     }
@@ -130,7 +129,6 @@ export default function CoursesSection() {
       if (data.success) {
         toast.success(data.message || "Đăng ký khóa học thành công!");
         
-        // ✅ FIX: Handle PRO course upgrade
         if (data.data?.upgradedToPro) {
           console.log(`[${courseType} COURSE] User upgraded to PRO`);
           // Reload page after delay to show new PRO status
@@ -168,7 +166,6 @@ export default function CoursesSection() {
 
   const handleProCourseClick = async (course: Course) => {
     if (!isAuthenticated) {
-      // ✅ FIX: Just show error message, don't auto-redirect (let user handle login)
       toast.error("Vui lòng đăng nhập để tiếp tục");
       return;
     }

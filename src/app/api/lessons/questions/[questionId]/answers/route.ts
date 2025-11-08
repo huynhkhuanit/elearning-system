@@ -107,23 +107,9 @@ export async function POST(
       }
     );
 
-    // Update question answers count and status
-    const currentQuestion = await queryOneBuilder<{ answers_count: number; status: string }>(
-      "lesson_questions",
-      {
-        select: "answers_count, status",
-        filters: { id: questionId }
-      }
-    );
-
-    await update(
-      "lesson_questions",
-      { id: questionId },
-      {
-        answers_count: (currentQuestion?.answers_count || 0) + 1,
-        status: currentQuestion?.status === "OPEN" ? "ANSWERED" : currentQuestion?.status
-      }
-    );
+    // Note: answers_count and status columns don't exist in Supabase
+    // They are calculated dynamically from lesson_answers table
+    // No need to update them here
 
     return NextResponse.json({
       success: true,

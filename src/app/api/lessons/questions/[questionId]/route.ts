@@ -23,34 +23,19 @@ export async function GET(
     const userId = decoded.userId;
     const { questionId } = await params;
 
-    // Increment view count
-    const questionForUpdate = await queryOneBuilder<{ views_count: number }>(
-      "lesson_questions",
-      {
-        select: "views_count",
-        filters: { id: questionId }
-      }
-    );
-
-    if (questionForUpdate) {
-      await update(
-        "lesson_questions",
-        { id: questionId },
-        { views_count: (questionForUpdate.views_count || 0) + 1 }
-      );
-    }
+    // Note: views_count column doesn't exist in Supabase
+    // Skip incrementing view count for now
 
     // Get question details with user info
+    // Note: Only select columns that exist in Supabase
     const { data: questionData, error: questionError } = await supabaseAdmin!
       .from("lesson_questions")
       .select(`
         id,
         title,
         content,
-        status,
-        answers_count,
+        is_resolved,
         likes_count,
-        views_count,
         created_at,
         updated_at,
         users!inner(id, username, full_name, avatar_url)
@@ -104,14 +89,27 @@ export async function GET(
 
     const likedAnswerIds = new Set((answerLikes || []).map((l: any) => l.answer_id));
 
+    // Calculate answers_count from lesson_answers table
+    const answersCount = (answersData || []).length;
+    
+    // Calculate status based on answers_count and is_resolved
+    let calculatedStatus: string;
+    if (questionData.is_resolved) {
+      calculatedStatus = "RESOLVED";
+    } else if (answersCount > 0) {
+      calculatedStatus = "ANSWERED";
+    } else {
+      calculatedStatus = "OPEN";
+    }
+    
     const question = {
       id: questionData.id,
       title: questionData.title,
       content: questionData.content,
-      status: questionData.status,
-      answersCount: questionData.answers_count,
-      likesCount: questionData.likes_count,
-      viewsCount: questionData.views_count,
+      status: calculatedStatus,
+      answersCount: answersCount,
+      likesCount: questionData.likes_count || 0,
+      viewsCount: 0, // views_count column doesn't exist, default to 0
       createdAt: questionData.created_at,
       updatedAt: questionData.updated_at,
       isLiked: !!userLike,
