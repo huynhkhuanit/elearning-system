@@ -1,30 +1,26 @@
 import { NextRequest, NextResponse } from "next/server"
-import { query, transaction } from "@/lib/db"
-import { verifyToken } from "@/lib/auth"
-import { RowDataPacket, ResultSetHeader } from "mysql2"
+import { rpc, queryBuilder, insert, queryOneBuilder } from "@/lib/db"
+import { verifyToken, extractTokenFromHeader } from "@/lib/auth"
+import { cookies } from "next/headers"
+import jwt from "jsonwebtoken"
 
-// Helper function to generate slug from Vietnamese text
 function generateSlug(title: string): string {
   return title
     .toLowerCase()
-    .normalize("NFD") // Decompose Vietnamese characters
-    .replace(/[\u0300-\u036f]/g, "") // Remove diacritics
-    .replace(/đ/g, "d") // Handle special case 'đ'
-    .replace(/Đ/g, "d")
-    .replace(/[^\w\s-]/g, "") // Remove special characters
-    .replace(/\s+/g, "-") // Replace spaces with hyphens
-    .replace(/-+/g, "-") // Remove duplicate hyphens
-    .replace(/^-+|-+$/g, "") // Trim hyphens from start/end
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "")
 }
 
-// Helper function to generate excerpt from HTML content
 function generateExcerpt(html: string, maxLength: number = 200): string {
-  // Remove all HTML tags
-  const text = html.replace(/<[^>]*>/g, "").trim()
-  // Remove extra whitespace
-  const cleaned = text.replace(/\s+/g, " ")
-  // Truncate to maxLength
-  return cleaned.length > maxLength ? cleaned.substring(0, maxLength) + "..." : cleaned
+  const cleaned = html
+    .replace(/<[^>]*>/g, "")
+    .replace(/\s+/g, " ")
+    .trim()
+  return cleaned.length > maxLength
+    ? cleaned.substring(0, maxLength) + "..."
+    : cleaned
 }
 
 // GET - Fetch blog posts with filters and pagination
@@ -32,148 +28,54 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const userId = searchParams.get("userId")
-    const status = searchParams.get("status")
+    const status = searchParams.get("status") || "published" // Default to published
     const categoryId = searchParams.get("categoryId")
     const tag = searchParams.get("tag")
     const search = searchParams.get("search")
     const limit = Math.min(parseInt(searchParams.get("limit") || "10"), 50) // Max 50
     const offset = parseInt(searchParams.get("offset") || "0")
 
-    // Build dynamic SQL query
-    let sql = `
-      SELECT 
-        bp.id,
-        bp.user_id,
-        bp.title,
-        bp.slug,
-        bp.excerpt,
-        bp.cover_image,
-        bp.status,
-        bp.view_count,
-        bp.published_at,
-        bp.created_at,
-        bp.updated_at,
-        u.username,
-        u.full_name,
-        u.avatar_url,
-        (SELECT COUNT(*) FROM blog_likes WHERE post_id = bp.id) as like_count,
-        (SELECT COUNT(*) FROM blog_comments WHERE post_id = bp.id) as comment_count,
-        (SELECT COUNT(*) FROM blog_bookmarks WHERE post_id = bp.id) as bookmark_count,
-        GROUP_CONCAT(DISTINCT bc.name ORDER BY bc.name SEPARATOR ', ') as category_names,
-        GROUP_CONCAT(DISTINCT bt.name ORDER BY bt.name SEPARATOR ', ') as tag_names
-      FROM blog_posts bp
-      INNER JOIN users u ON bp.user_id = u.id
-      LEFT JOIN blog_post_categories bpc ON bp.id = bpc.post_id
-      LEFT JOIN blog_categories bc ON bpc.category_id = bc.id
-      LEFT JOIN blog_post_tags bpt ON bp.id = bpt.post_id
-      LEFT JOIN blog_tags bt ON bpt.tag_id = bt.id
-      WHERE 1=1
-    `
+    // Use RPC function for complex query
+    const results = await rpc<any[]>('get_blog_posts_with_details', {
+      p_user_id: userId || null,
+      p_status: status,
+      p_category_id: categoryId ? parseInt(categoryId) : null,
+      p_tag_slug: tag || null,
+      p_search: search || null,
+      p_limit: limit,
+      p_offset: offset,
+    })
 
-    const params: any[] = []
-
-    // Filter by user
-    if (userId) {
-      sql += ` AND bp.user_id = ?`
-      params.push(userId)
-    }
-
-    // Filter by status
-    if (status) {
-      sql += ` AND bp.status = ?`
-      params.push(status)
-    } else {
-      // Default: only show published posts for public
-      sql += ` AND bp.status = 'published'`
-    }
-
-    // Filter by category
-    if (categoryId) {
-      sql += ` AND EXISTS (
-        SELECT 1 FROM blog_post_categories 
-        WHERE post_id = bp.id AND category_id = ?
-      )`
-      params.push(categoryId)
-    }
-
-    // Filter by tag
-    if (tag) {
-      sql += ` AND EXISTS (
-        SELECT 1 FROM blog_post_tags bpt2
-        INNER JOIN blog_tags bt2 ON bpt2.tag_id = bt2.id
-        WHERE bpt2.post_id = bp.id AND bt2.slug = ?
-      )`
-      params.push(tag)
-    }
-
-    // Search by title or content
-    if (search) {
-      sql += ` AND (bp.title LIKE ? OR bp.excerpt LIKE ?)`
-      const searchTerm = `%${search}%`
-      params.push(searchTerm, searchTerm)
-    }
-
-    // Group by post
-    sql += `
-      GROUP BY bp.id, bp.user_id, bp.title, bp.slug, bp.excerpt, bp.cover_image,
-               bp.status, bp.view_count, bp.published_at, bp.created_at, bp.updated_at,
-               u.username, u.full_name, u.avatar_url
-      ORDER BY bp.created_at DESC
-      LIMIT ? OFFSET ?
-    `
-    params.push(limit, offset)
-
-    const results = await query<RowDataPacket[]>(sql, params)
-
-    // Get total count for pagination
-    let countSql = `SELECT COUNT(DISTINCT bp.id) as total FROM blog_posts bp WHERE 1=1`
-    const countParams: any[] = []
-
-    if (userId) {
-      countSql += ` AND bp.user_id = ?`
-      countParams.push(userId)
-    }
-    if (status) {
-      countSql += ` AND bp.status = ?`
-      countParams.push(status)
-    } else {
-      countSql += ` AND bp.status = 'published'`
-    }
-    if (categoryId) {
-      countSql += ` AND EXISTS (SELECT 1 FROM blog_post_categories WHERE post_id = bp.id AND category_id = ?)`
-      countParams.push(categoryId)
-    }
-    if (tag) {
-      countSql += ` AND EXISTS (
-        SELECT 1 FROM blog_post_tags bpt INNER JOIN blog_tags bt ON bpt.tag_id = bt.id
-        WHERE bpt.post_id = bp.id AND bt.slug = ?
-      )`
-      countParams.push(tag)
-    }
-    if (search) {
-      countSql += ` AND (bp.title LIKE ? OR bp.excerpt LIKE ?)`
-      const searchTerm = `%${search}%`
-      countParams.push(searchTerm, searchTerm)
-    }
-
-    const [countResult] = await query<RowDataPacket[]>(countSql, countParams)
-    const total = countResult.total || 0
+    // Get total count
+    const total = await rpc<number>('count_blog_posts', {
+      p_user_id: userId || null,
+      p_status: status,
+      p_category_id: categoryId ? parseInt(categoryId) : null,
+      p_tag_slug: tag || null,
+      p_search: search || null,
+    })
 
     return NextResponse.json({
       success: true,
-      data: results,
-      pagination: {
-        total,
-        limit,
-        offset,
-        hasMore: offset + limit < total,
+      data: {
+        posts: results || [],
+        pagination: {
+          total: total || 0,
+          limit,
+          offset,
+          hasMore: offset + limit < (total || 0),
+        },
       },
     })
-  } catch (error) {
-    console.error("Get posts error:", error)
+  } catch (error: any) {
+    console.error("Get blog posts error:", error)
     return NextResponse.json(
-      { success: false, error: "Không thể lấy danh sách bài viết" },
-      { status: 500 },
+      {
+        success: false,
+        message: "Không thể lấy danh sách bài viết",
+        error: process.env.NODE_ENV === 'development' ? error.message : undefined,
+      },
+      { status: 500 }
     )
   }
 }
@@ -181,165 +83,140 @@ export async function GET(request: NextRequest) {
 // POST - Create new blog post
 export async function POST(request: NextRequest) {
   try {
-    // Get token from cookie (note: login API sets cookie as "auth_token")
-    const token = request.cookies.get("auth_token")?.value
+    const cookieStore = await cookies()
+    const token = cookieStore.get("auth_token")
 
     if (!token) {
       return NextResponse.json(
-        { success: false, error: "Vui lòng đăng nhập để viết blog" },
-        { status: 401 },
+        { success: false, message: "Unauthorized" },
+        { status: 401 }
       )
     }
 
-    const decoded = verifyToken(token)
-
-    if (!decoded || !decoded.userId) {
-      return NextResponse.json(
-        { success: false, error: "Phiên đăng nhập không hợp lệ" },
-        { status: 401 },
-      )
-    }
-
+    const decoded = jwt.verify(token.value, process.env.JWT_SECRET || "") as { userId: string }
     const body = await request.json()
     const { title, content, coverImage, categories, tags, status: postStatus } = body
 
-    // Validation
-    if (!title || !title.trim()) {
+    if (!title || !content) {
       return NextResponse.json(
-        { success: false, error: "Tiêu đề không được để trống" },
-        { status: 400 },
+        { success: false, message: "Title and content are required" },
+        { status: 400 }
       )
     }
 
-    if (!content || !content.trim()) {
-      return NextResponse.json(
-        { success: false, error: "Nội dung không được để trống" },
-        { status: 400 },
-      )
-    }
+    // Generate unique slug
+    let slug = generateSlug(title)
+    let slugExists = true
+    let slugSuffix = 1
 
-    if (title.length > 255) {
-      return NextResponse.json(
-        { success: false, error: "Tiêu đề không được vượt quá 255 ký tự" },
-        { status: 400 },
-      )
-    }
-
-    // Categories validation for published posts
-    if (postStatus === "published" && (!categories || categories.length === 0)) {
-      return NextResponse.json(
-        { success: false, error: "Vui lòng chọn ít nhất một danh mục khi đăng bài" },
-        { status: 400 },
-      )
-    }
-
-    // Use transaction for data consistency
-    const result = await transaction(async (connection) => {
-      // Generate unique slug
-      let slug = generateSlug(title)
-      let slugExists = true
-      let slugSuffix = 1
-
-      // Check for unique slug
-      while (slugExists) {
-        const [checkSlug] = await connection.query<RowDataPacket[]>(
-          "SELECT id FROM blog_posts WHERE slug = ?",
-          [slug],
-        )
-        if (checkSlug.length === 0) {
-          slugExists = false
-        } else {
-          slug = `${generateSlug(title)}-${slugSuffix}`
-          slugSuffix++
-        }
+    // Check for unique slug
+    while (slugExists) {
+      const existing = await queryOneBuilder<{ id: number }>('blog_posts', {
+        select: 'id',
+        filters: { slug },
+      })
+      if (!existing) {
+        slugExists = false
+      } else {
+        slug = `${generateSlug(title)}-${slugSuffix}`
+        slugSuffix++
       }
+    }
 
-      // Generate excerpt from content
-      const excerpt = generateExcerpt(content, 200)
+    // Generate excerpt from content
+    const excerpt = generateExcerpt(content, 200)
 
-      // Determine published_at timestamp
-      const publishedAt = postStatus === "published" ? new Date() : null
+    // Determine published_at timestamp
+    const publishedAt = postStatus === "published" ? new Date().toISOString() : null
 
-      // Insert blog post
-      const [postResult] = await connection.query<ResultSetHeader>(
-        `INSERT INTO blog_posts 
-        (user_id, title, slug, content, excerpt, cover_image, status, published_at) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-        [decoded.userId, title, slug, content, excerpt, coverImage || null, postStatus || "draft", publishedAt],
-      )
-
-      const postId = postResult.insertId
-
-      // Insert categories (if provided)
-      if (categories && Array.isArray(categories) && categories.length > 0) {
-        for (const categoryId of categories) {
-          // Validate category exists
-          const [categoryCheck] = await connection.query<RowDataPacket[]>(
-            "SELECT id FROM blog_categories WHERE id = ?",
-            [categoryId],
-          )
-
-          if (categoryCheck.length > 0) {
-            await connection.query(
-              "INSERT INTO blog_post_categories (post_id, category_id) VALUES (?, ?)",
-              [postId, categoryId],
-            )
-          }
-        }
-      }
-
-      // Insert tags (if provided)
-      if (tags && Array.isArray(tags) && tags.length > 0) {
-        for (const tagName of tags) {
-          const cleanTagName = tagName.trim().toLowerCase()
-          if (!cleanTagName) continue
-
-          // Get or create tag
-          const [tagResult] = await connection.query<RowDataPacket[]>(
-            "SELECT id FROM blog_tags WHERE name = ?",
-            [cleanTagName],
-          )
-
-          let tagId: number
-
-          if (tagResult.length === 0) {
-            // Create new tag
-            const tagSlug = generateSlug(cleanTagName)
-            const [newTag] = await connection.query<ResultSetHeader>(
-              "INSERT INTO blog_tags (name, slug) VALUES (?, ?)",
-              [cleanTagName, tagSlug],
-            )
-            tagId = newTag.insertId
-          } else {
-            tagId = tagResult[0].id
-          }
-
-          // Link tag to post (avoid duplicates)
-          await connection.query(
-            `INSERT INTO blog_post_tags (post_id, tag_id) 
-             VALUES (?, ?) 
-             ON DUPLICATE KEY UPDATE post_id = post_id`,
-            [postId, tagId],
-          )
-        }
-      }
-
-      return { postId, slug, status: postStatus || "draft" }
+    // Insert blog post using Supabase
+    const [newPost] = await insert<{
+      id: number;
+      user_id: string;
+      title: string;
+      slug: string;
+      content: string;
+      excerpt: string;
+      cover_image: string | null;
+      status: string;
+      published_at: string | null;
+    }>('blog_posts', {
+      user_id: decoded.userId,
+      title,
+      slug,
+      content,
+      excerpt,
+      cover_image: coverImage || null,
+      status: postStatus || "draft",
+      published_at: publishedAt,
     })
 
+    const postId = newPost.id
+
+    // Insert categories (if provided)
+    if (categories && Array.isArray(categories) && categories.length > 0) {
+      for (const categoryId of categories) {
+        // Validate category exists
+        const categoryCheck = await queryOneBuilder<{ id: number }>('blog_categories', {
+          select: 'id',
+          filters: { id: categoryId },
+        })
+
+        if (categoryCheck) {
+          await insert('blog_post_categories', {
+            post_id: postId,
+            category_id: categoryId,
+          })
+        }
+      }
+    }
+
+    // Insert tags (if provided)
+    if (tags && Array.isArray(tags) && tags.length > 0) {
+      for (const tagName of tags) {
+        // Check if tag exists, create if not
+        let tag = await queryOneBuilder<{ id: number; slug: string }>('blog_tags', {
+          select: 'id, slug',
+          filters: { slug: generateSlug(tagName) },
+        })
+
+        if (!tag) {
+          // Create new tag
+          const [newTag] = await insert<{ id: number }>('blog_tags', {
+            name: tagName,
+            slug: generateSlug(tagName),
+          })
+          tag = { id: newTag.id, slug: generateSlug(tagName) }
+        }
+
+        // Link tag to post
+        await insert('blog_post_tags', {
+          post_id: postId,
+          tag_id: tag.id,
+        })
+      }
+    }
+
+    return NextResponse.json({
+      success: true,
+      data: {
+        post: {
+          id: newPost.id,
+          slug: newPost.slug,
+          title: newPost.title,
+        },
+      },
+      message: "Bài viết đã được tạo thành công",
+    })
+  } catch (error: any) {
+    console.error("Create blog post error:", error)
     return NextResponse.json(
       {
-        success: true,
-        message: result.status === "published" ? "Đã đăng bài viết thành công!" : "Đã lưu bản nháp",
-        data: result,
+        success: false,
+        message: "Không thể tạo bài viết",
+        error: process.env.NODE_ENV === 'development' ? error.message : undefined,
       },
-      { status: 201 },
-    )
-  } catch (error) {
-    console.error("Create post error:", error)
-    return NextResponse.json(
-      { success: false, error: "Không thể tạo bài viết. Vui lòng thử lại." },
-      { status: 500 },
+      { status: 500 }
     )
   }
 }

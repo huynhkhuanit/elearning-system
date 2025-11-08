@@ -1,5 +1,10 @@
+/**
+ * Example: Migrated Login Route using Supabase
+ * This shows how to convert from MySQL to Supabase
+ */
+
 import { NextRequest, NextResponse } from 'next/server';
-import { queryOneBuilder, update } from '@/lib/db';
+import { queryOneBuilder, update } from '@/lib/db-helpers';
 import { comparePassword, generateToken } from '@/lib/auth';
 import { loginSchema } from '@/lib/validations/auth';
 
@@ -134,3 +139,4 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+

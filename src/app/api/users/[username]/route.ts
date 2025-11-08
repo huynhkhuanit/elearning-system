@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { query } from '@/lib/db';
-import { RowDataPacket } from 'mysql2';
+import { rpc, queryBuilder } from '@/lib/db-helpers';
 import { UserProfile } from '@/types/profile';
 
 export async function GET(
@@ -10,25 +9,10 @@ export async function GET(
   try {
     const { username } = await params;
 
-    // Fetch user profile data
-    const users = await query<RowDataPacket[]>(
-      `SELECT 
-        u.id, u.email, u.username, u.full_name, u.avatar_url, u.bio, u.phone,
-        u.membership_type, u.membership_expires_at, u.learning_streak, 
-        u.total_study_time, u.is_verified, u.created_at,
-        (SELECT COUNT(*) FROM enrollments WHERE user_id = u.id AND is_active = TRUE) as total_courses_enrolled,
-        (SELECT COUNT(*) FROM enrollments WHERE user_id = u.id AND completed_at IS NOT NULL) as total_courses_completed,
-        0 as total_articles_published,
-        0 as total_forum_posts,
-        0 as followers_count,
-        0 as following_count
-       FROM users u
-       WHERE u.username = ? AND u.is_active = TRUE
-       LIMIT 1`,
-      [username]
-    );
+    // Fetch user profile data using RPC function
+    const users = await rpc<any[]>('get_user_profile', { p_username: username });
 
-    if (users.length === 0) {
+    if (!users || users.length === 0) {
       return NextResponse.json(
         {
           success: false,
@@ -41,9 +25,12 @@ export async function GET(
     const user = users[0];
 
     // Fetch metadata separately
-    const metadataResults = await query<RowDataPacket[]>(
-      `SELECT meta_key, meta_value FROM user_metadata WHERE user_id = ?`,
-      [user.id]
+    const metadataResults = await queryBuilder<{ meta_key: string; meta_value: string }>(
+      'user_metadata',
+      {
+        select: 'meta_key, meta_value',
+        filters: { user_id: user.id },
+      }
     );
 
     // Build metadata object
@@ -66,12 +53,12 @@ export async function GET(
       total_study_time: user.total_study_time,
       is_verified: user.is_verified,
       created_at: user.created_at,
-      total_courses_enrolled: user.total_courses_enrolled,
-      total_courses_completed: user.total_courses_completed,
-      total_articles_published: user.total_articles_published,
-      total_forum_posts: user.total_forum_posts,
-      followers_count: user.followers_count,
-      following_count: user.following_count,
+      total_courses_enrolled: Number(user.total_courses_enrolled) || 0,
+      total_courses_completed: Number(user.total_courses_completed) || 0,
+      total_articles_published: Number(user.total_articles_published) || 0,
+      total_forum_posts: Number(user.total_forum_posts) || 0,
+      followers_count: Number(user.followers_count) || 0,
+      following_count: Number(user.following_count) || 0,
       
       // Social links from metadata
       website: metadata.social_website || null,

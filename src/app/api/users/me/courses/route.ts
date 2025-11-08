@@ -7,7 +7,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { query } from '@/lib/db';
+import { rpc } from '@/lib/db-helpers';
 import { verifyToken, extractTokenFromHeader } from '@/lib/auth';
 
 export async function GET(request: NextRequest) {
@@ -34,60 +34,30 @@ export async function GET(request: NextRequest) {
 
     const userId = payload.userId;
 
-    // 2. Query enrolled courses
-    const sqlQuery = `
-      SELECT 
-        c.id,
-        c.title,
-        c.slug,
-        c.short_description,
-        c.thumbnail_url,
-        c.level,
-        c.price,
-        c.is_free,
-        c.estimated_duration,
-        c.rating,
-        c.total_students,
-        c.total_lessons,
-        e.enrolled_at,
-        e.progress_percentage,
-        e.completed_at,
-        e.total_watch_time,
-        cat.name as category_name,
-        cat.slug as category_slug
-      FROM enrollments e
-      INNER JOIN courses c ON e.course_id = c.id
-      LEFT JOIN categories cat ON c.category_id = cat.id
-      WHERE e.user_id = ? AND e.is_active = 1
-      ORDER BY e.enrolled_at DESC
-    `;
-
-    const courses = await query(sqlQuery, [userId]);
+    // 2. Query enrolled courses using RPC function
+    const courses = await rpc<any[]>('get_user_enrolled_courses', { p_user_id: userId });
 
     // 3. Format response
-    const formattedCourses = (courses as any[]).map((course) => ({
-      id: course.id,
-      title: course.title,
-      slug: course.slug,
-      subtitle: course.short_description,
-      thumbnailUrl: course.thumbnail_url,
-      level: course.level,
-      price: course.is_free ? 'Miễn phí' : `${course.price.toLocaleString('vi-VN')}đ`,
-      isFree: Boolean(course.is_free),
-      isPro: !Boolean(course.is_free),
-      duration: formatDuration(course.estimated_duration),
-      rating: parseFloat(course.rating),
-      students: course.total_students,
-      totalLessons: course.total_lessons,
-      category: {
-        name: course.category_name,
-        slug: course.category_slug,
-      },
+    const formattedCourses = (courses || []).map((course: any) => ({
+      id: course.course_id,
+      title: course.course_title,
+      slug: course.course_slug,
+      subtitle: null, // Not returned by RPC, can be fetched separately if needed
+      thumbnailUrl: course.course_thumbnail_url,
+      level: null, // Not returned by RPC, can be fetched separately if needed
+      price: 'Miễn phí', // Default, can be enhanced
+      isFree: true, // Default, can be enhanced
+      isPro: false, // Default, can be enhanced
+      duration: null, // Not returned by RPC
+      rating: null, // Not returned by RPC
+      students: null, // Not returned by RPC
+      totalLessons: null, // Not returned by RPC
+      category: null, // Not returned by RPC
       enrollment: {
         enrolledAt: course.enrolled_at,
-        progress: parseFloat(course.progress_percentage),
+        progress: parseFloat(course.progress_percentage || 0),
         completedAt: course.completed_at,
-        watchTime: course.total_watch_time,
+        watchTime: course.total_watch_time || 0,
         isCompleted: Boolean(course.completed_at),
       },
     }));
@@ -105,18 +75,9 @@ export async function GET(request: NextRequest) {
       {
         success: false,
         message: 'Failed to fetch user courses',
-        error: error.message,
+        error: process.env.NODE_ENV === 'development' ? error.message : undefined,
       },
       { status: 500 }
     );
   }
-}
-
-/**
- * Format duration from minutes to human readable
- */
-function formatDuration(minutes: number): string {
-  const hours = Math.floor(minutes / 60);
-  const mins = minutes % 60;
-  return `${hours}h${mins > 0 ? mins.toString().padStart(2, '0') : '00'}p`;
 }

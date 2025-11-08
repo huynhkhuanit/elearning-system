@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { query } from "@/lib/db"
-import { RowDataPacket } from "mysql2"
+import { rpc, queryBuilder, update } from "@/lib/db"
 
 // GET - Get single blog post by slug
 export async function GET(
@@ -17,77 +16,72 @@ export async function GET(
       )
     }
 
-    // Get post details with author, categories, and tags
-    const sql = `
-      SELECT 
-        bp.id,
-        bp.user_id,
-        bp.title,
-        bp.slug,
-        bp.content,
-        bp.excerpt,
-        bp.cover_image,
-        bp.status,
-        bp.view_count,
-        bp.published_at,
-        bp.created_at,
-        bp.updated_at,
-        u.username,
-        u.full_name,
-        u.avatar_url,
-        u.bio,
-        (SELECT COUNT(*) FROM blog_likes WHERE post_id = bp.id) as like_count,
-        (SELECT COUNT(*) FROM blog_comments WHERE post_id = bp.id) as comment_count,
-        (SELECT COUNT(*) FROM blog_bookmarks WHERE post_id = bp.id) as bookmark_count
-      FROM blog_posts bp
-      INNER JOIN users u ON bp.user_id = u.id
-      WHERE bp.slug = ?
-      LIMIT 1
-    `
+    // Get post details using RPC function
+    const posts = await rpc<any[]>('get_blog_post_by_slug', { p_slug: slug })
 
-    const [post] = await query<RowDataPacket[]>(sql, [slug])
-
-    if (!post) {
+    if (!posts || posts.length === 0) {
       return NextResponse.json(
         { success: false, error: "Không tìm thấy bài viết" },
         { status: 404 }
       )
     }
 
-    // Get categories
-    const categoriesSql = `
-      SELECT bc.id, bc.name, bc.slug, bc.description
-      FROM blog_categories bc
-      INNER JOIN blog_post_categories bpc ON bc.id = bpc.category_id
-      WHERE bpc.post_id = ?
-      ORDER BY bc.name
-    `
-    const categories = await query<RowDataPacket[]>(categoriesSql, [post.id])
+    const post = posts[0]
 
-    // Get tags
-    const tagsSql = `
-      SELECT bt.id, bt.name, bt.slug
-      FROM blog_tags bt
-      INNER JOIN blog_post_tags bpt ON bt.id = bpt.tag_id
-      WHERE bpt.post_id = ?
-      ORDER BY bt.name
-    `
-    const tags = await query<RowDataPacket[]>(tagsSql, [post.id])
+    // Get categories for this post
+    const postCategories = await queryBuilder<{
+      category_id: number;
+    }>('blog_post_categories', {
+      select: 'category_id',
+      filters: { post_id: post.id },
+    })
 
-    // Increment view count
-    await query(
-      "UPDATE blog_posts SET view_count = view_count + 1 WHERE id = ?",
-      [post.id]
-    )
+    const categoryIds = postCategories.map(pc => pc.category_id)
+    const categories = categoryIds.length > 0 
+      ? await queryBuilder<{
+          id: number;
+          name: string;
+          slug: string;
+          description: string | null;
+        }>('blog_categories', {
+          select: 'id, name, slug, description',
+          filters: { id: categoryIds },
+        })
+      : []
+
+    // Get tags for this post
+    const postTags = await queryBuilder<{
+      tag_id: number;
+    }>('blog_post_tags', {
+      select: 'tag_id',
+      filters: { post_id: post.id },
+    })
+
+    const tagIds = postTags.map(pt => pt.tag_id)
+    const tags = tagIds.length > 0
+      ? await queryBuilder<{
+          id: number;
+          name: string;
+          slug: string;
+        }>('blog_tags', {
+          select: 'id, name, slug',
+          filters: { id: tagIds },
+        })
+      : []
+
+    // Increment view count using update helper
+    await update('blog_posts', { id: post.id }, {
+      view_count: (post.view_count || 0) + 1,
+    })
 
     // Return complete post data
     return NextResponse.json({
       success: true,
       data: {
         ...post,
-        view_count: post.view_count + 1, // Return updated count
-        categories,
-        tags,
+        view_count: (post.view_count || 0) + 1, // Return updated count
+        categories: categories.sort((a, b) => a.name.localeCompare(b.name)),
+        tags: tags.sort((a, b) => a.name.localeCompare(b.name)),
         author: {
           id: post.user_id,
           username: post.username,

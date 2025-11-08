@@ -1,3 +1,5 @@
+CREATE DATABASE  IF NOT EXISTS `learning_platform_db` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
+USE `learning_platform_db`;
 -- MySQL dump 10.13  Distrib 8.0.43, for Win64 (x86_64)
 --
 -- Host: 127.0.0.1    Database: learning_platform_db
@@ -156,6 +158,7 @@ CREATE TABLE `blog_post_categories` (
 
 LOCK TABLES `blog_post_categories` WRITE;
 /*!40000 ALTER TABLE `blog_post_categories` DISABLE KEYS */;
+INSERT INTO `blog_post_categories` VALUES (1,4),(2,8);
 /*!40000 ALTER TABLE `blog_post_categories` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -212,7 +215,7 @@ CREATE TABLE `blog_posts` (
   KEY `idx_status` (`status`),
   KEY `idx_published_at` (`published_at`),
   CONSTRAINT `blog_posts_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -221,6 +224,7 @@ CREATE TABLE `blog_posts` (
 
 LOCK TABLES `blog_posts` WRITE;
 /*!40000 ALTER TABLE `blog_posts` DISABLE KEYS */;
+INSERT INTO `blog_posts` VALUES (1,'2396a721-a1e4-11f0-864b-a036bc320b36','T1 vô địch','t1-vo-dich','<p>123</p>','123','https://cdn2.fptshop.com.vn/unsafe/800x0/T1_LOL_1_638b10d703.png','published',39,'2025-11-03 11:51:40','2025-11-03 11:51:39','2025-11-03 14:49:09'),(2,'2396a721-a1e4-11f0-864b-a036bc320b36','Lập trình không khó','lap-trinh-khong-kho','<p><strong>Việc xây dựng các bài viết lập trình không khó</strong></p><p><code>console.log(\"Hello world\");</code></p><blockquote><p>Log</p></blockquote><pre class=\"bg-gray-900 text-gray-100 rounded-lg p-4 my-4 overflow-x-auto\"><code>đâscxczx\ncádadzxczxc\nzc\nádasdas</code></pre><img class=\"max-w-full h-auto rounded-lg my-4\" src=\"https://cellphones.com.vn/sforum/wp-content/uploads/2024/03/lap-trinh-vien-0.jpg\"><p></p>','Việc xây dựng các bài viết lập trình không khóconsole.log(\"Hello world\");Logđâscxczx cádadzxczxc zc ádasdas','https://caodangvietmyhanoi.edu.vn/upload_images/images/ky-thuat-lap-trinh-cong-nghe-thong-tin.jpg','published',5,'2025-11-03 14:51:52','2025-11-03 14:51:52','2025-11-03 14:55:27');
 /*!40000 ALTER TABLE `blog_posts` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1329,4 +1333,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-11-03 18:43:30
+-- Dump completed on 2025-11-08 16:43:35

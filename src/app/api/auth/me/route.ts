@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { query } from '@/lib/db';
+import { queryOneBuilder } from '@/lib/db';
 import { verifyToken, extractTokenFromHeader } from '@/lib/auth';
-import { RowDataPacket } from 'mysql2';
 
 export async function GET(request: NextRequest) {
   try {
@@ -35,16 +34,30 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Get user from database
-    const users = await query<RowDataPacket[]>(
-      `SELECT id, email, username, full_name, avatar_url, bio, phone, role,
-              membership_type, membership_expires_at, learning_streak, 
-              total_study_time, is_verified, is_active, last_login, created_at
-       FROM users WHERE id = ? AND is_active = TRUE LIMIT 1`,
-      [payload.userId]
-    );
+    // Get user from database using Supabase
+    const user = await queryOneBuilder<{
+      id: string;
+      email: string;
+      username: string;
+      full_name: string;
+      avatar_url: string | null;
+      bio: string | null;
+      phone: string | null;
+      role: string;
+      membership_type: string;
+      membership_expires_at: string | null;
+      learning_streak: number;
+      total_study_time: number;
+      is_verified: boolean;
+      is_active: boolean;
+      last_login: string | null;
+      created_at: string;
+    }>('users', {
+      select: 'id, email, username, full_name, avatar_url, bio, phone, role, membership_type, membership_expires_at, learning_streak, total_study_time, is_verified, is_active, last_login, created_at',
+      filters: { id: payload.userId, is_active: true },
+    });
 
-    if (users.length === 0) {
+    if (!user) {
       return NextResponse.json(
         {
           success: false,
@@ -53,8 +66,6 @@ export async function GET(request: NextRequest) {
         { status: 404 }
       );
     }
-
-    const user = users[0];
 
     return NextResponse.json(
       {

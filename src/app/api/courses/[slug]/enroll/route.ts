@@ -9,7 +9,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { query } from '@/lib/db';
+import { queryOneBuilder, insert, update } from '@/lib/db';
 import { verifyToken, extractTokenFromHeader } from '@/lib/auth';
 
 export async function POST(
@@ -40,43 +40,48 @@ export async function POST(
     const userId = payload.userId;
     const { slug } = await params;
 
-    // 2. Get course details
-    const courseResults = await query(
-      `SELECT id, title, price, is_free, is_published FROM courses WHERE slug = ? AND is_published = 1 LIMIT 1`,
-      [slug]
-    );
+    // 2. Get course details using Supabase
+    const course = await queryOneBuilder<{
+      id: string;
+      title: string;
+      price: number;
+      is_free: boolean;
+      is_published: boolean;
+    }>('courses', {
+      select: 'id, title, price, is_free, is_published',
+      filters: { slug, is_published: true },
+    });
 
-    if (!courseResults || (courseResults as any[]).length === 0) {
+    if (!course) {
       return NextResponse.json(
         { success: false, message: 'Course not found' },
         { status: 404 }
       );
     }
 
-    const course = (courseResults as any[])[0];
-
     // 3. Get user membership status
-    const userResults = await query(
-      `SELECT membership_type, membership_expires_at FROM users WHERE id = ? LIMIT 1`,
-      [userId]
-    );
+    const user = await queryOneBuilder<{
+      membership_type: string;
+      membership_expires_at: string | null;
+    }>('users', {
+      select: 'membership_type, membership_expires_at',
+      filters: { id: userId },
+    });
 
-    if (!userResults || (userResults as any[]).length === 0) {
+    if (!user) {
       return NextResponse.json(
         { success: false, message: 'User not found' },
         { status: 404 }
       );
     }
 
-    const user = (userResults as any[])[0];
-
     // 4. Check if user is already enrolled
-    const enrollmentCheck = await query(
-      `SELECT id FROM enrollments WHERE user_id = ? AND course_id = ? LIMIT 1`,
-      [userId, course.id]
-    );
+    const existingEnrollment = await queryOneBuilder<{ id: string }>('enrollments', {
+      select: 'id',
+      filters: { user_id: userId, course_id: course.id },
+    });
 
-    if (enrollmentCheck && (enrollmentCheck as any[]).length > 0) {
+    if (existingEnrollment) {
       return NextResponse.json(
         { success: false, message: 'Bạn đã đăng ký khóa học này rồi!' },
         { status: 400 }
@@ -89,33 +94,33 @@ export async function POST(
                   new Date(user.membership_expires_at) > new Date();
 
     // If course is PRO and user is not PRO
+    let upgradedToPro = false;
     if (!course.is_free && !isPro) {
       // Auto upgrade user to PRO when enrolling in PRO course
       const expiryDate = new Date();
       expiryDate.setFullYear(expiryDate.getFullYear() + 1); // 1 year PRO
 
-      await query(
-        `UPDATE users SET membership_type = 'PRO', membership_expires_at = ? WHERE id = ?`,
-        [expiryDate, userId]
-      );
+      await update('users', { id: userId }, {
+        membership_type: 'PRO',
+        membership_expires_at: expiryDate.toISOString(),
+      });
 
+      upgradedToPro = true;
       console.log(`✅ User ${userId} upgraded to PRO`);
     }
 
-    // 6. Create enrollment
-    await query(
-      `INSERT INTO enrollments (user_id, course_id, enrolled_at, progress_percentage, is_active)
-       VALUES (?, ?, NOW(), 0, 1)`,
-      [userId, course.id]
-    );
+    // 6. Create enrollment using Supabase insert
+    await insert('enrollments', {
+      user_id: userId,
+      course_id: course.id,
+      enrolled_at: new Date().toISOString(),
+      progress_percentage: 0,
+      is_active: true,
+    });
 
-    // 7. Update course total_students count
-    await query(
-      `UPDATE courses SET total_students = total_students + 1 WHERE id = ?`,
-      [course.id]
-    );
+    // Note: total_students is updated automatically by trigger in PostgreSQL
 
-    // 8. Return success response
+    // 7. Return success response
     return NextResponse.json({
       success: true,
       message: course.is_free 
@@ -124,16 +129,25 @@ export async function POST(
       data: {
         courseId: course.id,
         courseTitle: course.title,
-        upgradedToPro: !course.is_free && !isPro,
+        upgradedToPro,
       },
     });
   } catch (error: any) {
     console.error('Error enrolling in course:', error);
+    
+    // Handle unique constraint violations
+    if (error?.code === '23505' || error?.message?.includes('duplicate')) {
+      return NextResponse.json(
+        { success: false, message: 'Bạn đã đăng ký khóa học này rồi!' },
+        { status: 400 }
+      );
+    }
+    
     return NextResponse.json(
       {
         success: false,
         message: 'Failed to enroll in course',
-        error: error.message,
+        error: process.env.NODE_ENV === 'development' ? error.message : undefined,
       },
       { status: 500 }
     );

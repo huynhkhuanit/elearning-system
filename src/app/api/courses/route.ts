@@ -8,7 +8,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { query } from '@/lib/db';
+import { rpc } from '@/lib/db-helpers';
 
 export async function GET(request: NextRequest) {
   try {
@@ -23,100 +23,55 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '12');
     const offset = (page - 1) * limit;
 
-    // Build WHERE clause with params
-    let whereConditions: string[] = [];
-    let queryParams: any[] = [];
-
-    // Always filter published courses
-    whereConditions.push('c.is_published = ?');
-    queryParams.push(1);
+    // Build RPC parameters
+    const rpcParams: any = {
+      p_limit: limit,
+      p_offset: offset,
+    };
 
     if (level) {
-      whereConditions.push('c.level = ?');
-      queryParams.push(level.toUpperCase());
+      rpcParams.p_level = level.toUpperCase();
     }
 
     if (isFreeParam !== null) {
-      whereConditions.push('c.is_free = ?');
-      queryParams.push(parseInt(isFreeParam));
+      rpcParams.p_is_free = parseInt(isFreeParam) === 1;
     }
 
     if (category) {
-      whereConditions.push('cat.slug = ?');
-      queryParams.push(category);
+      rpcParams.p_category_slug = category;
     }
 
     if (search) {
-      whereConditions.push('(c.title LIKE ? OR c.short_description LIKE ?)');
-      const searchPattern = `%${search}%`;
-      queryParams.push(searchPattern, searchPattern);
+      rpcParams.p_search = search;
     }
 
-    const whereClause = `WHERE ${whereConditions.join(' AND ')}`;
+    // Get courses using RPC function
+    const courses = await rpc<any[]>('get_courses_with_details', rpcParams);
 
-    // Query courses
-    const sqlQuery = `
-      SELECT 
-        c.id,
-        c.title,
-        c.slug,
-        c.short_description,
-        c.thumbnail_url,
-        c.level,
-        c.price,
-        c.is_free,
-        c.estimated_duration,
-        c.rating,
-        c.total_students,
-        c.total_lessons,
-        c.created_at,
-        cat.name as category_name,
-        cat.slug as category_slug,
-        u.full_name as instructor_name,
-        u.username as instructor_username
-      FROM courses c
-      LEFT JOIN categories cat ON c.category_id = cat.id
-      LEFT JOIN users u ON c.instructor_id = u.id
-      ${whereClause}
-      ORDER BY 
-        CASE WHEN c.is_free = 0 THEN 0 ELSE 1 END,
-        c.rating DESC,
-        c.created_at DESC
-      LIMIT ? OFFSET ?
-    `;
-
-    // Add limit and offset to params
-    const coursesParams = [...queryParams, limit, offset];
-
-    const courses = await query(sqlQuery, coursesParams);
-
-    // Get total count (without LIMIT/OFFSET)
-    const countQuery = `
-      SELECT COUNT(*) as total
-      FROM courses c
-      LEFT JOIN categories cat ON c.category_id = cat.id
-      ${whereClause}
-    `;
-
-    const countResult = await query(countQuery, queryParams);
-    const total = (countResult as any)[0].total;
+    // Get total count
+    const total = await rpc<number>('count_courses_with_filters', {
+      p_level: level?.toUpperCase() || null,
+      p_is_free: isFreeParam !== null ? parseInt(isFreeParam) === 1 : null,
+      p_category_slug: category || null,
+      p_search: search || null,
+    });
 
     // Format response
-    const formattedCourses = (courses as any[]).map((course) => ({
+    const formattedCourses = (courses || []).map((course: any) => ({
       id: course.id,
       title: course.title,
       slug: course.slug,
       subtitle: course.short_description,
       thumbnailUrl: course.thumbnail_url,
       level: course.level,
-      price: course.is_free ? 'Miễn phí' : `${course.price.toLocaleString('vi-VN')}đ`,
-      priceAmount: course.price,
+      price: course.is_free ? 'Miễn phí' : `${parseFloat(course.price || 0).toLocaleString('vi-VN')}đ`,
+      priceAmount: parseFloat(course.price || 0),
       isFree: Boolean(course.is_free),
       isPro: !Boolean(course.is_free),
-      duration: formatDuration(course.estimated_duration),
-      rating: parseFloat(course.rating),
-      students: course.total_students,
-      totalLessons: course.total_lessons,
+      duration: formatDuration(course.estimated_duration || 0),
+      rating: parseFloat(course.rating || 0),
+      students: course.total_students || 0,
+      totalLessons: course.total_lessons || 0,
       category: {
         name: course.category_name,
         slug: course.category_slug,
@@ -133,11 +88,11 @@ export async function GET(request: NextRequest) {
       data: {
         courses: formattedCourses,
         pagination: {
-          total,
+          total: total || 0,
           page,
           limit,
-          totalPages: Math.ceil(total / limit),
-          hasMore: page * limit < total,
+          totalPages: Math.ceil((total || 0) / limit),
+          hasMore: page * limit < (total || 0),
         },
       },
     });
@@ -147,7 +102,7 @@ export async function GET(request: NextRequest) {
       {
         success: false,
         message: 'Failed to fetch courses',
-        error: error.message,
+        error: process.env.NODE_ENV === 'development' ? error.message : undefined,
       },
       { status: 500 }
     );
