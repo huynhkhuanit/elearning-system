@@ -30,9 +30,11 @@ export async function GET(request: NextRequest) {
     const offset = parseInt(searchParams.get("offset") || "0")
 
     // Use RPC function to get posts
+    // If status is empty string or null, pass null to get all posts
+    const postStatus = status && status !== "" ? status : null
     const results = await rpc<any[]>('get_blog_posts_with_details', {
       p_user_id: decoded.userId,
-      p_status: status || 'published',
+      p_status: postStatus,
       p_category_id: null,
       p_tag_slug: null,
       p_search: null,
@@ -43,7 +45,7 @@ export async function GET(request: NextRequest) {
     // Get total count
     const total = await rpc<number>('count_blog_posts', {
       p_user_id: decoded.userId,
-      p_status: status || 'published',
+      p_status: postStatus,
       p_category_id: null,
       p_tag_slug: null,
       p_search: null,

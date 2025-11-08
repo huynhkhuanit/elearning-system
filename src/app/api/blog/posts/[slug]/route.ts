@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
-import { rpc, queryBuilder, update } from "@/lib/db"
+import { rpc, queryBuilder, update, deleteRows } from "@/lib/db"
+import { verifyToken } from "@/lib/auth"
+import { cookies } from "next/headers"
 
 // GET - Get single blog post by slug
 export async function GET(
@@ -95,6 +97,76 @@ export async function GET(
     console.error("Get post detail error:", error)
     return NextResponse.json(
       { success: false, error: "Không thể lấy thông tin bài viết" },
+      { status: 500 }
+    )
+  }
+}
+
+// DELETE - Delete blog post by slug
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ slug: string }> }
+) {
+  try {
+    const cookieStore = await cookies()
+    const token = cookieStore.get("auth_token")?.value
+
+    if (!token) {
+      return NextResponse.json(
+        { success: false, error: "Vui lòng đăng nhập" },
+        { status: 401 }
+      )
+    }
+
+    const decoded = verifyToken(token)
+
+    if (!decoded || !decoded.userId) {
+      return NextResponse.json(
+        { success: false, error: "Phiên đăng nhập không hợp lệ" },
+        { status: 401 }
+      )
+    }
+
+    const { slug } = await params
+
+    if (!slug) {
+      return NextResponse.json(
+        { success: false, error: "Slug không hợp lệ" },
+        { status: 400 }
+      )
+    }
+
+    // Get post details to verify ownership
+    const posts = await rpc<any[]>('get_blog_post_by_slug', { p_slug: slug })
+
+    if (!posts || posts.length === 0) {
+      return NextResponse.json(
+        { success: false, error: "Không tìm thấy bài viết" },
+        { status: 404 }
+      )
+    }
+
+    const post = posts[0]
+
+    // Verify ownership
+    if (post.user_id !== decoded.userId) {
+      return NextResponse.json(
+        { success: false, error: "Bạn không có quyền xóa bài viết này" },
+        { status: 403 }
+      )
+    }
+
+    // Delete post (cascade will handle related records)
+    await deleteRows('blog_posts', { id: post.id })
+
+    return NextResponse.json({
+      success: true,
+      message: "Xóa bài viết thành công",
+    })
+  } catch (error) {
+    console.error("Delete post error:", error)
+    return NextResponse.json(
+      { success: false, error: "Không thể xóa bài viết" },
       { status: 500 }
     )
   }
