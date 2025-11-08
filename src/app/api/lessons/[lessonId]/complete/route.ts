@@ -116,7 +116,7 @@ export async function POST(
       "learning_activities",
       {
         select: "id, lessons_completed",
-        filters: { user_id: userId, activity_date: today }
+        filters: { user_id: userId, activity_data: today }
       }
     );
 
@@ -129,7 +129,7 @@ export async function POST(
     } else {
       await insert("learning_activities", {
         user_id: userId,
-        activity_date: today,
+        activity_data: today,
         lessons_completed: 1
       });
     }

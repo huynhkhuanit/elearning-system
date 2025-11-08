@@ -36,32 +36,32 @@ export async function GET(
     const oneYearAgoStr = oneYearAgo.toISOString().split('T')[0];
 
     const activities = await queryBuilder<{
-      activity_date: string;
+      activity_data: string;
       lessons_completed: number;
       quizzes_completed: number;
       study_time: number | null;
     }>(
       'learning_activities',
       {
-        select: 'activity_date, lessons_completed, quizzes_completed, study_time',
+        select: 'activity_data, lessons_completed, quizzes_completed, study_time',
         filters: { user_id: userId },
-        orderBy: { column: 'activity_date', ascending: true }
+        orderBy: { column: 'activity_data', ascending: true }
       }
     );
 
     // Filter activities from last 12 months
     const filteredActivities = activities.filter(a => 
-      new Date(a.activity_date) >= new Date(oneYearAgoStr)
+      new Date(a.activity_data) >= new Date(oneYearAgoStr)
     );
 
     // Create a map of all days in the last 12 months
     const activityMap = new Map<string, ActivityDay>();
     const today = new Date();
-    const oneYearAgo = new Date();
-    oneYearAgo.setMonth(today.getMonth() - 12);
+    // Reuse oneYearAgo from above, create a copy for iteration
+    const oneYearAgoCopy = new Date(oneYearAgo);
 
     // Initialize all days with 0 activity
-    for (let d = new Date(oneYearAgo); d <= today; d.setDate(d.getDate() + 1)) {
+    for (let d = new Date(oneYearAgoCopy); d <= today; d.setDate(d.getDate() + 1)) {
       const dateStr = d.toISOString().split('T')[0];
       activityMap.set(dateStr, {
         date: dateStr,
@@ -73,7 +73,7 @@ export async function GET(
     // Fill in actual activity data
     let totalCount = 0;
     filteredActivities.forEach((activity) => {
-      const dateStr = new Date(activity.activity_date).toISOString().split('T')[0];
+      const dateStr = new Date(activity.activity_data).toISOString().split('T')[0];
       const count = 
         (activity.lessons_completed || 0) + 
         (activity.quizzes_completed || 0);
