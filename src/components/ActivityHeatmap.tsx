@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import type { ActivityDay } from "@/types/profile";
 
 interface ActivityHeatmapProps {
@@ -17,6 +17,9 @@ interface DayCell {
 
 export default function ActivityHeatmap({ activities, totalCount, currentStreak }: ActivityHeatmapProps) {
   const [hoveredCell, setHoveredCell] = useState<{ date: Date; count: number; x: number; y: number } | null>(null);
+  const [scale, setScale] = useState(1);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const gridRef = useRef<HTMLDivElement>(null);
 
   // Create a map for quick lookup of activity counts
   const activityMap = useMemo(() => {
@@ -100,6 +103,46 @@ export default function ActivityHeatmap({ activities, totalCount, currentStreak 
 
   const weekDayLabels = ["CN", "T2", "T3", "T4", "T5", "T6", "T7"];
 
+  // Calculate scale to fit container width without scroll
+  useEffect(() => {
+    const updateScale = () => {
+      if (containerRef.current && gridRef.current) {
+        // Wait for next frame to ensure DOM is updated
+        requestAnimationFrame(() => {
+          if (containerRef.current && gridRef.current) {
+            const containerWidth = containerRef.current.offsetWidth;
+            // Day labels take about 30px, gap is 3px, padding from container
+            const availableWidth = containerWidth - 33 - 16; // 16px for padding
+            
+            // Calculate grid width: 53 weeks * (10px cell + 3px gap) = 53 * 13 = 689px
+            // But we need to account for actual rendered width
+            const gridWidth = gridRef.current.scrollWidth;
+            
+            if (gridWidth > availableWidth && availableWidth > 0) {
+              // Calculate scale to fit exactly
+              const calculatedScale = availableWidth / gridWidth;
+              setScale(Math.max(0.5, Math.min(1, calculatedScale))); // Min scale 0.5, max 1
+            } else {
+              setScale(1);
+            }
+          }
+        });
+      }
+    };
+
+    // Initial calculation
+    updateScale();
+    
+    // Recalculate on resize
+    const timeoutId = setTimeout(updateScale, 100);
+    window.addEventListener('resize', updateScale);
+    
+    return () => {
+      window.removeEventListener('resize', updateScale);
+      clearTimeout(timeoutId);
+    };
+  }, [heatmapData]);
+
   return (
     <div className="bg-white rounded-xl border border-gray-200 p-6 w-full">
       {/* Header */}
@@ -114,74 +157,87 @@ export default function ActivityHeatmap({ activities, totalCount, currentStreak 
         )}
       </div>
 
-      {/* Heatmap Container - Full width */}
-      <div className="w-full overflow-x-auto pb-2">
-        <div className="w-full min-w-max">
-          {/* Month Labels */}
-          <div className="flex gap-[3px] mb-2 ml-8">
-            {monthLabels.map((label, index) => (
+      {/* Heatmap Container - Full width, no scroll */}
+      <div ref={containerRef} className="w-full pb-2 overflow-hidden">
+        {/* Month Labels */}
+        <div 
+          className="flex gap-[3px] mb-2 ml-8"
+          style={{
+            transform: `scale(${scale})`,
+            transformOrigin: 'left center',
+            height: scale < 1 ? `${14 / scale}px` : 'auto',
+          }}
+        >
+          {monthLabels.map((label, index) => (
+            <div
+              key={index}
+              className="text-xs text-gray-600 whitespace-nowrap"
+              style={{
+                marginLeft: index === 0 ? 0 : `${(label.offset - (monthLabels[index - 1]?.offset || 0)) * 11}px`,
+              }}
+            >
+              {label.month}
+            </div>
+          ))}
+        </div>
+
+        {/* Heatmap Grid - Full width, scaled to fit */}
+        <div className="flex gap-[3px]">
+          {/* Day labels */}
+          <div className="flex flex-col gap-[3px] justify-start pr-2 flex-shrink-0">
+            {weekDayLabels.map((day, index) => (
               <div
-                key={index}
-                className="text-xs text-gray-600"
-                style={{
-                  marginLeft: index === 0 ? 0 : `${(label.offset - (monthLabels[index - 1]?.offset || 0)) * 11}px`,
-                }}
+                key={day}
+                className="text-xs text-gray-600 h-[10px] flex items-center"
+                style={{ visibility: index % 2 === 1 ? "visible" : "hidden" }}
               >
-                {label.month}
+                {day}
               </div>
             ))}
           </div>
 
-          {/* Heatmap Grid - Full width */}
-          <div className="flex gap-[3px]">
-            {/* Day labels */}
-            <div className="flex flex-col gap-[3px] justify-start pr-2 flex-shrink-0">
-              {weekDayLabels.map((day, index) => (
-                <div
-                  key={day}
-                  className="text-xs text-gray-600 h-[10px] flex items-center"
-                  style={{ visibility: index % 2 === 1 ? "visible" : "hidden" }}
-                >
-                  {day}
-                </div>
-              ))}
-            </div>
-
-            {/* Activity cells - Full width grid */}
-            <div className="flex gap-[3px]">
-              {heatmapData.map((week, weekIndex) => (
-                <div key={weekIndex} className="flex flex-col gap-[3px]">
-                  {week.map((day, dayIndex) => {
-                    const isToday = day.date.toDateString() === new Date().toDateString();
-                    const isFutureDate = day.date > new Date();
-                    
-                    return (
-                      <div
-                        key={dayIndex}
-                        className={`
-                          w-[10px] h-[10px] rounded-sm cursor-pointer transition-all
-                          ${isFutureDate ? "bg-transparent" : getColor(day.count)}
-                          ${isToday ? "ring-2 ring-blue-500 ring-offset-1" : ""}
-                          hover:ring-2 hover:ring-gray-400 hover:ring-offset-1
-                        `}
-                        onMouseEnter={(e) => {
-                          if (!isFutureDate) {
-                            const rect = e.currentTarget.getBoundingClientRect();
-                            setHoveredCell({
-                              date: day.date,
-                              count: day.count,
-                              x: rect.left + rect.width / 2,
-                              y: rect.top,
-                            });
-                          }
-                        }}
-                        onMouseLeave={() => setHoveredCell(null)}
-                      />
-                    );
-                  })}
-                </div>
-              ))}
-            </div>
+          {/* Activity cells - Scaled to fit container */}
+          <div 
+            ref={gridRef}
+            className="flex gap-[3px]"
+            style={{
+              transform: `scale(${scale})`,
+              transformOrigin: 'left top',
+              width: scale < 1 ? `${100 / scale}%` : '100%',
+            }}
+          >
+            {heatmapData.map((week, weekIndex) => (
+              <div key={weekIndex} className="flex flex-col gap-[3px]">
+                {week.map((day, dayIndex) => {
+                  const isToday = day.date.toDateString() === new Date().toDateString();
+                  const isFutureDate = day.date > new Date();
+                  
+                  return (
+                    <div
+                      key={dayIndex}
+                      className={`
+                        w-[10px] h-[10px] rounded-sm cursor-pointer transition-all flex-shrink-0
+                        ${isFutureDate ? "bg-transparent" : getColor(day.count)}
+                        ${isToday ? "ring-2 ring-blue-500 ring-offset-1" : ""}
+                        hover:ring-2 hover:ring-gray-400 hover:ring-offset-1
+                      `}
+                      onMouseEnter={(e) => {
+                        if (!isFutureDate) {
+                          const rect = e.currentTarget.getBoundingClientRect();
+                          setHoveredCell({
+                            date: day.date,
+                            count: day.count,
+                            x: rect.left + rect.width / 2,
+                            y: rect.top,
+                          });
+                        }
+                      }}
+                      onMouseLeave={() => setHoveredCell(null)}
+                    />
+                  );
+                })}
+              </div>
+            ))}
           </div>
         </div>
       </div>
