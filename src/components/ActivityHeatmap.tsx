@@ -147,9 +147,9 @@ export default function ActivityHeatmap({ activities, totalCount, currentStreak 
     <div className="bg-white rounded-xl border border-gray-200 p-6 w-full">
       {/* Header */}
       <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
-        <h2 className="text-lg font-semibold text-gray-900">
+        <h3 className="text-lg font-semibold text-gray-900">
           {totalCount.toLocaleString("vi-VN")} hoạt động trong năm qua
-        </h2>
+        </h3>
         {currentStreak > 0 && (
           <div className="flex items-center gap-2 text-sm text-gray-600">
             <span className="text-orange-500 font-semibold">🔥 {currentStreak} ngày liên tiếp</span>
