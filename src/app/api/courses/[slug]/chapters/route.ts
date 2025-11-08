@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import pool from "@/lib/db";
-import { RowDataPacket } from "mysql2";
+import { queryOneBuilder, queryBuilder, db as supabaseAdmin } from "@/lib/db";
 
 export async function GET(
   request: NextRequest,
@@ -10,32 +9,37 @@ export async function GET(
     const { slug } = await params;
 
     // Get course ID from slug
-    const [courseRows] = await pool.query<RowDataPacket[]>(
-      "SELECT id FROM courses WHERE slug = ? AND is_published = 1",
-      [slug]
+    const course = await queryOneBuilder<{ id: string }>(
+      "courses",
+      {
+        select: "id",
+        filters: { slug, is_published: true }
+      }
     );
 
-    if (courseRows.length === 0) {
+    if (!course) {
       return NextResponse.json(
         { success: false, message: "Course not found" },
         { status: 404 }
       );
     }
 
-    const courseId = courseRows[0].id;
+    const courseId = course.id;
 
     // Get chapters with lessons
-    const [chapters] = await pool.query<RowDataPacket[]>(
-      `SELECT 
-        c.id,
-        c.title,
-        c.description,
-        c.sort_order,
-        c.is_published
-      FROM chapters c
-      WHERE c.course_id = ? AND c.is_published = 1
-      ORDER BY c.sort_order ASC`,
-      [courseId]
+    const chapters = await queryBuilder<{
+      id: string;
+      title: string;
+      description: string | null;
+      sort_order: number;
+      is_published: boolean;
+    }>(
+      "chapters",
+      {
+        select: "id, title, description, sort_order, is_published",
+        filters: { course_id: courseId, is_published: true },
+        orderBy: { column: "sort_order", ascending: true }
+      }
     );
 
     // Get all lessons for these chapters
@@ -51,22 +55,27 @@ export async function GET(
       });
     }
 
-    const [lessons] = await pool.query<RowDataPacket[]>(
-      `SELECT 
-        l.id,
-        l.chapter_id,
-        l.title,
-        l.content,
-        l.video_url,
-        l.video_duration,
-        l.sort_order,
-        l.is_preview,
-        l.is_published
-      FROM lessons l
-      WHERE l.chapter_id IN (?) AND l.is_published = 1
-      ORDER BY l.sort_order ASC`,
-      [chapterIds]
+    const lessons = await queryBuilder<{
+      id: string;
+      chapter_id: string;
+      title: string;
+      content: string | null;
+      video_url: string | null;
+      video_duration: number | null;
+      sort_order: number;
+      is_preview: boolean;
+      is_published: boolean;
+    }>(
+      "lessons",
+      {
+        select: "id, chapter_id, title, content, video_url, video_duration, sort_order, is_preview, is_published",
+        filters: { is_published: true },
+        orderBy: { column: "sort_order", ascending: true }
+      }
     );
+
+    // Filter lessons by chapter_ids
+    const courseLessons = lessons.filter(l => chapterIds.includes(l.chapter_id));
 
     // Format duration from seconds to mm:ss
     const formatDuration = (seconds: number | null): string => {
@@ -78,7 +87,7 @@ export async function GET(
 
     // Calculate total duration for each chapter
     const chaptersWithLessons = chapters.map(chapter => {
-      const chapterLessons = lessons.filter(l => l.chapter_id === chapter.id);
+      const chapterLessons = courseLessons.filter(l => l.chapter_id === chapter.id);
       const totalSeconds = chapterLessons.reduce((sum, l) => sum + (l.video_duration || 0), 0);
       const totalMinutes = Math.floor(totalSeconds / 60);
       
@@ -102,8 +111,8 @@ export async function GET(
           title: lesson.title,
           duration: formatDuration(lesson.video_duration),
           type: lesson.video_url ? "video" : "reading",
-          isFree: lesson.is_preview === 1,
-          isPreview: lesson.is_preview === 1,
+          isFree: lesson.is_preview === true,
+          isPreview: lesson.is_preview === true,
           order: lesson.sort_order,
           videoUrl: lesson.video_url,
           content: lesson.content
@@ -111,7 +120,7 @@ export async function GET(
       };
     });
 
-    const totalLessons = lessons.length;
+    const totalLessons = courseLessons.length;
 
     return NextResponse.json({
       success: true,

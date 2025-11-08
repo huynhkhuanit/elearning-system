@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { queryOne } from '@/lib/db';
+import { queryOneBuilder } from '@/lib/db';
 
 interface VideoSourceResponse {
   primary: string | null;
@@ -64,14 +64,17 @@ export async function GET(
   try {
     const { lessonId } = await params;
 
-    const lesson = await queryOne<{
+    const lesson = await queryOneBuilder<{
       id: string;
       title: string;
       video_url: string | null;
       video_duration: number | null;
     }>(
-      `SELECT id, title, video_url, video_duration FROM lessons WHERE id = ?`,
-      [lessonId]
+      'lessons',
+      {
+        select: 'id, title, video_url, video_duration',
+        filters: { id: lessonId }
+      }
     );
 
     if (!lesson) {

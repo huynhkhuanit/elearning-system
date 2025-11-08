@@ -7,7 +7,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { query } from '@/lib/db';
+import { queryOneBuilder, db as supabaseAdmin } from '@/lib/db';
 import { verifyToken, extractTokenFromHeader } from '@/lib/auth';
 
 export async function GET(
@@ -28,43 +28,34 @@ export async function GET(
       userId = payload?.userId || null;
     }
 
-    // Query course details
-    const sqlQuery = `
-      SELECT 
-        c.id,
-        c.title,
-        c.slug,
-        c.description,
-        c.short_description,
-        c.thumbnail_url,
-        c.level,
-        c.price,
-        c.is_free,
-        c.is_published,
-        c.estimated_duration,
-        c.rating,
-        c.total_students,
-        c.total_lessons,
-        c.created_at,
-        c.updated_at,
-        cat.id as category_id,
-        cat.name as category_name,
-        cat.slug as category_slug,
-        u.id as instructor_id,
-        u.full_name as instructor_name,
-        u.username as instructor_username,
-        u.avatar_url as instructor_avatar,
-        u.bio as instructor_bio
-      FROM courses c
-      LEFT JOIN categories cat ON c.category_id = cat.id
-      LEFT JOIN users u ON c.instructor_id = u.id
-      WHERE c.slug = ? AND c.is_published = 1
-      LIMIT 1
-    `;
+    // Query course details with joins using Supabase
+    const { data: courseData, error: courseError } = await supabaseAdmin!
+      .from('courses')
+      .select(`
+        id,
+        title,
+        slug,
+        description,
+        short_description,
+        thumbnail_url,
+        level,
+        price,
+        is_free,
+        is_published,
+        estimated_duration,
+        rating,
+        total_students,
+        total_lessons,
+        created_at,
+        updated_at,
+        categories!left(id, name, slug),
+        users!left(id, full_name, username, avatar_url, bio)
+      `)
+      .eq('slug', slug)
+      .eq('is_published', true)
+      .single();
 
-    const results = await query(sqlQuery, [slug]);
-
-    if (!results || (results as any[]).length === 0) {
+    if (courseError || !courseData) {
       return NextResponse.json(
         {
           success: false,
@@ -74,16 +65,21 @@ export async function GET(
       );
     }
 
-    const course = (results as any[])[0];
+    const course = courseData;
+    const category = course.categories as any;
+    const instructor = course.users as any;
 
     // Check if user is enrolled (if authenticated)
     let isEnrolled = false;
     if (userId) {
-      const enrollmentResults = await query(
-        `SELECT id FROM enrollments WHERE user_id = ? AND course_id = ? LIMIT 1`,
-        [userId, course.id]
+      const enrollment = await queryOneBuilder<{ id: string }>(
+        'enrollments',
+        {
+          select: 'id',
+          filters: { user_id: userId, course_id: course.id }
+        }
       );
-      isEnrolled = enrollmentResults && (enrollmentResults as any[]).length > 0;
+      isEnrolled = !!enrollment;
     }
 
     // Format response
@@ -101,21 +97,21 @@ export async function GET(
       isPro: !Boolean(course.is_free),
       duration: formatDuration(course.estimated_duration),
       durationMinutes: course.estimated_duration,
-      rating: parseFloat(course.rating),
+      rating: parseFloat(course.rating || '0'),
       students: course.total_students,
       totalLessons: course.total_lessons,
       isEnrolled: isEnrolled,
       category: {
-        id: course.category_id,
-        name: course.category_name,
-        slug: course.category_slug,
+        id: category?.id || null,
+        name: category?.name || null,
+        slug: category?.slug || null,
       },
       instructor: {
-        id: course.instructor_id,
-        name: course.instructor_name,
-        username: course.instructor_username,
-        avatar: course.instructor_avatar,
-        bio: course.instructor_bio,
+        id: instructor?.id || null,
+        name: instructor?.full_name || null,
+        username: instructor?.username || null,
+        avatar: instructor?.avatar_url || null,
+        bio: instructor?.bio || null,
       },
       createdAt: course.created_at,
       updatedAt: course.updated_at,

@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import pool from "@/lib/db";
-import { RowDataPacket } from "mysql2";
+import { queryOneBuilder, update, db as supabaseAdmin } from "@/lib/db";
 import { cookies } from "next/headers";
 import jwt from "jsonwebtoken";
 
@@ -24,26 +23,25 @@ export async function POST(
     const userId = decoded.userId;
     const { answerId } = await params;
 
-    // Get answer and question details
-    const [answerRows] = await pool.query<RowDataPacket[]>(
-      `SELECT a.id, a.question_id, q.user_id as questionOwnerId
-       FROM lesson_answers a
-       JOIN lesson_questions q ON a.question_id = q.id
-       WHERE a.id = ?`,
-      [answerId]
-    );
+    // Get answer and question details using Supabase join
+    const { data: answerData, error: answerError } = await supabaseAdmin!
+      .from("lesson_answers")
+      .select("id, question_id, lesson_questions!inner(user_id)")
+      .eq("id", answerId)
+      .single();
 
-    if (answerRows.length === 0) {
+    if (answerError || !answerData) {
       return NextResponse.json(
         { success: false, message: "Answer not found" },
         { status: 404 }
       );
     }
 
-    const answer = answerRows[0];
+    const questionOwnerId = (answerData.lesson_questions as any).user_id;
+    const questionId = answerData.question_id;
 
     // Check if current user is the question owner
-    if (answer.questionOwnerId !== userId) {
+    if (questionOwnerId !== userId) {
       return NextResponse.json(
         { success: false, message: "Only question owner can accept answers" },
         { status: 403 }
@@ -51,21 +49,24 @@ export async function POST(
     }
 
     // Unaccept all other answers for this question
-    await pool.query(
-      `UPDATE lesson_answers SET is_accepted = 0 WHERE question_id = ?`,
-      [answer.question_id]
+    await update(
+      "lesson_answers",
+      { question_id: questionId },
+      { is_accepted: false }
     );
 
     // Accept this answer
-    await pool.query(
-      `UPDATE lesson_answers SET is_accepted = 1 WHERE id = ?`,
-      [answerId]
+    await update(
+      "lesson_answers",
+      { id: answerId },
+      { is_accepted: true }
     );
 
     // Update question status to RESOLVED
-    await pool.query(
-      `UPDATE lesson_questions SET status = 'RESOLVED' WHERE id = ?`,
-      [answer.question_id]
+    await update(
+      "lesson_questions",
+      { id: questionId },
+      { status: "RESOLVED" }
     );
 
     return NextResponse.json({

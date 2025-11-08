@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import pool from "@/lib/db";
-import { RowDataPacket, ResultSetHeader } from "mysql2";
+import { queryBuilder, queryOneBuilder, insert, update, db as supabaseAdmin } from "@/lib/db";
 import { cookies } from "next/headers";
 import jwt from "jsonwebtoken";
 
@@ -29,71 +28,75 @@ export async function GET(
     const sortBy = searchParams.get("sortBy") || "RECENT";
     const search = searchParams.get("search") || "";
 
-    let query = `
-      SELECT 
-        q.id,
-        q.title,
-        q.content,
-        q.status,
-        q.answers_count as answersCount,
-        q.likes_count as likesCount,
-        q.views_count as viewsCount,
-        q.created_at as createdAt,
-        q.updated_at as updatedAt,
-        u.id as userId,
-        u.username,
-        u.full_name as fullName,
-        u.avatar_url as avatarUrl,
-        EXISTS(
-          SELECT 1 FROM lesson_question_likes lql 
-          WHERE lql.question_id = q.id AND lql.user_id = ?
-        ) as isLiked
-      FROM lesson_questions q
-      JOIN users u ON q.user_id = u.id
-      WHERE q.lesson_id = ?
-    `;
-
-    const queryParams: any[] = [userId, lessonId];
+    // Build query with Supabase
+    let questionsQuery = supabaseAdmin!
+      .from("lesson_questions")
+      .select(`
+        id,
+        title,
+        content,
+        status,
+        answers_count,
+        likes_count,
+        views_count,
+        created_at,
+        updated_at,
+        is_pinned,
+        users!inner(id, username, full_name, avatar_url)
+      `)
+      .eq("lesson_id", lessonId);
 
     // Filter by status
     if (status !== "ALL") {
-      query += ` AND q.status = ?`;
-      queryParams.push(status);
+      questionsQuery = questionsQuery.eq("status", status);
     }
 
     // Search
     if (search) {
-      query += ` AND (q.title LIKE ? OR q.content LIKE ?)`;
-      const searchPattern = `%${search}%`;
-      queryParams.push(searchPattern, searchPattern);
+      questionsQuery = questionsQuery.or(`title.ilike.%${search}%,content.ilike.%${search}%`);
     }
 
     // Sort
     if (sortBy === "POPULAR") {
-      query += ` ORDER BY q.likes_count DESC, q.created_at DESC`;
+      questionsQuery = questionsQuery.order("likes_count", { ascending: false })
+        .order("created_at", { ascending: false });
     } else {
-      query += ` ORDER BY q.is_pinned DESC, q.created_at DESC`;
+      questionsQuery = questionsQuery.order("is_pinned", { ascending: false })
+        .order("created_at", { ascending: false });
     }
 
-    const [rows] = await pool.query<RowDataPacket[]>(query, queryParams);
+    const { data: questionsData, error: questionsError } = await questionsQuery;
 
-    const questions = rows.map((row) => ({
+    if (questionsError) {
+      throw questionsError;
+    }
+
+    // Get likes for current user
+    const { data: userLikes } = await supabaseAdmin!
+      .from("lesson_question_likes")
+      .select("question_id")
+      .eq("user_id", userId)
+      .in("question_id", (questionsData || []).map((q: any) => q.id));
+
+    const likedQuestionIds = new Set((userLikes || []).map((l: any) => l.question_id));
+
+    const questions = (questionsData || []).map((row: any) => ({
       id: row.id,
       title: row.title,
       content: row.content,
       status: row.status,
-      answersCount: row.answersCount,
-      likesCount: row.likesCount,
-      viewsCount: row.viewsCount,
-      createdAt: row.createdAt,
-      updatedAt: row.updatedAt,
+      answersCount: row.answers_count,
+      likesCount: row.likes_count,
+      viewsCount: row.views_count,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
       user: {
-        id: row.userId,
-        username: row.username,
-        fullName: row.fullName,
-        avatarUrl: row.avatarUrl,
+        id: row.users.id,
+        username: row.users.username,
+        fullName: row.users.full_name,
+        avatarUrl: row.users.avatar_url,
       },
-      isLiked: Boolean(row.isLiked),
+      isLiked: likedQuestionIds.has(row.id),
     }));
 
     return NextResponse.json({
@@ -140,21 +143,46 @@ export async function POST(
     }
 
     // Check if user is enrolled in the course
-    const [enrollmentRows] = await pool.query<RowDataPacket[]>(
-      `SELECT e.id 
-       FROM enrollments e
-       JOIN lessons l ON l.chapter_id IN (
-         SELECT ch.id FROM chapters ch WHERE ch.course_id = (
-           SELECT ch2.course_id FROM chapters ch2 
-           JOIN lessons l2 ON l2.chapter_id = ch2.id 
-           WHERE l2.id = ?
-         )
-       )
-       WHERE e.user_id = ? AND e.is_active = 1`,
-      [lessonId, userId]
+    // Get course_id from lesson
+    const lesson = await queryOneBuilder<{ chapter_id: string }>(
+      "lessons",
+      {
+        select: "chapter_id",
+        filters: { id: lessonId }
+      }
     );
 
-    if (enrollmentRows.length === 0) {
+    if (!lesson) {
+      return NextResponse.json(
+        { success: false, message: "Lesson not found" },
+        { status: 404 }
+      );
+    }
+
+    const chapter = await queryOneBuilder<{ course_id: string }>(
+      "chapters",
+      {
+        select: "course_id",
+        filters: { id: lesson.chapter_id }
+      }
+    );
+
+    if (!chapter) {
+      return NextResponse.json(
+        { success: false, message: "Chapter not found" },
+        { status: 404 }
+      );
+    }
+
+    const enrollment = await queryOneBuilder<{ id: string }>(
+      "enrollments",
+      {
+        select: "id",
+        filters: { user_id: userId, course_id: chapter.course_id, is_active: true }
+      }
+    );
+
+    if (!enrollment) {
       return NextResponse.json(
         { success: false, message: "You must be enrolled in this course to ask questions" },
         { status: 403 }
@@ -162,15 +190,20 @@ export async function POST(
     }
 
     // Create question
-    const [result] = await pool.query<ResultSetHeader>(
-      `INSERT INTO lesson_questions (lesson_id, user_id, title, content, status)
-       VALUES (?, ?, ?, ?, 'OPEN')`,
-      [lessonId, userId, title, content]
+    const [newQuestion] = await insert<{ id: string }>(
+      "lesson_questions",
+      {
+        lesson_id: lessonId,
+        user_id: userId,
+        title,
+        content,
+        status: "OPEN"
+      }
     );
 
     return NextResponse.json({
       success: true,
-      data: { questionId: result.insertId },
+      data: { questionId: newQuestion.id },
       message: "Question created successfully",
     });
   } catch (error) {

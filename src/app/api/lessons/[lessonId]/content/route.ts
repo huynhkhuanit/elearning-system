@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { query, queryOne } from '@/lib/db';
+import { queryOneBuilder, update as updateHelper, queryBuilder } from '@/lib/db';
 
 interface LessonContentRequest {
   content: string;
@@ -23,9 +23,12 @@ export async function GET(
   try {
     const { lessonId } = await params;
 
-    const lesson = await queryOne<LessonContentResponse>(
-      'SELECT id, title, content, updated_at FROM lessons WHERE id = ?',
-      [lessonId]
+    const lesson = await queryOneBuilder<LessonContentResponse>(
+      'lessons',
+      {
+        select: 'id, title, content, updated_at',
+        filters: { id: lessonId }
+      }
     );
 
     if (!lesson) {
@@ -66,9 +69,12 @@ export async function PUT(
     }
 
     // Check if lesson exists
-    const lesson = await queryOne(
-      'SELECT id FROM lessons WHERE id = ?',
-      [lessonId]
+    const lesson = await queryOneBuilder<{ id: string }>(
+      'lessons',
+      {
+        select: 'id',
+        filters: { id: lessonId }
+      }
     );
 
     if (!lesson) {
@@ -79,15 +85,19 @@ export async function PUT(
     }
 
     // Update lesson content
-    await query(
-      'UPDATE lessons SET content = ?, updated_at = NOW() WHERE id = ?',
-      [content, lessonId]
+    await updateHelper(
+      'lessons',
+      { id: lessonId },
+      { content, updated_at: new Date().toISOString() }
     );
 
     // Return updated lesson
-    const updated = await queryOne<LessonContentResponse>(
-      'SELECT id, title, content, updated_at FROM lessons WHERE id = ?',
-      [lessonId]
+    const updated = await queryOneBuilder<LessonContentResponse>(
+      'lessons',
+      {
+        select: 'id, title, content, updated_at',
+        filters: { id: lessonId }
+      }
     );
 
     return NextResponse.json({
@@ -125,9 +135,12 @@ export async function PATCH(
     }
 
     // Get current content
-    const lesson = await queryOne<{ content: string | null }>(
-      'SELECT content FROM lessons WHERE id = ?',
-      [lessonId]
+    const lesson = await queryOneBuilder<{ content: string | null }>(
+      'lessons',
+      {
+        select: 'content',
+        filters: { id: lessonId }
+      }
     );
 
     if (!lesson) {
@@ -143,14 +156,18 @@ export async function PATCH(
       : content;
 
     // Update lesson content
-    await query(
-      'UPDATE lessons SET content = ?, updated_at = NOW() WHERE id = ?',
-      [mergedContent, lessonId]
+    await updateHelper(
+      'lessons',
+      { id: lessonId },
+      { content: mergedContent, updated_at: new Date().toISOString() }
     );
 
-    const updated = await queryOne<LessonContentResponse>(
-      'SELECT id, title, content, updated_at FROM lessons WHERE id = ?',
-      [lessonId]
+    const updated = await queryOneBuilder<LessonContentResponse>(
+      'lessons',
+      {
+        select: 'id, title, content, updated_at',
+        filters: { id: lessonId }
+      }
     );
 
     return NextResponse.json({

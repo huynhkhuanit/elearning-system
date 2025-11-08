@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import pool from '@/lib/db';
-import { RowDataPacket } from 'mysql2';
+import { queryBuilder } from '@/lib/db';
 
 interface AdminCourse {
   id: string;
@@ -32,8 +31,13 @@ interface AdminLesson {
 export async function GET(request: NextRequest) {
   try {
     // Get all published courses
-    const [courseRows] = await pool.query<RowDataPacket[]>(
-      `SELECT id, title, slug FROM courses WHERE is_published = 1 ORDER BY created_at DESC`
+    const courseRows = await queryBuilder<{ id: string; title: string; slug: string }>(
+      'courses',
+      {
+        select: 'id, title, slug',
+        filters: { is_published: true },
+        orderBy: { column: 'created_at', ascending: false }
+      }
     );
 
     if (courseRows.length === 0) {
@@ -48,28 +52,36 @@ export async function GET(request: NextRequest) {
     const courseIds = courseRows.map(c => c.id);
 
     // Get all chapters for these courses
-    const [chapterRows] = await pool.query<RowDataPacket[]>(
-      `SELECT id, course_id, title, sort_order 
-       FROM chapters 
-       WHERE course_id IN (?) AND is_published = 1
-       ORDER BY sort_order ASC`,
-      [courseIds]
+    const chapterRows = await queryBuilder<{ id: string; course_id: string; title: string; sort_order: number }>(
+      'chapters',
+      {
+        select: 'id, course_id, title, sort_order',
+        filters: { is_published: true },
+        orderBy: { column: 'sort_order', ascending: true }
+      }
     );
 
-    const chapterIds = chapterRows.length > 0 ? chapterRows.map(c => c.id) : [0];
+    // Filter chapters by course_ids
+    const filteredChapters = chapterRows.filter(c => courseIds.includes(c.course_id));
+    const chapterIds = filteredChapters.length > 0 ? filteredChapters.map(c => c.id) : [];
 
     // Get all lessons for these chapters
-    const [lessonRows] = await pool.query<RowDataPacket[]>(
-      `SELECT id, chapter_id, title, content, sort_order, is_published
-       FROM lessons 
-       WHERE chapter_id IN (?)
-       ORDER BY sort_order ASC`,
-      [chapterIds]
+    const lessonRows = await queryBuilder<{ id: string; chapter_id: string; title: string; content: string | null; sort_order: number; is_published: boolean }>(
+      'lessons',
+      {
+        select: 'id, chapter_id, title, content, sort_order, is_published',
+        orderBy: { column: 'sort_order', ascending: true }
+      }
     );
+
+    // Filter lessons by chapter_ids
+    const filteredLessons = chapterIds.length > 0 
+      ? lessonRows.filter(l => chapterIds.includes(l.chapter_id))
+      : [];
 
     // Build hierarchical structure
     const lessons: { [key: string]: AdminLesson[] } = {};
-    lessonRows.forEach((lesson: any) => {
+    filteredLessons.forEach((lesson) => {
       if (!lessons[lesson.chapter_id]) {
         lessons[lesson.chapter_id] = [];
       }
@@ -78,12 +90,12 @@ export async function GET(request: NextRequest) {
         title: lesson.title,
         content: lesson.content,
         sort_order: lesson.sort_order,
-        is_published: lesson.is_published,
+        is_published: lesson.is_published ? 1 : 0,
       });
     });
 
     const chapters: { [key: string]: AdminChapter[] } = {};
-    chapterRows.forEach((chapter: any) => {
+    filteredChapters.forEach((chapter) => {
       if (!chapters[chapter.course_id]) {
         chapters[chapter.course_id] = [];
       }
@@ -95,7 +107,7 @@ export async function GET(request: NextRequest) {
       });
     });
 
-    const courses: AdminCourse[] = courseRows.map((course: any) => ({
+    const courses: AdminCourse[] = courseRows.map((course) => ({
       id: course.id,
       title: course.title,
       slug: course.slug,
@@ -108,8 +120,8 @@ export async function GET(request: NextRequest) {
         courses,
         meta: {
           totalCourses: courses.length,
-          totalChapters: chapterRows.length,
-          totalLessons: lessonRows.length,
+          totalChapters: filteredChapters.length,
+          totalLessons: filteredLessons.length,
         }
       }
     });

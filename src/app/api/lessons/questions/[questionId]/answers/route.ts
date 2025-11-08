@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import pool from "@/lib/db";
-import { RowDataPacket, ResultSetHeader } from "mysql2";
+import { queryOneBuilder, insert, update } from "@/lib/db";
 import { cookies } from "next/headers";
 import jwt from "jsonwebtoken";
 
@@ -34,23 +33,64 @@ export async function POST(
     }
 
     // Check if user is enrolled
-    const [enrollmentCheck] = await pool.query<RowDataPacket[]>(
-      `SELECT e.id 
-       FROM enrollments e
-       JOIN lessons l ON l.chapter_id IN (
-         SELECT ch.id FROM chapters ch WHERE ch.course_id = (
-           SELECT ch2.course_id FROM chapters ch2 
-           JOIN lessons l2 ON l2.chapter_id = ch2.id 
-           WHERE l2.id = (
-             SELECT lesson_id FROM lesson_questions WHERE id = ?
-           )
-         )
-       )
-       WHERE e.user_id = ? AND e.is_active = 1`,
-      [questionId, userId]
+    // Get lesson_id from question
+    const question = await queryOneBuilder<{ lesson_id: string }>(
+      "lesson_questions",
+      {
+        select: "lesson_id",
+        filters: { id: questionId }
+      }
     );
 
-    if (enrollmentCheck.length === 0) {
+    if (!question) {
+      return NextResponse.json(
+        { success: false, message: "Question not found" },
+        { status: 404 }
+      );
+    }
+
+    // Get chapter_id from lesson
+    const lesson = await queryOneBuilder<{ chapter_id: string }>(
+      "lessons",
+      {
+        select: "chapter_id",
+        filters: { id: question.lesson_id }
+      }
+    );
+
+    if (!lesson) {
+      return NextResponse.json(
+        { success: false, message: "Lesson not found" },
+        { status: 404 }
+      );
+    }
+
+    // Get course_id from chapter
+    const chapter = await queryOneBuilder<{ course_id: string }>(
+      "chapters",
+      {
+        select: "course_id",
+        filters: { id: lesson.chapter_id }
+      }
+    );
+
+    if (!chapter) {
+      return NextResponse.json(
+        { success: false, message: "Chapter not found" },
+        { status: 404 }
+      );
+    }
+
+    // Check enrollment
+    const enrollment = await queryOneBuilder<{ id: string }>(
+      "enrollments",
+      {
+        select: "id",
+        filters: { user_id: userId, course_id: chapter.course_id, is_active: true }
+      }
+    );
+
+    if (!enrollment) {
       return NextResponse.json(
         { success: false, message: "You must be enrolled in this course to answer questions" },
         { status: 403 }
@@ -58,19 +98,31 @@ export async function POST(
     }
 
     // Create answer
-    await pool.query<ResultSetHeader>(
-      `INSERT INTO lesson_answers (question_id, user_id, content)
-       VALUES (?, ?, ?)`,
-      [questionId, userId, content]
+    await insert(
+      "lesson_answers",
+      {
+        question_id: questionId,
+        user_id: userId,
+        content
+      }
     );
 
     // Update question answers count and status
-    await pool.query(
-      `UPDATE lesson_questions 
-       SET answers_count = answers_count + 1,
-           status = CASE WHEN status = 'OPEN' THEN 'ANSWERED' ELSE status END
-       WHERE id = ?`,
-      [questionId]
+    const currentQuestion = await queryOneBuilder<{ answers_count: number; status: string }>(
+      "lesson_questions",
+      {
+        select: "answers_count, status",
+        filters: { id: questionId }
+      }
+    );
+
+    await update(
+      "lesson_questions",
+      { id: questionId },
+      {
+        answers_count: (currentQuestion?.answers_count || 0) + 1,
+        status: currentQuestion?.status === "OPEN" ? "ANSWERED" : currentQuestion?.status
+      }
     );
 
     return NextResponse.json({

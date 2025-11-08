@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { queryOne } from '@/lib/db';
+import { queryOneBuilder, db as supabaseAdmin } from '@/lib/db';
 
 interface LessonData {
   id: string;
@@ -32,23 +32,52 @@ export async function GET(
     const { lessonId } = await params;
     const useMockVideo = request.nextUrl.searchParams.get('mock') === 'true';
 
-    const lesson = await queryOne<LessonData>(
-      `SELECT l.id, l.title, l.chapter_id, l.content, l.video_url, l.video_duration, 
-              l.sort_order, l.is_preview, l.is_published, l.created_at, l.updated_at,
-              c.course_id, co.is_free
-       FROM lessons l
-       LEFT JOIN chapters c ON l.chapter_id = c.id
-       LEFT JOIN courses co ON c.course_id = co.id
-       WHERE l.id = ?`,
-      [lessonId]
-    );
+    // Get lesson with chapter and course info using Supabase joins
+    const { data: lessonData, error } = await supabaseAdmin!
+      .from('lessons')
+      .select(`
+        id,
+        title,
+        chapter_id,
+        content,
+        video_url,
+        video_duration,
+        sort_order,
+        is_preview,
+        is_published,
+        created_at,
+        updated_at,
+        chapters!left(course_id, courses!left(is_free))
+      `)
+      .eq('id', lessonId)
+      .single();
 
-    if (!lesson) {
+    if (error || !lessonData) {
       return NextResponse.json(
         { error: 'Bài học không tìm thấy' },
         { status: 404 }
       );
     }
+
+    const chapters = lessonData.chapters as any;
+    const courseId = chapters?.course_id;
+    const courses = chapters?.courses as any;
+    const isFree = courses?.is_free || false;
+
+    const lesson: LessonData = {
+      id: lessonData.id,
+      title: lessonData.title,
+      chapter_id: lessonData.chapter_id,
+      content: lessonData.content,
+      video_url: lessonData.video_url,
+      video_duration: lessonData.video_duration,
+      sort_order: lessonData.sort_order,
+      is_preview: lessonData.is_preview ? 1 : 0,
+      is_published: lessonData.is_published ? 1 : 0,
+      is_free: isFree ? 1 : 0,
+      created_at: lessonData.created_at,
+      updated_at: lessonData.updated_at,
+    };
 
     // Nếu là FREE course và không có video, tạo placeholder
     if (!lesson.video_url || useMockVideo) {

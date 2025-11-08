@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { query } from '@/lib/db';
+import { queryBuilder } from '@/lib/db';
 
 interface Lesson {
   id: string;
@@ -20,12 +20,13 @@ export async function GET(
   try {
     const { chapterId } = await params;
 
-    const lessons = await query<Lesson[]>(
-      `SELECT id, title, content, sort_order, is_published 
-       FROM lessons 
-       WHERE chapter_id = ? 
-       ORDER BY sort_order ASC`,
-      [chapterId]
+    const lessons = await queryBuilder<Lesson>(
+      'lessons',
+      {
+        select: 'id, title, content, sort_order, is_published',
+        filters: { chapter_id: chapterId },
+        orderBy: { column: 'sort_order', ascending: true }
+      }
     );
 
     return NextResponse.json(lessons);

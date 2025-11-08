@@ -6,7 +6,7 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { query } from "@/lib/db";
+import { queryOneBuilder, insert, update } from "@/lib/db";
 import { verifyToken, extractTokenFromHeader } from "@/lib/auth";
 
 interface Params {
@@ -64,17 +64,36 @@ export async function POST(
 
     const userId = payload.userId;
 
-    // Save progress to database
-    await query(
-      `INSERT INTO lesson_progress 
-       (user_id, lesson_id, last_position, watch_time, updated_at)
-       VALUES (?, ?, ?, ?, NOW())
-       ON DUPLICATE KEY UPDATE
-       last_position = VALUES(last_position),
-       watch_time = VALUES(watch_time),
-       updated_at = NOW()`,
-      [userId, lessonId, Math.round(timestamp), Math.round(duration)]
+    // Save progress to database - check if exists first
+    const existingProgress = await queryOneBuilder<{ id: string }>(
+      'lesson_progress',
+      {
+        select: 'id',
+        filters: { user_id: userId, lesson_id: lessonId }
+      }
     );
+
+    if (existingProgress) {
+      // Update existing progress
+      await update(
+        'lesson_progress',
+        { id: existingProgress.id },
+        {
+          last_position: Math.round(timestamp),
+          watch_time: Math.round(duration),
+          updated_at: new Date().toISOString()
+        }
+      );
+    } else {
+      // Create new progress
+      await insert('lesson_progress', {
+        user_id: userId,
+        lesson_id: lessonId,
+        last_position: Math.round(timestamp),
+        watch_time: Math.round(duration),
+        updated_at: new Date().toISOString()
+      });
+    }
 
     return NextResponse.json({ 
       success: true,

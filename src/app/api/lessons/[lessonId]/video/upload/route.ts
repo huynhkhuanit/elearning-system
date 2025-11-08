@@ -10,7 +10,7 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { query, queryOne } from "@/lib/db";
+import { queryOneBuilder, update, db as supabaseAdmin } from "@/lib/db";
 import { writeFile, mkdir } from "fs/promises";
 import { resolve } from "path";
 import { uploadImage } from "@/lib/cloudinary";
@@ -36,17 +36,20 @@ export async function POST(
     const contentType = request.headers.get("content-type") || "";
 
     // Verify lesson exists and user has admin access
-    const lesson = await queryOne(
-      `SELECT l.*, c.course_id 
-       FROM lessons l 
-       JOIN chapters c ON l.chapter_id = c.id 
-       WHERE l.id = ?`,
-      [lessonId]
-    ) as any;
+    const { data: lessonData, error: lessonError } = await supabaseAdmin!
+      .from('lessons')
+      .select('*, chapters!inner(course_id)')
+      .eq('id', lessonId)
+      .single();
 
-    if (!lesson) {
+    if (lessonError || !lessonData) {
       return NextResponse.json({ error: "Lesson not found" }, { status: 404 });
     }
+
+    const lesson = {
+      ...lessonData,
+      course_id: (lessonData.chapters as any).course_id
+    };
 
     // TODO: Verify user is course instructor or admin
     // For now, allowing all uploads for testing
@@ -105,11 +108,14 @@ export async function POST(
     }
 
     // Update lesson with video URL
-    await query(
-      `UPDATE lessons 
-       SET video_url = ?, video_duration = ?, updated_at = NOW()
-       WHERE id = ?`,
-      [videoUrl, videoDuration, lessonId]
+    await update(
+      'lessons',
+      { id: lessonId },
+      {
+        video_url: videoUrl,
+        video_duration: videoDuration,
+        updated_at: new Date().toISOString()
+      }
     );
 
     return NextResponse.json({
@@ -386,10 +392,13 @@ export async function DELETE(
     const { lessonId } = await params;
 
     // Verify lesson exists
-    const lesson = await queryOne(
-      `SELECT video_url FROM lessons WHERE id = ?`,
-      [lessonId]
-    ) as any;
+    const lesson = await queryOneBuilder<{ video_url: string | null }>(
+      'lessons',
+      {
+        select: 'video_url',
+        filters: { id: lessonId }
+      }
+    );
 
     if (!lesson || !lesson.video_url) {
       return NextResponse.json(
@@ -401,11 +410,14 @@ export async function DELETE(
     // TODO: Delete from storage (local file or Cloudinary)
 
     // Update lesson to remove video URL
-    await query(
-      `UPDATE lessons 
-       SET video_url = NULL, video_duration = NULL, updated_at = NOW()
-       WHERE id = ?`,
-      [lessonId]
+    await update(
+      'lessons',
+      { id: lessonId },
+      {
+        video_url: null,
+        video_duration: null,
+        updated_at: new Date().toISOString()
+      }
     );
 
     return NextResponse.json({ success: true });

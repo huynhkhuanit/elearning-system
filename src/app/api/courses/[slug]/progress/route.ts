@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import pool from "@/lib/db";
-import { RowDataPacket } from "mysql2";
+import { queryOneBuilder, queryBuilder, db as supabaseAdmin } from "@/lib/db";
 import { cookies } from "next/headers";
 import jwt from "jsonwebtoken";
 
@@ -24,43 +23,46 @@ export async function GET(
     const { slug } = await params;
 
     // Get course ID
-    const [courseRows] = await pool.query<RowDataPacket[]>(
-      "SELECT id FROM courses WHERE slug = ?",
-      [slug]
+    const course = await queryOneBuilder<{ id: string }>(
+      "courses",
+      {
+        select: "id",
+        filters: { slug }
+      }
     );
 
-    if (courseRows.length === 0) {
+    if (!course) {
       return NextResponse.json(
         { success: false, message: "Course not found" },
         { status: 404 }
       );
     }
 
-    const courseId = courseRows[0].id;
+    const courseId = course.id;
 
     // Check if user is enrolled
-    const [enrollmentRows] = await pool.query<RowDataPacket[]>(
-      "SELECT * FROM enrollments WHERE user_id = ? AND course_id = ?",
-      [userId, courseId]
+    const enrollment = await queryOneBuilder<{ id: string; [key: string]: any }>(
+      "enrollments",
+      {
+        select: "*",
+        filters: { user_id: userId, course_id: courseId }
+      }
     );
 
-    if (enrollmentRows.length === 0) {
+    if (!enrollment) {
       return NextResponse.json(
         { success: false, message: "Not enrolled" },
         { status: 403 }
       );
     }
 
-    // Get all lessons for this course
-    const [lessons] = await pool.query<RowDataPacket[]>(
-      `SELECT l.id 
-       FROM lessons l
-       INNER JOIN chapters c ON l.chapter_id = c.id
-       WHERE c.course_id = ?`,
-      [courseId]
-    );
+    // Get all lessons for this course using Supabase join
+    const { data: lessonsData, error: lessonsError } = await supabaseAdmin!
+      .from("lessons")
+      .select("id, chapters!inner(course_id)")
+      .eq("chapters.course_id", courseId);
 
-    const lessonIds = lessons.map(l => l.id);
+    const lessonIds = (lessonsData || []).map((l: any) => l.id);
 
     if (lessonIds.length === 0) {
       return NextResponse.json({
@@ -75,24 +77,29 @@ export async function GET(
     }
 
     // Get lesson progress
-    const [progressRows] = await pool.query<RowDataPacket[]>(
-      `SELECT 
-        lesson_id,
-        is_completed,
-        watch_time,
-        last_position
-       FROM lesson_progress
-       WHERE user_id = ? AND lesson_id IN (?)`,
-      [userId, lessonIds]
+    const progressRows = await queryBuilder<{
+      lesson_id: string;
+      is_completed: boolean;
+      watch_time: number | null;
+      last_position: number | null;
+    }>(
+      "lesson_progress",
+      {
+        select: "lesson_id, is_completed, watch_time, last_position",
+        filters: { user_id: userId }
+      }
     );
 
-    const completedLessons = progressRows
-      .filter(p => p.is_completed === 1)
+    // Filter progress for lessons in this course
+    const courseProgress = progressRows.filter(p => lessonIds.includes(p.lesson_id));
+
+    const completedLessons = courseProgress
+      .filter(p => p.is_completed === true)
       .map(p => p.lesson_id);
 
-    const progressMap = progressRows.reduce((acc, p) => {
+    const progressMap = courseProgress.reduce((acc, p) => {
       acc[p.lesson_id] = {
-        isCompleted: p.is_completed === 1,
+        isCompleted: p.is_completed === true,
         watchTime: p.watch_time,
         lastPosition: p.last_position
       };
@@ -113,7 +120,7 @@ export async function GET(
         progress: progressPercentage,
         totalLessons,
         completedCount,
-        enrollment: enrollmentRows[0]
+        enrollment
       }
     });
 

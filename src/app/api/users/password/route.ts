@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { query } from '@/lib/db';
+import { queryOneBuilder, update } from '@/lib/db';
 import { cookies } from 'next/headers';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
@@ -56,19 +56,20 @@ export async function PUT(request: Request) {
     }
 
     // Get current user
-    const users = await query<any>(
-      'SELECT id, password_hash FROM users WHERE id = ?',
-      [userId]
+    const user = await queryOneBuilder<{ id: string; password_hash: string }>(
+      'users',
+      {
+        select: 'id, password_hash',
+        filters: { id: userId }
+      }
     );
 
-    if (!users || users.length === 0) {
+    if (!user) {
       return NextResponse.json(
         { success: false, message: 'Không tìm thấy người dùng' },
         { status: 404 }
       );
     }
-
-    const user = users[0];
 
     // Verify current password
     const isValidPassword = await bcrypt.compare(current_password, user.password_hash);
@@ -85,9 +86,10 @@ export async function PUT(request: Request) {
     const newPasswordHash = await bcrypt.hash(new_password, salt);
 
     // Update password
-    await query(
-      'UPDATE users SET password_hash = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
-      [newPasswordHash, userId]
+    await update(
+      'users',
+      { id: userId },
+      { password_hash: newPasswordHash, updated_at: new Date().toISOString() }
     );
 
     return NextResponse.json({

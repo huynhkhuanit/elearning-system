@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { query, transaction } from '@/lib/db';
+import { queryOneBuilder, update, insert, deleteRows, queryBuilder } from '@/lib/db';
 import { cookies } from 'next/headers';
 import jwt from 'jsonwebtoken';
 
@@ -61,110 +61,110 @@ export async function PUT(request: Request) {
       social: { website, linkedin, github, twitter, facebook }
     });
 
-    // Use transaction helper to avoid prepared statement protocol issue
-    const result = await transaction(async (connection) => {
-      // 1. Update users table (chỉ update fields có giá trị)
-      const userUpdates: string[] = [];
-      const userValues: any[] = [];
+    // 1. Update users table (chỉ update fields có giá trị)
+    const userUpdates: Record<string, any> = {};
 
-      if (full_name !== undefined) {
-        userUpdates.push('full_name = ?');
-        userValues.push(full_name);
-      }
-      if (username !== undefined) {
-        userUpdates.push('username = ?');
-        userValues.push(username);
-      }
-      if (bio !== undefined) {
-        userUpdates.push('bio = ?');
-        userValues.push(bio);
-      }
-      if (phone !== undefined) {
-        userUpdates.push('phone = ?');
-        userValues.push(phone);
-      }
-      if (avatar_url !== undefined) {
-        userUpdates.push('avatar_url = ?');
-        userValues.push(avatar_url);
-      }
+    if (full_name !== undefined) userUpdates.full_name = full_name;
+    if (username !== undefined) userUpdates.username = username;
+    if (bio !== undefined) userUpdates.bio = bio;
+    if (phone !== undefined) userUpdates.phone = phone;
+    if (avatar_url !== undefined) userUpdates.avatar_url = avatar_url;
 
-      if (userUpdates.length > 0) {
-        userValues.push(userId);
-        await connection.execute(
-          `UPDATE users SET ${userUpdates.join(', ')} WHERE id = ?`,
-          userValues
-        );
-      }
+    if (Object.keys(userUpdates).length > 0) {
+      userUpdates.updated_at = new Date().toISOString();
+      await update('users', { id: userId }, userUpdates);
+    }
 
-      // 2. Update metadata (social links) - chỉ update các field được gửi lên
-      const metadataItems = [
-        { key: 'social_website', value: website },
-        { key: 'social_linkedin', value: linkedin },
-        { key: 'social_github', value: github },
-        { key: 'social_twitter', value: twitter },
-        { key: 'social_facebook', value: facebook },
-      ];
+    // 2. Update metadata (social links) - chỉ update các field được gửi lên
+    const metadataItems = [
+      { key: 'social_website', value: website },
+      { key: 'social_linkedin', value: linkedin },
+      { key: 'social_github', value: github },
+      { key: 'social_twitter', value: twitter },
+      { key: 'social_facebook', value: facebook },
+    ];
 
-      for (const item of metadataItems) {
-        // Chỉ xử lý khi value KHÔNG phải undefined (tức là được gửi từ client)
-        if (item.value !== undefined) {
-          if (item.value === null || item.value === '' || item.value.trim() === '') {
-            // Delete if empty or whitespace
-            console.log(`🗑️  Deleting ${item.key}`);
-            await connection.execute(
-              'DELETE FROM user_metadata WHERE user_id = ? AND meta_key = ?',
-              [userId, item.key]
+    for (const item of metadataItems) {
+      // Chỉ xử lý khi value KHÔNG phải undefined (tức là được gửi từ client)
+      if (item.value !== undefined) {
+        if (item.value === null || item.value === '' || item.value.trim() === '') {
+          // Delete if empty or whitespace
+          console.log(`🗑️  Deleting ${item.key}`);
+          await deleteRows('user_metadata', { user_id: userId, meta_key: item.key });
+        } else {
+          // Check if metadata exists
+          const existing = await queryOneBuilder<{ id: string }>(
+            'user_metadata',
+            {
+              select: 'id',
+              filters: { user_id: userId, meta_key: item.key }
+            }
+          );
+
+          if (existing) {
+            // Update existing
+            console.log(`✅ Updating ${item.key} = ${item.value}`);
+            await update(
+              'user_metadata',
+              { id: existing.id },
+              { meta_value: item.value, updated_at: new Date().toISOString() }
             );
           } else {
-            // Insert or update
-            console.log(`✅ Upserting ${item.key} = ${item.value}`);
-            await connection.execute(
-              `INSERT INTO user_metadata (id, user_id, meta_key, meta_value)
-               VALUES (UUID(), ?, ?, ?)
-               ON DUPLICATE KEY UPDATE 
-                 meta_value = VALUES(meta_value),
-                 updated_at = CURRENT_TIMESTAMP`,
-              [userId, item.key, item.value]
-            );
+            // Insert new
+            console.log(`✅ Inserting ${item.key} = ${item.value}`);
+            await insert('user_metadata', {
+              user_id: userId,
+              meta_key: item.key,
+              meta_value: item.value
+            });
           }
-        } else {
-          console.log(`⏭️  Skipping ${item.key} (undefined - not sent from client)`);
         }
+      } else {
+        console.log(`⏭️  Skipping ${item.key} (undefined - not sent from client)`);
       }
+    }
 
-      // Fetch updated user data without metadata aggregation to avoid NULL key issues
-      const [userResult] = await connection.execute(
-        `SELECT * FROM users WHERE id = ?`,
-        [userId]
-      );
-
-      // Fetch metadata separately
-      const [metadataResult] = await connection.execute(
-        `SELECT meta_key, meta_value FROM user_metadata WHERE user_id = ?`,
-        [userId]
-      );
-
-      // Build metadata object
-      const metadata: any = {};
-      for (const row of metadataResult as any[]) {
-        metadata[row.meta_key] = row.meta_value;
+    // Fetch updated user data
+    const userData = await queryOneBuilder<any>(
+      'users',
+      {
+        select: '*',
+        filters: { id: userId }
       }
+    );
 
-      // Combine user data with metadata
-      const userData = (userResult as any[])[0];
-      const combinedData = {
-        ...userData,
-        metadata,
-        // Extract social links for convenience
-        website: metadata.social_website || null,
-        linkedin: metadata.social_linkedin || null,
-        github: metadata.social_github || null,
-        twitter: metadata.social_twitter || null,
-        facebook: metadata.social_facebook || null,
-      };
+    if (!userData) {
+      throw new Error('User not found');
+    }
 
-      return combinedData;
-    });
+    // Fetch metadata separately
+    const metadataRows = await queryBuilder<{ meta_key: string; meta_value: string }>(
+      'user_metadata',
+      {
+        select: 'meta_key, meta_value',
+        filters: { user_id: userId }
+      }
+    );
+
+    // Build metadata object
+    const metadata: any = {};
+    for (const row of metadataRows) {
+      metadata[row.meta_key] = row.meta_value;
+    }
+
+    // Combine user data with metadata
+    const combinedData = {
+      ...userData,
+      metadata,
+      // Extract social links for convenience
+      website: metadata.social_website || null,
+      linkedin: metadata.social_linkedin || null,
+      github: metadata.social_github || null,
+      twitter: metadata.social_twitter || null,
+      facebook: metadata.social_facebook || null,
+    };
+
+    const result = combinedData;
 
     return NextResponse.json({
       success: true,

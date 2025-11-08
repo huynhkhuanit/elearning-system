@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { query, queryOneBuilder, insert } from '@/lib/db';
+import { queryOneBuilder, insert } from '@/lib/db';
 import { hashPassword } from '@/lib/auth';
 import { registerSchema } from '@/lib/validations/auth';
 import { User } from '@/types/auth';

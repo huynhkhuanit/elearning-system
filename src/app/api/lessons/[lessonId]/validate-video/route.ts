@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { queryOne } from '@/lib/db';
+import { queryOneBuilder } from '@/lib/db';
 
 interface LessonData {
   id: string;
@@ -101,9 +101,12 @@ export async function GET(
   try {
     const { lessonId } = await params;
 
-    const lesson = await queryOne<LessonData>(
-      `SELECT id, title, video_url, video_duration FROM lessons WHERE id = ?`,
-      [lessonId]
+    const lesson = await queryOneBuilder<LessonData>(
+      'lessons',
+      {
+        select: 'id, title, video_url, video_duration',
+        filters: { id: lessonId }
+      }
     );
 
     if (!lesson) {

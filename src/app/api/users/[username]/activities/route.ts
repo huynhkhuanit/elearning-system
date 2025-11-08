@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { query } from '@/lib/db';
-import { RowDataPacket } from 'mysql2';
+import { queryOneBuilder, queryBuilder } from '@/lib/db';
 import { ActivityData, ActivityDay } from '@/types/profile';
 
 export async function GET(
@@ -11,12 +10,15 @@ export async function GET(
     const { username } = await params;
 
     // Get user ID from username
-    const users = await query<RowDataPacket[]>(
-      'SELECT id FROM users WHERE username = ? LIMIT 1',
-      [username]
+    const user = await queryOneBuilder<{ id: string }>(
+      'users',
+      {
+        select: 'id',
+        filters: { username }
+      }
     );
 
-    if (users.length === 0) {
+    if (!user) {
       return NextResponse.json(
         {
           success: false,
@@ -26,20 +28,30 @@ export async function GET(
       );
     }
 
-    const userId = users[0].id;
+    const userId = user.id;
 
     // Get activities from the last 12 months
-    const activities = await query<RowDataPacket[]>(
-      `SELECT 
-        activity_date,
-        lessons_completed,
-        quizzes_completed,
-        study_time
-       FROM learning_activities
-       WHERE user_id = ? 
-         AND activity_date >= DATE_SUB(CURDATE(), INTERVAL 12 MONTH)
-       ORDER BY activity_date ASC`,
-      [userId]
+    const oneYearAgo = new Date();
+    oneYearAgo.setMonth(oneYearAgo.getMonth() - 12);
+    const oneYearAgoStr = oneYearAgo.toISOString().split('T')[0];
+
+    const activities = await queryBuilder<{
+      activity_date: string;
+      lessons_completed: number;
+      quizzes_completed: number;
+      study_time: number | null;
+    }>(
+      'learning_activities',
+      {
+        select: 'activity_date, lessons_completed, quizzes_completed, study_time',
+        filters: { user_id: userId },
+        orderBy: { column: 'activity_date', ascending: true }
+      }
+    );
+
+    // Filter activities from last 12 months
+    const filteredActivities = activities.filter(a => 
+      new Date(a.activity_date) >= new Date(oneYearAgoStr)
     );
 
     // Create a map of all days in the last 12 months
@@ -60,7 +72,7 @@ export async function GET(
 
     // Fill in actual activity data
     let totalCount = 0;
-    activities.forEach((activity) => {
+    filteredActivities.forEach((activity) => {
       const dateStr = new Date(activity.activity_date).toISOString().split('T')[0];
       const count = 
         (activity.lessons_completed || 0) + 

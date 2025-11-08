@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import pool from "@/lib/db";
-import { RowDataPacket, ResultSetHeader } from "mysql2";
+import { queryOneBuilder, insert, deleteRows, update } from "@/lib/db";
 import { cookies } from "next/headers";
 import jwt from "jsonwebtoken";
 
@@ -25,21 +24,36 @@ export async function POST(
     const { questionId } = await params;
 
     // Check if already liked
-    const [existingLike] = await pool.query<RowDataPacket[]>(
-      `SELECT id FROM lesson_question_likes WHERE question_id = ? AND user_id = ?`,
-      [questionId, userId]
+    const existingLike = await queryOneBuilder<{ id: string }>(
+      "lesson_question_likes",
+      {
+        select: "id",
+        filters: { question_id: questionId, user_id: userId }
+      }
     );
 
-    if (existingLike.length > 0) {
+    if (existingLike) {
       // Unlike
-      await pool.query(
-        `DELETE FROM lesson_question_likes WHERE question_id = ? AND user_id = ?`,
-        [questionId, userId]
+      await deleteRows(
+        "lesson_question_likes",
+        { question_id: questionId, user_id: userId }
       );
-      await pool.query(
-        `UPDATE lesson_questions SET likes_count = likes_count - 1 WHERE id = ?`,
-        [questionId]
+      
+      // Get current likes count and decrement
+      const question = await queryOneBuilder<{ likes_count: number }>(
+        "lesson_questions",
+        {
+          select: "likes_count",
+          filters: { id: questionId }
+        }
       );
+      
+      await update(
+        "lesson_questions",
+        { id: questionId },
+        { likes_count: Math.max(0, (question?.likes_count || 0) - 1) }
+      );
+      
       return NextResponse.json({
         success: true,
         data: { liked: false },
@@ -47,14 +61,26 @@ export async function POST(
       });
     } else {
       // Like
-      await pool.query(
-        `INSERT INTO lesson_question_likes (question_id, user_id) VALUES (?, ?)`,
-        [questionId, userId]
+      await insert(
+        "lesson_question_likes",
+        { question_id: questionId, user_id: userId }
       );
-      await pool.query(
-        `UPDATE lesson_questions SET likes_count = likes_count + 1 WHERE id = ?`,
-        [questionId]
+      
+      // Get current likes count and increment
+      const question = await queryOneBuilder<{ likes_count: number }>(
+        "lesson_questions",
+        {
+          select: "likes_count",
+          filters: { id: questionId }
+        }
       );
+      
+      await update(
+        "lesson_questions",
+        { id: questionId },
+        { likes_count: (question?.likes_count || 0) + 1 }
+      );
+      
       return NextResponse.json({
         success: true,
         data: { liked: true },

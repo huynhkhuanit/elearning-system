@@ -9,7 +9,7 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { query, queryOne } from "@/lib/db";
+import { queryOneBuilder, update, insert, db as supabaseAdmin } from "@/lib/db";
 import { readFile, stat } from "fs/promises";
 import { resolve } from "path";
 
@@ -31,17 +31,21 @@ export async function GET(
     const rangeHeader = request.headers.get("Range");
 
     // Validate lesson exists and get video info
-    const lesson = await queryOne(
-      `SELECT l.*, c.course_id 
-       FROM lessons l 
-       JOIN chapters c ON l.chapter_id = c.id 
-       WHERE l.id = ? AND l.is_published = 1`,
-      [lessonId]
-    ) as any;
+    const { data: lessonData, error: lessonError } = await supabaseAdmin!
+      .from('lessons')
+      .select('*, chapters!inner(course_id)')
+      .eq('id', lessonId)
+      .eq('is_published', true)
+      .single();
 
-    if (!lesson) {
+    if (lessonError || !lessonData) {
       return NextResponse.json({ error: "Lesson not found" }, { status: 404 });
     }
+
+    const lesson = {
+      ...lessonData,
+      course_id: (lessonData.chapters as any).course_id
+    };
 
     // Check if video exists
     if (!lesson.video_url) {
@@ -247,16 +251,33 @@ export async function POST(
     }
 
     // Update or create lesson progress
-    await query(
-      `INSERT INTO lesson_progress 
-       (user_id, lesson_id, last_position, video_watched_duration, updated_at)
-       VALUES (?, ?, ?, ?, NOW())
-       ON DUPLICATE KEY UPDATE
-       last_position = VALUES(last_position),
-       video_watched_duration = VALUES(video_watched_duration),
-       updated_at = NOW()`,
-      [userId, lessonId, timestamp, duration]
+    const existingProgress = await queryOneBuilder<{ id: string }>(
+      'lesson_progress',
+      {
+        select: 'id',
+        filters: { user_id: userId, lesson_id: lessonId }
+      }
     );
+
+    if (existingProgress) {
+      await update(
+        'lesson_progress',
+        { id: existingProgress.id },
+        {
+          last_position: timestamp,
+          watch_time: duration,
+          updated_at: new Date().toISOString()
+        }
+      );
+    } else {
+      await insert('lesson_progress', {
+        user_id: userId,
+        lesson_id: lessonId,
+        last_position: timestamp,
+        watch_time: duration,
+        updated_at: new Date().toISOString()
+      });
+    }
 
     return NextResponse.json({ success: true });
 
