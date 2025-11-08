@@ -2,7 +2,7 @@ import Image from "next/image";
 
 interface AvatarWithProBadgeProps {
   avatarUrl?: string | null;
-  fullName: string;
+  fullName?: string | null;
   isPro: boolean;
   size?: "xs" | "sm" | "md" | "lg" | "xl" | "2xl";
   className?: string;
@@ -55,7 +55,7 @@ export default function AvatarWithProBadge({
   className = ""
 }: AvatarWithProBadgeProps) {
   const sizes = sizeMap[size];
-  const initials = fullName
+  const initials = (fullName || "U")
     .split(" ")
     .map(n => n[0])
     .join("")
@@ -77,7 +77,7 @@ export default function AvatarWithProBadge({
           {avatarUrl ? (
             <Image
               src={avatarUrl}
-              alt={fullName}
+              alt={fullName || "User"}
               width={128}
               height={128}
               className="w-full h-full object-cover"

@@ -22,34 +22,7 @@ export async function POST(
     const userId = decoded.userId;
     const { lessonId } = await params;
 
-    // Check if progress record exists
-    const existingProgress = await queryOneBuilder<{ id: string }>(
-      "lesson_progress",
-      {
-        select: "id",
-        filters: { user_id: userId, lesson_id: lessonId }
-      }
-    );
-
-    if (existingProgress) {
-      // Update existing progress
-      await update(
-        "lesson_progress",
-        { user_id: userId, lesson_id: lessonId },
-        { is_completed: true, completed_at: new Date().toISOString() }
-      );
-    } else {
-      // Create new progress record
-      await insert("lesson_progress", {
-        user_id: userId,
-        lesson_id: lessonId,
-        is_completed: true,
-        completed_at: new Date().toISOString()
-      });
-    }
-
-    // Update enrollment progress
-    // Get course_id from lesson via chapter
+    // Get course_id from lesson via chapter first (needed for enrollment_id)
     const lesson = await queryOneBuilder<{ chapter_id: string }>(
       "lessons",
       {
@@ -82,6 +55,51 @@ export async function POST(
 
     const courseId = chapter.course_id;
 
+    // Get enrollment_id from enrollments table
+    const enrollment = await queryOneBuilder<{ id: string }>(
+      "enrollments",
+      {
+        select: "id",
+        filters: { user_id: userId, course_id: courseId }
+      }
+    );
+
+    if (!enrollment) {
+      return NextResponse.json(
+        { success: false, message: "User is not enrolled in this course" },
+        { status: 404 }
+      );
+    }
+
+    const enrollmentId = enrollment.id;
+
+    // Check if progress record exists
+    const existingProgress = await queryOneBuilder<{ id: string }>(
+      "lesson_progress",
+      {
+        select: "id",
+        filters: { user_id: userId, lesson_id: lessonId }
+      }
+    );
+
+    if (existingProgress) {
+      // Update existing progress
+      await update(
+        "lesson_progress",
+        { user_id: userId, lesson_id: lessonId },
+        { is_completed: true, completed_at: new Date().toISOString() }
+      );
+    } else {
+      // Create new progress record
+      await insert("lesson_progress", {
+        user_id: userId,
+        lesson_id: lessonId,
+        enrollment_id: enrollmentId,
+        is_completed: true,
+        completed_at: new Date().toISOString()
+      });
+    }
+
     // Calculate new progress percentage using Supabase joins
     // Get total lessons for this course
     const { data: courseLessonsData, error: lessonsError } = await supabaseAdmin!
@@ -110,28 +128,34 @@ export async function POST(
       { progress_percentage: progressPercentage, last_lesson_id: lessonId }
     );
 
-    // Update learning activity for today
-    const today = new Date().toISOString().split('T')[0];
-    const existingActivity = await queryOneBuilder<{ id: string; lessons_completed: number }>(
-      "learning_activities",
-      {
-        select: "id, lessons_completed",
-        filters: { user_id: userId, activity_data: today }
-      }
-    );
-
-    if (existingActivity) {
-      await update(
+    // Update learning activity for today (wrapped in try-catch in case column doesn't exist)
+    try {
+      const today = new Date().toISOString().split('T')[0];
+      const existingActivity = await queryOneBuilder<{ id: string; lessons_completed: number }>(
         "learning_activities",
-        { id: existingActivity.id },
-        { lessons_completed: (existingActivity.lessons_completed || 0) + 1 }
+        {
+          select: "id, lessons_completed",
+          filters: { user_id: userId, activity_data: today }
+        }
       );
-    } else {
-      await insert("learning_activities", {
-        user_id: userId,
-        activity_data: today,
-        lessons_completed: 1
-      });
+
+      if (existingActivity) {
+        await update(
+          "learning_activities",
+          { id: existingActivity.id },
+          { lessons_completed: (existingActivity.lessons_completed || 0) + 1 }
+        );
+      } else {
+        await insert("learning_activities", {
+          user_id: userId,
+          activity_data: today,
+          lessons_completed: 1
+        });
+      }
+    } catch (activityError: any) {
+      // Log error but don't fail the request if learning_activities table structure is different
+      console.warn("Failed to update learning_activities:", activityError?.message || activityError);
+      // Continue execution - this is not critical for marking lesson as complete
     }
 
     return NextResponse.json({
