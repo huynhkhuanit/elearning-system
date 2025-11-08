@@ -35,25 +35,180 @@ export async function GET(request: NextRequest) {
     const limit = Math.min(parseInt(searchParams.get("limit") || "10"), 50) // Max 50
     const offset = parseInt(searchParams.get("offset") || "0")
 
-    // Use RPC function for complex query
-    const results = await rpc<any[]>('get_blog_posts_with_details', {
-      p_user_id: userId || null,
-      p_status: status,
-      p_category_id: categoryId ? parseInt(categoryId) : null,
-      p_tag_slug: tag || null,
-      p_search: search || null,
-      p_limit: limit,
-      p_offset: offset,
-    })
+    // Try RPC function first, fallback to direct query if it fails
+    let results: any[] = []
+    let total: number = 0
 
-    // Get total count
-    const total = await rpc<number>('count_blog_posts', {
-      p_user_id: userId || null,
-      p_status: status,
-      p_category_id: categoryId ? parseInt(categoryId) : null,
-      p_tag_slug: tag || null,
-      p_search: search || null,
-    })
+    try {
+      // Use RPC function for complex query
+      results = await rpc<any[]>('get_blog_posts_with_details', {
+        p_user_id: userId || null,
+        p_status: status,
+        p_category_id: categoryId ? parseInt(categoryId) : null,
+        p_tag_slug: tag || null,
+        p_search: search || null,
+        p_limit: limit,
+        p_offset: offset,
+      }) || []
+
+      // Get total count
+      total = await rpc<number>('count_blog_posts', {
+        p_user_id: userId || null,
+        p_status: status,
+        p_category_id: categoryId ? parseInt(categoryId) : null,
+        p_tag_slug: tag || null,
+        p_search: search || null,
+      }) || 0
+    } catch (rpcError: any) {
+      console.error("RPC function error, falling back to direct query:", rpcError)
+      
+      // Fallback: Query directly from Supabase
+      const { db: supabaseAdmin } = await import("@/lib/db")
+      
+      // If filtering by category, first get post IDs for that category
+      let postIdsForCategory: number[] = []
+      if (categoryId) {
+        const { data: postCategoriesFilter } = await supabaseAdmin!
+          .from("blog_post_categories")
+          .select("post_id")
+          .eq("category_id", parseInt(categoryId))
+        
+        if (postCategoriesFilter && postCategoriesFilter.length > 0) {
+          postIdsForCategory = postCategoriesFilter.map((pc: any) => pc.post_id)
+        } else {
+          // No posts in this category, return empty results
+          return NextResponse.json({
+            success: true,
+            data: {
+              posts: [],
+              pagination: {
+                total: 0,
+                limit,
+                offset,
+                hasMore: false,
+              },
+            },
+          })
+        }
+      }
+
+      let query = supabaseAdmin!
+        .from("blog_posts")
+        .select(`
+          id,
+          title,
+          slug,
+          excerpt,
+          content,
+          cover_image,
+          status,
+          view_count,
+          published_at,
+          created_at,
+          updated_at,
+          user_id,
+          users!inner(id, username, full_name, avatar_url)
+        `)
+        .eq("status", status)
+        .order("created_at", { ascending: false })
+        .range(offset, offset + limit - 1)
+
+      if (userId) {
+        query = query.eq("user_id", userId)
+      }
+
+      if (categoryId && postIdsForCategory.length > 0) {
+        query = query.in("id", postIdsForCategory)
+      }
+
+      if (search) {
+        query = query.or(`title.ilike.%${search}%,excerpt.ilike.%${search}%`)
+      }
+
+      const { data: posts, error: postsError } = await query
+
+      if (postsError) {
+        throw postsError
+      }
+
+      // Get categories and tags for posts
+      const postIds = (posts || []).map((p: any) => p.id)
+      
+      // Get categories
+      const { data: postCategories } = postIds.length > 0
+        ? await supabaseAdmin!
+            .from("blog_post_categories")
+            .select("post_id, category_id")
+            .in("post_id", postIds)
+        : { data: [] }
+
+      const categoryIds = postCategories ? [...new Set(postCategories.map((pc: any) => pc.category_id))] : []
+      const { data: categories } = categoryIds.length > 0
+        ? await supabaseAdmin!
+            .from("blog_categories")
+            .select("id, name, slug")
+            .in("id", categoryIds)
+        : { data: [] }
+
+      const categoryMap = new Map<number, any>()
+      const postCategoryMap = new Map<number, any[]>()
+      
+      if (categories) {
+        categories.forEach((cat: any) => categoryMap.set(cat.id, cat))
+      }
+      
+      if (postCategories) {
+        postCategories.forEach((pc: any) => {
+          const cat = categoryMap.get(pc.category_id)
+          if (cat) {
+            if (!postCategoryMap.has(pc.post_id)) {
+              postCategoryMap.set(pc.post_id, [])
+            }
+            postCategoryMap.get(pc.post_id)!.push(cat)
+          }
+        })
+      }
+
+      // Format results similar to RPC function output
+      results = (posts || []).map((post: any) => ({
+        id: post.id,
+        title: post.title,
+        slug: post.slug,
+        excerpt: post.excerpt,
+        cover_image: post.cover_image,
+        username: post.users?.username || '',
+        full_name: post.users?.full_name || '',
+        avatar_url: post.users?.avatar_url || null,
+        published_at: post.published_at,
+        view_count: post.view_count || 0,
+        like_count: 0, // TODO: Get from blog_post_likes
+        comment_count: 0, // TODO: Get from blog_comments
+        bookmark_count: 0, // TODO: Get from blog_bookmarks
+        category_names: postCategoryMap.get(post.id)?.map((c: any) => c.name).join(", ") || null,
+        tag_names: null, // TODO: Get tags
+      }))
+
+      // Get count
+      let countQuery = supabaseAdmin!
+        .from("blog_posts")
+        .select("id", { count: "exact", head: true })
+        .eq("status", status)
+
+      if (userId) {
+        countQuery = countQuery.eq("user_id", userId)
+      }
+
+      if (categoryId && postIdsForCategory.length > 0) {
+        countQuery = countQuery.in("id", postIdsForCategory)
+      }
+
+      if (search) {
+        countQuery = countQuery.or(`title.ilike.%${search}%,excerpt.ilike.%${search}%`)
+      }
+
+      const { count } = await countQuery
+      total = count || 0
+    }
 
     return NextResponse.json({
       success: true,

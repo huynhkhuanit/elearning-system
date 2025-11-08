@@ -89,11 +89,18 @@ export default function ArticlesPage() {
       const res = await fetch(`/api/blog/posts?${params}`);
       const result = await res.json();
 
-      if (result.success && Array.isArray(result.data)) {
-        setArticles(result.data);
-        if (result.pagination) {
+      if (result.success) {
+        // API returns { success: true, data: { posts: [], pagination: {} } }
+        const posts = result.data?.posts || result.data || [];
+        setArticles(Array.isArray(posts) ? posts : []);
+        if (result.data?.pagination) {
+          setPagination(result.data.pagination);
+        } else if (result.pagination) {
           setPagination(result.pagination);
         }
+      } else {
+        console.error("Failed to fetch articles:", result.error || result.message);
+        toast.error(result.error || result.message || "Không thể tải danh sách bài viết");
       }
     } catch (error) {
       console.error("Fetch articles error:", error);
@@ -121,9 +128,15 @@ export default function ArticlesPage() {
       const res = await fetch(`/api/blog/posts?${params}`);
       const result = await res.json();
 
-      if (result.success && Array.isArray(result.data)) {
-        setArticles((prev) => [...prev, ...result.data]);
-        if (result.pagination) {
+      if (result.success) {
+        // API returns { success: true, data: { posts: [], pagination: {} } }
+        const posts = result.data?.posts || result.data || [];
+        if (Array.isArray(posts)) {
+          setArticles((prev) => [...prev, ...posts]);
+        }
+        if (result.data?.pagination) {
+          setPagination(result.data.pagination);
+        } else if (result.pagination) {
           setPagination(result.pagination);
         }
       }
