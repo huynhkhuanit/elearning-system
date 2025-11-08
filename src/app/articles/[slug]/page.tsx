@@ -56,6 +56,14 @@ export default function ArticlePage() {
   const [showTOC, setShowTOC] = useState(false)
 
   useEffect(() => {
+    // Validate slug before fetching
+    if (!slug || slug === "undefined") {
+      toast.error("Slug bài viết không hợp lệ")
+      router.push("/articles")
+      setIsLoading(false)
+      return
+    }
+
     fetchPostApi(slug)
       .then((data) => {
         if (data) {
@@ -64,6 +72,11 @@ export default function ArticlePage() {
           toast.error("Không tìm thấy bài viết")
           router.push("/articles")
         }
+      })
+      .catch((error) => {
+        console.error("Error fetching post:", error)
+        toast.error("Không thể tải bài viết")
+        router.push("/articles")
       })
       .finally(() => setIsLoading(false))
   }, [slug, toast, router])

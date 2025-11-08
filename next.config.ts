@@ -23,6 +23,11 @@ const nextConfig: NextConfig = {
         hostname: 'caodangvietmyhanoi.edu.vn',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'i.ytimg.com',
+        pathname: '/**',
+      },
     ],
   },
   // Increase max duration for video uploads

@@ -110,8 +110,9 @@ export default function WriteBlogPage() {
         if (!silent) {
           toast.success(data.message || "Đã lưu bản nháp")
           // Redirect to edit page if this is a new post
-          if (data.data?.slug) {
-            router.push(`/write/${data.data.slug}`)
+          const postSlug = data.data?.post?.slug || data.data?.slug
+          if (postSlug) {
+            router.push(`/write/${postSlug}`)
           }
         }
       } else {
@@ -167,7 +168,14 @@ export default function WriteBlogPage() {
 
       if (res.ok && data.success) {
         toast.success(data.message || "Đã đăng bài viết thành công!")
-        router.push(`/articles/${data.data?.slug}`)
+        const postSlug = data.data?.post?.slug || data.data?.slug
+        if (postSlug) {
+          router.push(`/articles/${postSlug}`)
+        } else {
+          // Fallback: redirect to articles list if slug is missing
+          console.error("Slug not found in response:", data)
+          router.push("/articles")
+        }
       } else {
         throw new Error(data.error || "Không thể đăng bài viết")
       }
@@ -221,7 +229,7 @@ export default function WriteBlogPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="sticky top-0 z-30 bg-white border-b border-gray-200 shadow-sm">
+      <header className="sticky top-[66px] z-30 bg-white border-b border-gray-200 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Left */}

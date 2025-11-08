@@ -7,7 +7,9 @@ import ActivityHeatmap from '@/components/ActivityHeatmap';
 import ProfileStats from '@/components/ProfileStats';
 import PageContainer from '@/components/PageContainer';
 import AvatarWithProBadge from '@/components/AvatarWithProBadge';
-import { Calendar, Award, Clock, BookOpen, FileText, Globe, Linkedin, Github, Twitter, Facebook } from 'lucide-react';
+import { Calendar, Award, Clock, BookOpen, FileText, Globe, Linkedin, Github, Twitter, Facebook, Eye, Heart, MessageCircle } from 'lucide-react';
+import Link from 'next/link';
+import Image from 'next/image';
 
 export default function UserProfilePage() {
   const params = useParams();
@@ -18,6 +20,8 @@ export default function UserProfilePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<string>('enrolled');
+  const [articles, setArticles] = useState<any[]>([]);
+  const [articlesLoading, setArticlesLoading] = useState(false);
 
   const tabs: ProfileTab[] = [
     { id: 'enrolled', label: 'Khóa học đã đăng ký', count: profile?.total_courses_enrolled },
@@ -59,6 +63,29 @@ export default function UserProfilePage() {
       fetchProfileData();
     }
   }, [username]);
+
+  // Fetch articles when articles tab is selected
+  useEffect(() => {
+    const fetchArticles = async () => {
+      if (activeTab !== 'articles' || !profile) return;
+      
+      try {
+        setArticlesLoading(true);
+        const res = await fetch(`/api/blog/posts?userId=${profile.id}&status=published&limit=12&offset=0`);
+        const data = await res.json();
+        
+        if (data.success && data.data?.posts) {
+          setArticles(data.data.posts);
+        }
+      } catch (err) {
+        console.error('Failed to fetch articles:', err);
+      } finally {
+        setArticlesLoading(false);
+      }
+    };
+
+    fetchArticles();
+  }, [activeTab, profile]);
 
   if (loading) {
     return (
@@ -326,7 +353,7 @@ export default function UserProfilePage() {
                     px-4 py-2.5 rounded-lg text-sm font-medium transition-all whitespace-nowrap
                     ${
                       activeTab === tab.id
-                        ? "bg-emerald-50 text-emerald-700"
+                        ? "bg-primary/10 text-primary"
                         : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                     }
                   `}
@@ -363,11 +390,131 @@ export default function UserProfilePage() {
             )}
 
             {activeTab === "articles" && (
-              <div className="text-center py-12">
-                <FileText className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Chưa có bài viết nào</h3>
-                <p className="text-gray-600">Người dùng này chưa xuất bản bài viết nào</p>
-              </div>
+              <>
+                {articlesLoading ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {[1, 2, 3].map((i) => (
+                      <div key={i} className="bg-white rounded-xl border border-gray-200 overflow-hidden animate-pulse">
+                        <div className="h-48 bg-gray-200"></div>
+                        <div className="p-6 space-y-3">
+                          <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                          <div className="h-4 bg-gray-200 rounded"></div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : articles.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {articles.map((article) => {
+                      const getCategories = (categoryNames: string | null) => {
+                        if (!categoryNames) return [];
+                        return categoryNames.split(", ").filter((c) => c).slice(0, 2);
+                      };
+
+                      const formatDate = (dateString: string) => {
+                        const date = new Date(dateString);
+                        return date.toLocaleDateString("vi-VN", {
+                          day: "2-digit",
+                          month: "2-digit",
+                          year: "numeric",
+                        });
+                      };
+
+                      return (
+                        <Link key={article.id} href={`/articles/${article.slug}`}>
+                          <div className="bg-white rounded-xl border border-gray-200 shadow-md hover:shadow-lg transition-shadow duration-200 overflow-hidden h-full flex flex-col cursor-pointer group">
+                            {/* Cover Image */}
+                            <div className="h-48 bg-gradient-to-r from-primary to-purple-600 relative overflow-hidden">
+                              {article.cover_image ? (
+                                <Image
+                                  src={article.cover_image}
+                                  alt={article.title}
+                                  fill
+                                  className="object-cover group-hover:scale-105 transition-transform duration-300"
+                                />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center">
+                                  <FileText className="w-16 h-16 text-white opacity-50" />
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Content */}
+                            <div className="p-6 flex-1 flex flex-col">
+                              {/* Categories */}
+                              {article.category_names && (
+                                <div className="flex flex-wrap gap-2 mb-3">
+                                  {getCategories(article.category_names).map((cat, idx) => (
+                                    <span
+                                      key={idx}
+                                      className="px-2 py-1 bg-primary/10 text-primary rounded-md text-xs font-medium"
+                                    >
+                                      {cat}
+                                    </span>
+                                  ))}
+                                </div>
+                              )}
+
+                              {/* Title */}
+                              <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-primary transition-colors">
+                                {article.title}
+                              </h3>
+
+                              {/* Excerpt */}
+                              <p className="text-gray-600 text-sm mb-4 line-clamp-3 flex-1">
+                                {article.excerpt}
+                              </p>
+
+                              {/* Author & Date */}
+                              <div className="flex items-center justify-between text-sm text-gray-500 mb-3 pb-3 border-b border-gray-200">
+                                <div className="flex items-center gap-2">
+                                  {article.avatar_url ? (
+                                    <Image
+                                      src={article.avatar_url}
+                                      alt={article.full_name}
+                                      width={24}
+                                      height={24}
+                                      className="rounded-full"
+                                    />
+                                  ) : (
+                                    <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center text-white text-xs">
+                                      {article.full_name?.charAt(0) || 'U'}
+                                    </div>
+                                  )}
+                                  <span className="font-medium">{article.full_name}</span>
+                                </div>
+                                <span>{formatDate(article.published_at)}</span>
+                              </div>
+
+                              {/* Stats */}
+                              <div className="flex items-center gap-4 text-sm text-gray-500">
+                                <div className="flex items-center gap-1">
+                                  <Eye className="w-4 h-4" />
+                                  <span>{article.view_count || 0}</span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <Heart className="w-4 h-4" />
+                                  <span>{article.like_count || 0}</span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <MessageCircle className="w-4 h-4" />
+                                  <span>{article.comment_count || 0}</span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </Link>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <FileText className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">Chưa có bài viết nào</h3>
+                    <p className="text-gray-600">Người dùng này chưa xuất bản bài viết nào</p>
+                  </div>
+                )}
+              </>
             )}
 
             {activeTab === "saved" && (
