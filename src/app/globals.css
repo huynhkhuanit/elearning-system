@@ -225,7 +225,7 @@ h6, .h6 {
 .course-card-title {
   font-size: 1rem !important; /* 16px - not responsive */
   line-height: 1.4;
-  font-weight: 600;
+  font-weight: 700; /* font-bold */
 }
 
 /* Roadmap card title - Fixed 16px, single line */

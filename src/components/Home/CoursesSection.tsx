@@ -239,7 +239,7 @@ export default function CoursesSection() {
           >
             <div className="flex items-center justify-between mb-8">
               <div>
-                <h2 className="font-[900] text-gray-900 mb-2">
+                <h2 className="font-bold text-gray-900 mb-2">
                   Khóa học Pro
                   <span className="ml-3 text-sm font-semibold text-white bg-gradient-to-r from-indigo-600 to-purple-600 px-3 py-1 rounded-full">
                      PRO
@@ -270,7 +270,7 @@ export default function CoursesSection() {
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.3 }}>
             <div className="flex items-center justify-between mb-8">
               <div>
-                <h2 className="font-[900] text-gray-900 mb-2">Khóa học miễn phí</h2>
+                <h2 className="font-bold text-gray-900 mb-2">Khóa học miễn phí</h2>
                 <p className="text-gray-600">Học miễn phí với các khóa học chất lượng</p>
               </div>
               <a href="/roadmap" className="hidden md:flex items-center text-primary font-semibold hover:text-primary/80 transition-colors duration-200">
