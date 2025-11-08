@@ -7,7 +7,7 @@ import ActivityHeatmap from '@/components/ActivityHeatmap';
 import ProfileStats from '@/components/ProfileStats';
 import PageContainer from '@/components/PageContainer';
 import AvatarWithProBadge from '@/components/AvatarWithProBadge';
-import { Calendar, Mail, Award, Clock, BookOpen, FileText, Globe, Linkedin, Github, Twitter, Facebook } from 'lucide-react';
+import { Calendar, Award, Clock, BookOpen, FileText, Globe, Linkedin, Github, Twitter, Facebook } from 'lucide-react';
 
 export default function UserProfilePage() {
   const params = useParams();
@@ -110,7 +110,10 @@ export default function UserProfilePage() {
           {/* Stats Grid Skeleton */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="bg-white rounded-xl border border-gray-200 p-6 animate-pulse">
+              <div
+                key={i}
+                className="bg-white rounded-xl border border-gray-200 p-6 animate-pulse"
+              >
                 <div className="h-10 w-10 bg-gray-200 rounded-lg mb-3"></div>
                 <div className="h-8 bg-gray-200 rounded-lg w-16 mb-2"></div>
                 <div className="h-4 bg-gray-100 rounded-lg w-24"></div>
@@ -123,7 +126,6 @@ export default function UserProfilePage() {
             <div className="flex items-center justify-between mb-4">
               <div className="h-6 bg-gray-200 rounded-lg w-48"></div>
               <div className="flex gap-4">
-                <div className="h-5 bg-gray-100 rounded-lg w-32"></div>
                 <div className="h-5 bg-gray-100 rounded-lg w-32"></div>
               </div>
             </div>
@@ -302,16 +304,14 @@ export default function UserProfilePage() {
           <ProfileStats profile={profile} />
         </div>
 
-        {/* Activity Heatmap */}
-        {activityData && (
-          <div className="mb-6">
-            <ActivityHeatmap
-              activities={activityData.activities}
-              totalCount={activityData.total_count}
-              currentStreak={activityData.current_streak}
-            />
-          </div>
-        )}
+        {/* Activity Heatmap - Always show, even if no data */}
+        <div className="mb-6">
+          <ActivityHeatmap
+            activities={activityData?.activities || []}
+            totalCount={activityData?.total_count || 0}
+            currentStreak={activityData?.current_streak || 0}
+          />
+        </div>
 
         {/* Tabs */}
         <div className="bg-white rounded-xl border border-gray-200">
@@ -324,9 +324,10 @@ export default function UserProfilePage() {
                   onClick={() => setActiveTab(tab.id)}
                   className={`
                     px-4 py-2.5 rounded-lg text-sm font-medium transition-all whitespace-nowrap
-                    ${activeTab === tab.id
-                      ? 'bg-primary/10 text-primary'
-                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                    ${
+                      activeTab === tab.id
+                        ? "bg-emerald-50 text-emerald-700"
+                        : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                     }
                   `}
                 >
@@ -343,51 +344,37 @@ export default function UserProfilePage() {
 
           {/* Tab Content */}
           <div className="p-6">
-            {activeTab === 'enrolled' && (
+            {activeTab === "enrolled" && (
               <div className="text-center py-12">
                 <BookOpen className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                  Chưa có khóa học nào
-                </h3>
-                <p className="text-gray-600">
-                  Người dùng này chưa đăng ký khóa học nào
-                </p>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Chưa có khóa học nào</h3>
+                <p className="text-gray-600">Người dùng này chưa đăng ký khóa học nào</p>
               </div>
             )}
 
-            {activeTab === 'completed' && (
+            {activeTab === "completed" && (
               <div className="text-center py-12">
                 <Award className="w-16 h-16 text-gray-300 mx-auto mb-4" />
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
                   Chưa hoàn thành khóa học nào
                 </h3>
-                <p className="text-gray-600">
-                  Người dùng này chưa hoàn thành khóa học nào
-                </p>
+                <p className="text-gray-600">Người dùng này chưa hoàn thành khóa học nào</p>
               </div>
             )}
 
-            {activeTab === 'articles' && (
+            {activeTab === "articles" && (
               <div className="text-center py-12">
                 <FileText className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                  Chưa có bài viết nào
-                </h3>
-                <p className="text-gray-600">
-                  Người dùng này chưa xuất bản bài viết nào
-                </p>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Chưa có bài viết nào</h3>
+                <p className="text-gray-600">Người dùng này chưa xuất bản bài viết nào</p>
               </div>
             )}
 
-            {activeTab === 'saved' && (
+            {activeTab === "saved" && (
               <div className="text-center py-12">
                 <BookOpen className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                  Chưa lưu bài viết nào
-                </h3>
-                <p className="text-gray-600">
-                  Người dùng này chưa lưu bài viết nào
-                </p>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Chưa lưu bài viết nào</h3>
+                <p className="text-gray-600">Người dùng này chưa lưu bài viết nào</p>
               </div>
             )}
           </div>

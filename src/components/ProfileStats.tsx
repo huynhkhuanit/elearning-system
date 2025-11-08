@@ -54,7 +54,7 @@ export default function ProfileStats({ profile }: ProfileStatsProps) {
   ];
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+    <div className="w-full grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
       {stats.map((stat, index) => {
         const Icon = stat.icon;
         return (

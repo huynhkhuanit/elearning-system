@@ -35,19 +35,63 @@ export async function GET(
     oneYearAgo.setMonth(oneYearAgo.getMonth() - 12);
     const oneYearAgoStr = oneYearAgo.toISOString().split('T')[0];
 
-    const activities = await queryBuilder<{
+    // Try to get activities from learning_activities table first
+    // If that fails, calculate from lesson_progress
+    let activities: Array<{
       activity_data: string;
       lessons_completed: number;
       quizzes_completed: number;
       study_time: number | null;
-    }>(
-      'learning_activities',
-      {
-        select: 'activity_data, lessons_completed, quizzes_completed, study_time',
-        filters: { user_id: userId },
-        orderBy: { column: 'activity_data', ascending: true }
-      }
-    );
+    }> = [];
+
+    try {
+      // Try to query learning_activities table
+      activities = await queryBuilder<{
+        activity_data: string;
+        lessons_completed: number;
+        quizzes_completed: number;
+        study_time: number | null;
+      }>(
+        'learning_activities',
+        {
+          select: 'activity_data, lessons_completed, quizzes_completed, study_time',
+          filters: { user_id: userId },
+          orderBy: { column: 'activity_data', ascending: true }
+        }
+      );
+    } catch (error: any) {
+      // If learning_activities table doesn't have the columns, calculate from lesson_progress
+      console.warn('learning_activities table structure different, calculating from lesson_progress:', error?.message);
+      
+      // Get completed lessons grouped by date
+      const completedLessons = await queryBuilder<{
+        completed_at: string;
+      }>(
+        'lesson_progress',
+        {
+          select: 'completed_at',
+          filters: { user_id: userId, is_completed: true },
+          orderBy: { column: 'completed_at', ascending: true }
+        }
+      );
+
+      // Group by date
+      const dateCountMap = new Map<string, number>();
+      completedLessons.forEach((lesson) => {
+        if (lesson.completed_at) {
+          const dateStr = new Date(lesson.completed_at).toISOString().split('T')[0];
+          dateCountMap.set(dateStr, (dateCountMap.get(dateStr) || 0) + 1);
+        }
+      });
+
+      // Convert to activities format
+      activities = Array.from(dateCountMap.entries()).map(([date, count]) => ({
+        activity_data: date,
+        lessons_completed: count,
+        quizzes_completed: 0,
+        study_time: null,
+      }));
+    }
 
     // Filter activities from last 12 months
     const filteredActivities = activities.filter(a => 
