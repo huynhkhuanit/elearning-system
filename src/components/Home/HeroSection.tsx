@@ -40,6 +40,8 @@ export default function HeroSection() {
   const [loading, setLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const [slideKey, setSlideKey] = useState(0); // Unique key for each slide to ensure proper animation
   const router = useRouter();
 
   useEffect(() => {
@@ -90,11 +92,28 @@ export default function HeroSection() {
 
   const paginate = (newDirection: number) => {
     if (courses.length === 0) return;
+    
+    // Always keep direction consistent: 
+    // direction = 1 (right/next) -> slide from right to left
+    // direction = -1 (left/prev) -> slide from left to right
     setDirection(newDirection);
+    
     setCurrentIndex((prevIndex) => {
+      const isWrapping = 
+        (newDirection === 1 && prevIndex === courses.length - 1) ||
+        (newDirection === -1 && prevIndex === 0);
+      
+      // Update slideKey when wrapping to ensure AnimatePresence recognizes the transition
+      // This ensures each wrap-around gets a unique key combination
+      if (isWrapping) {
+        setSlideKey(prev => prev + 1);
+      }
+      
       if (newDirection === 1) {
+        // Moving forward (right) - slide from right to left
         return prevIndex === courses.length - 1 ? 0 : prevIndex + 1;
       } else {
+        // Moving backward (left) - slide from left to right
         return prevIndex === 0 ? courses.length - 1 : prevIndex - 1;
       }
     });
@@ -143,7 +162,7 @@ export default function HeroSection() {
             <div className="relative h-[220px] sm:h-[250px] md:h-[270px]">
               <AnimatePresence initial={false} custom={direction}>
                 <motion.div
-                  key={currentIndex}
+                  key={`${currentIndex}-${slideKey}`}
                   custom={direction}
                   variants={slideVariants}
                   initial="enter"
@@ -156,6 +175,9 @@ export default function HeroSection() {
                   drag="x"
                   dragConstraints={{ left: 0, right: 0 }}
                   dragElastic={1}
+                  onDragStart={() => {
+                    setIsDragging(true);
+                  }}
                   onDragEnd={(e, { offset, velocity }) => {
                     const swipe = swipePower(offset.x, velocity.x);
                     if (swipe < -swipeConfidenceThreshold) {
@@ -163,10 +185,24 @@ export default function HeroSection() {
                     } else if (swipe > swipeConfidenceThreshold) {
                       paginate(-1);
                     }
+                    // Reset dragging state after a delay to prevent accidental clicks
+                    setTimeout(() => {
+                      setIsDragging(false);
+                    }, 200);
+                  }}
+                  onDrag={(e, info) => {
+                    // Keep dragging state true while dragging
+                    if (!isDragging) {
+                      setIsDragging(true);
+                    }
                   }}
                   className="absolute inset-0"
                 >
-                  <CourseCard course={courses[currentIndex]} featured={courses[currentIndex].featured} />
+                  <CourseCard 
+                    course={courses[currentIndex]} 
+                    featured={courses[currentIndex].featured}
+                    isDragging={isDragging}
+                  />
                 </motion.div>
               </AnimatePresence>
             </div>
@@ -189,20 +225,28 @@ export default function HeroSection() {
 
         {/* Dots Indicator */}
         <div className="flex justify-center space-x-2 mt-4 sm:mt-5 md:mt-6">
-          {courses.map((course, index) => (
-            <button
-              key={course.id}
-              onClick={() => {
-                setDirection(index > currentIndex ? 1 : -1);
-                setCurrentIndex(index);
-              }}
-              className={`h-2 sm:h-3 rounded-full transition-all duration-200 ${
-                index === currentIndex
-                  ? "bg-indigo-600 w-6 sm:w-8"
-                  : "bg-gray-300 hover:bg-gray-400 w-2 sm:w-3"
-              }`}
-            />
-          ))}
+          {courses.map((course, index) => {
+            const handleDotClick = () => {
+              if (index === currentIndex) return;
+              
+              // Consistent direction: right (next) = 1, left (prev) = -1
+              const direction = index > currentIndex ? 1 : -1;
+              setDirection(direction);
+              setCurrentIndex(index);
+            };
+            
+            return (
+              <button
+                key={course.id}
+                onClick={handleDotClick}
+                className={`h-2 sm:h-3 rounded-full transition-all duration-200 ${
+                  index === currentIndex
+                    ? "bg-indigo-600 w-6 sm:w-8"
+                    : "bg-gray-300 hover:bg-gray-400 w-2 sm:w-3"
+                }`}
+              />
+            );
+          })}
         </div>
 
       </PageContainer>
@@ -210,16 +254,55 @@ export default function HeroSection() {
   );
 }
 
-function CourseCard({ course, featured }: { course: Course; featured?: boolean }) {
+function CourseCard({ course, featured, isDragging }: { course: Course; featured?: boolean; isDragging?: boolean }) {
   const router = useRouter();
   const levelDisplay = LEVEL_MAP[course.level] || "Cơ bản";
+  const [hasMoved, setHasMoved] = useState(false);
+  const [startPos, setStartPos] = useState<{ x: number; y: number } | null>(null);
 
-  const handleClick = () => {
+  const handleClick = (e: React.MouseEvent) => {
+    // Prevent navigation if user was dragging or moved mouse significantly
+    if (isDragging || hasMoved) {
+      e.preventDefault();
+      e.stopPropagation();
+      return;
+    }
     router.push(`/courses/${course.slug}`);
   };
 
+  const handleMouseDown = (e: React.MouseEvent) => {
+    setStartPos({ x: e.clientX, y: e.clientY });
+    setHasMoved(false);
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (startPos) {
+      const deltaX = Math.abs(e.clientX - startPos.x);
+      const deltaY = Math.abs(e.clientY - startPos.y);
+      // If mouse moved more than 5px, consider it a drag
+      if (deltaX > 5 || deltaY > 5) {
+        setHasMoved(true);
+      }
+    }
+  };
+
+  const handleMouseUp = () => {
+    // Reset after a short delay to allow click to process
+    setTimeout(() => {
+      setHasMoved(false);
+      setStartPos(null);
+    }, 50);
+  };
+
   return (
-    <div className="h-full bg-gradient-to-br from-white to-gray-50 flex flex-col sm:flex-row cursor-pointer" onClick={handleClick}>
+    <div 
+      className={`h-full bg-gradient-to-br from-white to-gray-50 flex flex-col sm:flex-row ${isDragging ? 'cursor-grabbing' : 'cursor-pointer'}`}
+      onClick={handleClick}
+      onMouseDown={handleMouseDown}
+      onMouseMove={handleMouseMove}
+      onMouseUp={handleMouseUp}
+      onMouseLeave={handleMouseUp}
+    >
       {/* Content Section */}
       <div className="flex-1 p-3 sm:p-4 md:p-6 flex flex-col justify-between">
         <div>
