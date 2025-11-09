@@ -368,7 +368,7 @@ function CourseCard({ course, featured, isDragging }: { course: Course; featured
                     -{calculatePricing(course.priceAmount).discountPercent}%
                   </span>
                 </div>
-                <span className="text-base sm:text-lg md:text-xl font-bold text-red-600">
+                <span className="text-base sm:text-lg md:text-xl font-bold text-indigo-600">
                   {new Intl.NumberFormat('vi-VN').format(course.priceAmount)}₫
                 </span>
               </div>

@@ -289,7 +289,7 @@ export default function CourseDetailPage() {
                       -{calculatePricing(course.priceAmount).discountPercent}%
                     </span>
                   </div>
-                  <p className="text-3xl font-black text-red-600">
+                  <p className="text-3xl font-black text-indigo-600">
                     {new Intl.NumberFormat('vi-VN').format(course.priceAmount)}₫
                   </p>
                   <p className="text-sm text-gray-600">Mua một lần, học mãi mãi</p>
@@ -938,7 +938,7 @@ export default function CourseDetailPage() {
                       -{calculatePricing(course.priceAmount).discountPercent}%
                     </span>
                   </div>
-                  <p className="text-3xl font-black text-white">{new Intl.NumberFormat('vi-VN').format(course.priceAmount)}₫</p>
+                  <p className="text-3xl font-black text-indigo-600">{new Intl.NumberFormat('vi-VN').format(course.priceAmount)}₫</p>
                   <p className="text-sm opacity-90">Mua một lần, học mãi mãi</p>
                 </div>
               )}
