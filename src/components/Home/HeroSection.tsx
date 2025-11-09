@@ -1,78 +1,70 @@
 "use client";
 
-import { ChevronLeft, ChevronRight, Star, Award, Users, Clock, ArrowRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Star, Users, Clock } from "lucide-react";
 import Badge from "@/components/Badge";
 import PageContainer from "@/components/PageContainer";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useRouter } from "next/navigation";
 
 interface Course {
-  id: number;
+  id: string;
   title: string;
-  instructor: string;
+  subtitle: string;
+  slug: string;
+  price: string;
+  priceAmount: number;
   rating: number;
   students: number;
   duration: string;
-  level: string;
-  price: string;
-  originalPrice?: string;
-  image: string;
+  level: "BEGINNER" | "INTERMEDIATE" | "ADVANCED";
+  isPro: boolean;
+  isFree: boolean;
+  thumbnailUrl?: string | null;
+  instructor?: {
+    name?: string;
+    username?: string;
+    avatar?: string | null;
+  };
   featured?: boolean;
 }
 
-const courses: Course[] = [
-  {
-    id: 1,
-    title: "C++ Programming Mastery",
-    instructor: "Đội ngũ DHV LearnX",
-    rating: 4.9,
-    students: 18200,
-    duration: "28h 45m",
-    level: "Trung cấp",
-    price: "Miễn phí",
-    image: "/api/placeholder/400/250",
-    featured: true,
-  },
-  {
-    id: 2,
-    title: "Data Structures & Algorithms",
-    instructor: "Đội ngũ DHV LearnX",
-    rating: 4.8,
-    students: 15640,
-    duration: "35h 20m",
-    level: "Nâng cao",
-    price: "Miễn phí",
-    image: "/api/placeholder/400/250",
-  },
-  {
-    id: 3,
-    title: "HTML & CSS Fundamentals",
-    instructor: "Đội ngũ DHV LearnX",
-    rating: 4.7,
-    students: 22350,
-    duration: "16h 30m",
-    level: "Cơ bản",
-    price: "Miễn phí",
-    image: "/api/placeholder/400/250",
-    featured: true,
-  },
-  {
-    id: 4,
-    title: "Advanced JavaScript Programming",
-    instructor: "Đội ngũ DHV LearnX",
-    rating: 4.6,
-    students: 12890,
-    duration: "22h 15m",
-    level: "Trung cấp",
-    price: "899.000đ",
-    originalPrice: "1.299.000đ",
-    image: "/api/placeholder/400/250",
-  },
-];
+const LEVEL_MAP: Record<string, "Cơ bản" | "Trung cấp" | "Nâng cao"> = {
+  BEGINNER: "Cơ bản",
+  INTERMEDIATE: "Trung cấp",
+  ADVANCED: "Nâng cao",
+};
 
 export default function HeroSection() {
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [loading, setLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState(0);
+  const router = useRouter();
+
+  useEffect(() => {
+    fetchCourses();
+  }, []);
+
+  const fetchCourses = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch("/api/courses?limit=5");
+      const data = await response.json();
+
+      if (data.success) {
+        const fetchedCourses = data.data.courses.map((course: any, index: number) => ({
+          ...course,
+          featured: index === 0, // First course is featured
+        }));
+        setCourses(fetchedCourses);
+      }
+    } catch (error) {
+      console.error("Error fetching courses:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const slideVariants = {
     enter: (direction: number) => ({
@@ -97,6 +89,7 @@ export default function HeroSection() {
   };
 
   const paginate = (newDirection: number) => {
+    if (courses.length === 0) return;
     setDirection(newDirection);
     setCurrentIndex((prevIndex) => {
       if (newDirection === 1) {
@@ -106,6 +99,23 @@ export default function HeroSection() {
       }
     });
   };
+
+  if (loading) {
+    return (
+      <section className="relative w-full bg-gradient-to-br from-indigo-50 via-white to-purple-50 py-8 sm:py-12 md:py-16 overflow-hidden">
+        <PageContainer size="lg" className="relative py-0">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
+            <p className="mt-4 text-gray-600">Đang tải khóa học...</p>
+          </div>
+        </PageContainer>
+      </section>
+    );
+  }
+
+  if (courses.length === 0) {
+    return null;
+  }
 
   return (
     <section className="relative w-full bg-gradient-to-br from-indigo-50 via-white to-purple-50 py-8 sm:py-12 md:py-16 overflow-hidden">
@@ -179,9 +189,9 @@ export default function HeroSection() {
 
         {/* Dots Indicator */}
         <div className="flex justify-center space-x-2 mt-4 sm:mt-5 md:mt-6">
-          {courses.map((_, index) => (
+          {courses.map((course, index) => (
             <button
-              key={index}
+              key={course.id}
               onClick={() => {
                 setDirection(index > currentIndex ? 1 : -1);
                 setCurrentIndex(index);
@@ -201,8 +211,15 @@ export default function HeroSection() {
 }
 
 function CourseCard({ course, featured }: { course: Course; featured?: boolean }) {
+  const router = useRouter();
+  const levelDisplay = LEVEL_MAP[course.level] || "Cơ bản";
+
+  const handleClick = () => {
+    router.push(`/courses/${course.slug}`);
+  };
+
   return (
-    <div className="h-full bg-gradient-to-br from-white to-gray-50 flex flex-col sm:flex-row">
+    <div className="h-full bg-gradient-to-br from-white to-gray-50 flex flex-col sm:flex-row cursor-pointer" onClick={handleClick}>
       {/* Content Section */}
       <div className="flex-1 p-3 sm:p-4 md:p-6 flex flex-col justify-between">
         <div>
@@ -216,17 +233,27 @@ function CourseCard({ course, featured }: { course: Course; featured?: boolean }
             {course.title}
           </h3>
 
-          <p className="text-gray-600 mb-2 sm:mb-3 text-sm">
-            GV: <span className="font-semibold text-indigo-600">{course.instructor}</span>
+          <p className="text-gray-600 mb-2 sm:mb-3 text-sm line-clamp-1">
+            {course.subtitle}
           </p>
+
+          {course.instructor?.name && (
+            <p className="text-gray-600 mb-2 sm:mb-3 text-sm">
+              GV: <span className="font-semibold text-indigo-600">{course.instructor.name}</span>
+            </p>
+          )}
 
           <div className="flex items-center space-x-2 sm:space-x-3 mb-2 sm:mb-3">
             <div className="flex items-center space-x-1">
               <Star className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-yellow-400 text-yellow-400" />
               <span className="font-semibold text-gray-900 text-sm sm:text-base">{course.rating}</span>
             </div>
-            <Badge variant="primary" size="sm">
-              {course.level}
+            <div className="flex items-center space-x-1">
+              <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-500" />
+              <span className="text-sm text-gray-600">{course.students.toLocaleString()}</span>
+            </div>
+            <Badge variant={levelDisplay === "Nâng cao" ? "warning" : levelDisplay === "Trung cấp" ? "primary" : "success"} size="sm">
+              {levelDisplay}
             </Badge>
           </div>
         </div>
@@ -234,27 +261,45 @@ function CourseCard({ course, featured }: { course: Course; featured?: boolean }
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <div className="text-base sm:text-lg md:text-xl font-bold text-gray-900">{course.price}</div>
-            {course.originalPrice && (
-              <div className="text-sm text-gray-500 line-through">{course.originalPrice}</div>
-            )}
           </div>
-          <button className="relative inline-block text-white font-semibold rounded-lg p-[2px] bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-600 hover:to-purple-600 transition-all duration-200">
+          <button 
+            onClick={(e) => {
+              e.stopPropagation();
+              handleClick();
+            }}
+            className="relative inline-block text-white font-semibold rounded-lg p-[2px] bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-600 hover:to-purple-600 transition-all duration-200"
+          >
             <span className="block px-2.5 py-1.5 sm:px-3 sm:py-2 md:px-4 md:py-2 rounded-lg bg-gradient-to-r from-indigo-600 to-purple-600 hover:bg-transparent text-sm">
-                Đăng ký
+              {course.isFree ? "Học ngay" : "Xem chi tiết"}
             </span>
-        </button>
-
+          </button>
         </div>
       </div>
 
       {/* Image Section */}
-      <div className="w-full h-24 sm:w-32 sm:h-auto md:w-40 bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center p-3">
-        <div className="w-full h-full sm:h-20 bg-gradient-to-br from-indigo-200 to-purple-200 rounded-lg flex items-center justify-center text-indigo-600">
-          <div className="text-center">
-            <Award className="w-4 h-4 sm:w-5 sm:h-5 mx-auto mb-1" />
-            <div className="text-xs font-semibold">Preview</div>
+      <div className="w-full h-24 sm:w-32 sm:h-auto md:w-40 relative overflow-hidden">
+        {course.thumbnailUrl ? (
+          <img
+            src={course.thumbnailUrl}
+            alt={course.title}
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              target.style.display = 'none';
+              const parent = target.parentElement;
+              if (parent) {
+                parent.className = "w-full h-24 sm:w-32 sm:h-auto md:w-40 bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center";
+                parent.innerHTML = '<div class="text-center text-indigo-600"><div class="text-xs font-semibold">Course</div></div>';
+              }
+            }}
+          />
+        ) : (
+          <div className="w-full h-full bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center">
+            <div className="text-center text-indigo-600">
+              <div className="text-xs font-semibold">Course</div>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

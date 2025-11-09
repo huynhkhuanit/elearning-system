@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { ArrowRight, Star, Users, Clock, Play } from "lucide-react";
+import { ArrowRight, Star, Users, Clock } from "lucide-react";
 import Badge from "@/components/Badge";
 import PageContainer from "@/components/PageContainer";
 import { useState, useEffect } from "react";
@@ -376,46 +376,35 @@ function CourseCard({
       <div className={`relative h-32 flex items-center justify-center flex-shrink-0 overflow-hidden ${isEnrolling ? 'opacity-50' : ''}`}>
         {/* Banner Image or Gradient Background */}
         {course.thumbnailUrl ? (
-          <>
-            <img
-              src={course.thumbnailUrl}
-              alt={course.title}
-              className="absolute inset-0 w-full h-full object-cover"
-              onError={(e) => {
-                // Fallback to gradient if image fails to load
-                const target = e.target as HTMLImageElement;
-                target.style.display = 'none';
-                const parent = target.parentElement;
-                if (parent) {
-                  parent.className = `relative h-32 bg-gradient-to-br ${course.gradient} flex items-center justify-center flex-shrink-0 overflow-hidden ${isEnrolling ? 'opacity-50' : ''}`;
-                }
-              }}
-            />
-            {/* Dark overlay for better text readability */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/40 to-black/20"></div>
-          </>
+          <img
+            src={course.thumbnailUrl}
+            alt={course.title}
+            className="absolute inset-0 w-full h-full object-cover"
+            onError={(e) => {
+              // Fallback to gradient if image fails to load
+              const target = e.target as HTMLImageElement;
+              target.style.display = 'none';
+              const parent = target.parentElement;
+              if (parent) {
+                parent.className = `relative h-32 bg-gradient-to-br ${course.gradient} flex items-center justify-center flex-shrink-0 overflow-hidden ${isEnrolling ? 'opacity-50' : ''}`;
+              }
+            }}
+          />
         ) : (
           <div className={`absolute inset-0 bg-gradient-to-br ${course.gradient}`}></div>
         )}
         
-        {/* Content overlay */}
-        <div className="relative z-10 text-white text-center">
-          {isEnrolling ? (
-            <>
+        {/* Loading overlay when enrolling */}
+        {isEnrolling && (
+          <div className="absolute inset-0 bg-black/30 flex items-center justify-center z-10">
+            <div className="text-white text-center">
               <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white mx-auto mb-2"></div>
               <div className="text-xs font-semibold opacity-90">
                 {course.isFree ? "Đang đăng ký..." : "Đang kiểm tra..."}
               </div>
-            </>
-          ) : (
-            <>
-              <Play className="w-8 h-8 mx-auto mb-2 opacity-80 group-hover:opacity-100 transition-opacity duration-200" />
-              <div className="text-xs font-semibold opacity-90">
-                {course.isFree ? "Miễn phí" : "Preview"}
-              </div>
-            </>
-          )}
-        </div>
+            </div>
+          </div>
+        )}
         
         {/* Featured badge */}
         {course.featured && !isEnrolling && (
