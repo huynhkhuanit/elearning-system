@@ -9,6 +9,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { rpc } from '@/lib/db-helpers';
+import { db as supabaseAdmin } from '@/lib/db';
 
 export async function GET(request: NextRequest) {
   try {
@@ -56,6 +57,23 @@ export async function GET(request: NextRequest) {
       p_search: search || null,
     });
 
+    // Get instructor avatars for all courses
+    const instructorIds = [...new Set((courses || []).map((c: any) => c.instructor_id).filter(Boolean))];
+    const instructorAvatars: Record<string, string | null> = {};
+    
+    if (instructorIds.length > 0 && supabaseAdmin) {
+      const { data: instructors } = await supabaseAdmin
+        .from('users')
+        .select('id, avatar_url')
+        .in('id', instructorIds);
+      
+      if (instructors) {
+        instructors.forEach((instructor: any) => {
+          instructorAvatars[instructor.id] = instructor.avatar_url;
+        });
+      }
+    }
+
     // Format response
     const formattedCourses = (courses || []).map((course: any) => ({
       id: course.id,
@@ -79,6 +97,7 @@ export async function GET(request: NextRequest) {
       instructor: {
         name: course.instructor_name,
         username: course.instructor_username,
+        avatar: course.instructor_avatar_url || instructorAvatars[course.instructor_id] || null,
       },
       createdAt: course.created_at,
     }));

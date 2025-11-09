@@ -26,6 +26,12 @@ interface Course {
   featured?: boolean;
   totalLessons: number;
   isEnrolled?: boolean;
+  thumbnailUrl?: string | null;
+  instructor?: {
+    name?: string;
+    username?: string;
+    avatar?: string | null;
+  };
 }
 
 // Gradients cho PRO courses (màu sắc đa dạng)
@@ -367,8 +373,33 @@ function CourseCard({
       style={{ backgroundColor: "#f7f7f7" }} 
       onClick={handleCardClick}
     >
-      <div className={`relative h-32 bg-gradient-to-br ${course.gradient} flex items-center justify-center flex-shrink-0 ${isEnrolling ? 'opacity-50' : ''}`}>
-        <div className="text-white text-center">
+      <div className={`relative h-32 flex items-center justify-center flex-shrink-0 overflow-hidden ${isEnrolling ? 'opacity-50' : ''}`}>
+        {/* Banner Image or Gradient Background */}
+        {course.thumbnailUrl ? (
+          <>
+            <img
+              src={course.thumbnailUrl}
+              alt={course.title}
+              className="absolute inset-0 w-full h-full object-cover"
+              onError={(e) => {
+                // Fallback to gradient if image fails to load
+                const target = e.target as HTMLImageElement;
+                target.style.display = 'none';
+                const parent = target.parentElement;
+                if (parent) {
+                  parent.className = `relative h-32 bg-gradient-to-br ${course.gradient} flex items-center justify-center flex-shrink-0 overflow-hidden ${isEnrolling ? 'opacity-50' : ''}`;
+                }
+              }}
+            />
+            {/* Dark overlay for better text readability */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/40 to-black/20"></div>
+          </>
+        ) : (
+          <div className={`absolute inset-0 bg-gradient-to-br ${course.gradient}`}></div>
+        )}
+        
+        {/* Content overlay */}
+        <div className="relative z-10 text-white text-center">
           {isEnrolling ? (
             <>
               <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white mx-auto mb-2"></div>
@@ -385,9 +416,11 @@ function CourseCard({
             </>
           )}
         </div>
+        
+        {/* Featured badge */}
         {course.featured && !isEnrolling && (
-          <div className="absolute top-3 right-3">
-            <div className="w-[26px] px-[6px] py-[6px] bg-[#0000004d] rounded-lg flex items-center justify-center">
+          <div className="absolute top-3 right-3 z-20">
+            <div className="w-[26px] px-[6px] py-[6px] bg-[#0000004d] backdrop-blur-sm rounded-lg flex items-center justify-center">
               <span className="text-white text-xs">⭐</span>
             </div>
           </div>
