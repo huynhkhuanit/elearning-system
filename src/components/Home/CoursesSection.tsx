@@ -55,6 +55,21 @@ const LEVEL_MAP: Record<string, "Cơ bản" | "Trung cấp" | "Nâng cao"> = {
   ADVANCED: "Nâng cao",
 };
 
+// Helper function to calculate original price and discount for PRO courses
+const calculatePricing = (currentPrice: number) => {
+  // Original price is ~40% higher than current price (seller strategy)
+  const originalPrice = Math.round(currentPrice * 1.4);
+  // Round to nearest 100k for cleaner display
+  const roundedOriginalPrice = Math.round(originalPrice / 100000) * 100000;
+  const discountPercent = Math.round(((roundedOriginalPrice - currentPrice) / roundedOriginalPrice) * 100);
+  
+  return {
+    originalPrice: roundedOriginalPrice,
+    currentPrice: currentPrice,
+    discountPercent,
+  };
+};
+
 export default function CoursesSection() {
   const [proCourses, setProCourses] = useState<Course[]>([]);
   const [freeCourses, setFreeCourses] = useState<Course[]>([]);
@@ -441,7 +456,15 @@ function CourseCard({
         <div className="flex items-center justify-between flex-shrink-0">
           <div className="flex items-center space-x-2">
             {course.isPro ? (
-              <div className="flex flex-col">
+              <div className="flex flex-col gap-1">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-gray-500 line-through">
+                    {new Intl.NumberFormat('vi-VN').format(calculatePricing(course.priceAmount).originalPrice)}₫
+                  </span>
+                  <span className="text-xs font-bold px-1.5 py-0.5 rounded bg-red-500 text-white">
+                    -{calculatePricing(course.priceAmount).discountPercent}%
+                  </span>
+                </div>
                 <span className="text-lg font-bold text-indigo-600">
                   {new Intl.NumberFormat('vi-VN').format(course.priceAmount)}₫
                 </span>

@@ -35,6 +35,21 @@ const LEVEL_MAP: Record<string, "Cơ bản" | "Trung cấp" | "Nâng cao"> = {
   ADVANCED: "Nâng cao",
 };
 
+// Helper function to calculate original price and discount for PRO courses
+const calculatePricing = (currentPrice: number) => {
+  // Original price is ~40% higher than current price (seller strategy)
+  const originalPrice = Math.round(currentPrice * 1.4);
+  // Round to nearest 100k for cleaner display
+  const roundedOriginalPrice = Math.round(originalPrice / 100000) * 100000;
+  const discountPercent = Math.round(((roundedOriginalPrice - currentPrice) / roundedOriginalPrice) * 100);
+  
+  return {
+    originalPrice: roundedOriginalPrice,
+    currentPrice: currentPrice,
+    discountPercent,
+  };
+};
+
 export default function HeroSection() {
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
@@ -343,12 +358,28 @@ function CourseCard({ course, featured, isDragging }: { course: Course; featured
 
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <div className="text-base sm:text-lg md:text-xl font-bold text-gray-900">{course.price}</div>
+            {course.isPro ? (
+              <div className="flex flex-col gap-1">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs sm:text-sm text-gray-500 line-through">
+                    {new Intl.NumberFormat('vi-VN').format(calculatePricing(course.priceAmount).originalPrice)}₫
+                  </span>
+                  <span className="text-xs font-bold px-1.5 py-0.5 rounded bg-red-500 text-white">
+                    -{calculatePricing(course.priceAmount).discountPercent}%
+                  </span>
+                </div>
+                <span className="text-base sm:text-lg md:text-xl font-bold text-red-600">
+                  {new Intl.NumberFormat('vi-VN').format(course.priceAmount)}₫
+                </span>
+              </div>
+            ) : (
+              <div className="text-base sm:text-lg md:text-xl font-bold text-gray-900">{course.price}</div>
+            )}
           </div>
           <button 
             onClick={(e) => {
               e.stopPropagation();
-              handleClick();
+              handleClick(e);
             }}
             className="relative inline-block text-white font-semibold rounded-lg p-[2px] bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-600 hover:to-purple-600 transition-all duration-200"
           >

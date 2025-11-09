@@ -45,6 +45,21 @@ const LEVEL_MAP: Record<string, string> = {
   ADVANCED: "Nâng cao",
 };
 
+// Helper function to calculate original price and discount for PRO courses
+const calculatePricing = (currentPrice: number) => {
+  // Original price is ~40% higher than current price (seller strategy)
+  const originalPrice = Math.round(currentPrice * 1.4);
+  // Round to nearest 100k for cleaner display
+  const roundedOriginalPrice = Math.round(originalPrice / 100000) * 100000;
+  const discountPercent = Math.round(((roundedOriginalPrice - currentPrice) / roundedOriginalPrice) * 100);
+  
+  return {
+    originalPrice: roundedOriginalPrice,
+    currentPrice: currentPrice,
+    discountPercent,
+  };
+};
+
 export default function CourseDetailPage() {
   const params = useParams();
   const router = useRouter();
@@ -266,7 +281,15 @@ export default function CourseDetailPage() {
               
               {!course.isFree && (
                 <div className="text-center sm:text-left">
-                  <p className="text-3xl font-black text-orange-600">
+                  <div className="flex items-center gap-3 mb-1">
+                    <span className="text-lg text-gray-500 line-through">
+                      {new Intl.NumberFormat('vi-VN').format(calculatePricing(course.priceAmount).originalPrice)}₫
+                    </span>
+                    <span className="text-sm font-bold px-2 py-1 rounded bg-red-500 text-white">
+                      -{calculatePricing(course.priceAmount).discountPercent}%
+                    </span>
+                  </div>
+                  <p className="text-3xl font-black text-red-600">
                     {new Intl.NumberFormat('vi-VN').format(course.priceAmount)}₫
                   </p>
                   <p className="text-sm text-gray-600">Mua một lần, học mãi mãi</p>
@@ -907,7 +930,15 @@ export default function CourseDetailPage() {
               </button>
               {!course.isFree && (
                 <div className="text-center sm:text-left">
-                  <p className="text-3xl font-black">{new Intl.NumberFormat('vi-VN').format(course.priceAmount)}₫</p>
+                  <div className="flex items-center gap-3 mb-1 justify-center sm:justify-start">
+                    <span className="text-lg text-white/70 line-through">
+                      {new Intl.NumberFormat('vi-VN').format(calculatePricing(course.priceAmount).originalPrice)}₫
+                    </span>
+                    <span className="text-sm font-bold px-2 py-1 rounded bg-white text-red-600">
+                      -{calculatePricing(course.priceAmount).discountPercent}%
+                    </span>
+                  </div>
+                  <p className="text-3xl font-black text-white">{new Intl.NumberFormat('vi-VN').format(course.priceAmount)}₫</p>
                   <p className="text-sm opacity-90">Mua một lần, học mãi mãi</p>
                 </div>
               )}
