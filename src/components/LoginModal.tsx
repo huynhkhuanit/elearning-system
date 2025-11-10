@@ -4,6 +4,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Mail, Lock, Eye, EyeOff, ArrowRight, LogIn } from "lucide-react";
 import Modal from "./Modal";
+import ForgotPasswordModal from "./ForgotPasswordModal";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/contexts/ToastContext";
 
@@ -23,6 +24,7 @@ export default function LoginModal({ isOpen, onClose, onSwitchToRegister }: Logi
   });
   
   const [showPassword, setShowPassword] = useState(false);
+  const [isForgotPasswordOpen, setIsForgotPasswordOpen] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -108,6 +110,7 @@ export default function LoginModal({ isOpen, onClose, onSwitchToRegister }: Logi
               </label>
               <button
                 type="button"
+                onClick={() => setIsForgotPasswordOpen(true)}
                 className="text-sm text-indigo-600 hover:text-indigo-700 font-medium transition-colors"
               >
                 Quên mật khẩu?
@@ -189,6 +192,12 @@ export default function LoginModal({ isOpen, onClose, onSwitchToRegister }: Logi
           </button>
         </p>
       </div>
+
+      {/* Forgot Password Modal */}
+      <ForgotPasswordModal
+        isOpen={isForgotPasswordOpen}
+        onClose={() => setIsForgotPasswordOpen(false)}
+      />
     </Modal>
   );
 }
