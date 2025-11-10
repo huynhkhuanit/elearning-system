@@ -36,7 +36,7 @@ interface CourseDetail {
     name: string;
     slug: string;
   };
-  learningOutcomes?: string[]; // Thêm field để lưu nội dung học được
+  learningOutcomes?: string[];
 }
 
 const LEVEL_MAP: Record<string, string> = {
@@ -100,7 +100,6 @@ export default function CourseDetailPage() {
 
   const handleEnroll = async () => {
     if (!isAuthenticated) {
-      // ✅ FIX: Show toast BEFORE redirect so user sees the message
       toast.error("Vui lòng đăng nhập để đăng ký khóa học");
       setTimeout(() => {
         router.push("/auth/login");

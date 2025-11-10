@@ -134,22 +134,29 @@ export default function HeroSection() {
     });
   };
 
-  if (loading) {
-    return (
-      <section className="relative w-full bg-gradient-to-br from-indigo-50 via-white to-purple-50 py-8 sm:py-12 md:py-16 overflow-hidden">
-        <PageContainer size="lg" className="relative py-0">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
-            <p className="mt-4 text-gray-600">Đang tải khóa học...</p>
+  // Skeleton loading component
+  const SkeletonCard = () => (
+    <div className="h-full bg-gradient-to-br from-white to-gray-50 flex flex-col sm:flex-row animate-pulse">
+      <div className="flex-1 p-3 sm:p-4 md:p-6 flex flex-col justify-between">
+        <div>
+          <div className="h-4 w-16 bg-gray-200 rounded mb-2"></div>
+          <div className="h-6 w-3/4 bg-gray-200 rounded mb-2"></div>
+          <div className="h-4 w-full bg-gray-200 rounded mb-2"></div>
+          <div className="h-4 w-2/3 bg-gray-200 rounded mb-3"></div>
+          <div className="flex items-center space-x-3 mb-3">
+            <div className="h-4 w-12 bg-gray-200 rounded"></div>
+            <div className="h-4 w-16 bg-gray-200 rounded"></div>
+            <div className="h-5 w-16 bg-gray-200 rounded"></div>
           </div>
-        </PageContainer>
-      </section>
-    );
-  }
-
-  if (courses.length === 0) {
-    return null;
-  }
+        </div>
+        <div className="flex items-center justify-between">
+          <div className="h-6 w-24 bg-gray-200 rounded"></div>
+          <div className="h-10 w-28 bg-gray-200 rounded-lg"></div>
+        </div>
+      </div>
+      <div className="w-full h-24 sm:w-32 sm:h-auto md:w-40 bg-gray-200"></div>
+    </div>
+  );
 
   return (
     <section className="relative w-full bg-gradient-to-br from-indigo-50 via-white to-purple-50 py-8 sm:py-12 md:py-16 overflow-hidden">
@@ -175,94 +182,104 @@ export default function HeroSection() {
         <div className="relative w-full px-4 sm:px-0">
           <div className="overflow-hidden rounded-xl sm:rounded-2xl shadow-xl sm:shadow-2xl bg-white">
             <div className="relative h-[220px] sm:h-[250px] md:h-[270px]">
-              <AnimatePresence initial={false} custom={direction}>
-                <motion.div
-                  key={`${currentIndex}-${slideKey}`}
-                  custom={direction}
-                  variants={slideVariants}
-                  initial="enter"
-                  animate="center"
-                  exit="exit"
-                  transition={{
-                    x: { type: "spring", stiffness: 300, damping: 30 },
-                    opacity: { duration: 0.2 },
-                  }}
-                  drag="x"
-                  dragConstraints={{ left: 0, right: 0 }}
-                  dragElastic={1}
-                  onDragStart={() => {
-                    setIsDragging(true);
-                  }}
-                  onDragEnd={(e, { offset, velocity }) => {
-                    const swipe = swipePower(offset.x, velocity.x);
-                    if (swipe < -swipeConfidenceThreshold) {
-                      paginate(1);
-                    } else if (swipe > swipeConfidenceThreshold) {
-                      paginate(-1);
-                    }
-                    // Reset dragging state after a delay to prevent accidental clicks
-                    setTimeout(() => {
-                      setIsDragging(false);
-                    }, 200);
-                  }}
-                  onDrag={(e, info) => {
-                    // Keep dragging state true while dragging
-                    if (!isDragging) {
+              {loading ? (
+                <SkeletonCard />
+              ) : courses.length === 0 ? null : (
+                <AnimatePresence initial={false} custom={direction}>
+                  <motion.div
+                    key={`${currentIndex}-${slideKey}`}
+                    custom={direction}
+                    variants={slideVariants}
+                    initial="enter"
+                    animate="center"
+                    exit="exit"
+                    transition={{
+                      x: { type: "spring", stiffness: 300, damping: 30 },
+                      opacity: { duration: 0.2 },
+                    }}
+                    drag="x"
+                    dragConstraints={{ left: 0, right: 0 }}
+                    dragElastic={1}
+                    onDragStart={() => {
                       setIsDragging(true);
-                    }
-                  }}
-                  className="absolute inset-0"
-                >
-                  <CourseCard 
-                    course={courses[currentIndex]} 
-                    featured={courses[currentIndex].featured}
-                    isDragging={isDragging}
-                  />
-                </motion.div>
-              </AnimatePresence>
+                    }}
+                    onDragEnd={(e, { offset, velocity }) => {
+                      const swipe = swipePower(offset.x, velocity.x);
+                      if (swipe < -swipeConfidenceThreshold) {
+                        paginate(1);
+                      } else if (swipe > swipeConfidenceThreshold) {
+                        paginate(-1);
+                      }
+                      // Reset dragging state after a delay to prevent accidental clicks
+                      setTimeout(() => {
+                        setIsDragging(false);
+                      }, 200);
+                    }}
+                    onDrag={(e, info) => {
+                      // Keep dragging state true while dragging
+                      if (!isDragging) {
+                        setIsDragging(true);
+                      }
+                    }}
+                    className="absolute inset-0"
+                  >
+                    <CourseCard 
+                      course={courses[currentIndex]} 
+                      featured={courses[currentIndex].featured}
+                      isDragging={isDragging}
+                    />
+                  </motion.div>
+                </AnimatePresence>
+              )}
             </div>
           </div>
 
           {/* Navigation Arrows - positioned outside carousel */}
-          <button
-            onClick={() => paginate(-1)}
-            className="absolute left-0 sm:left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 w-7 h-7 sm:w-8 sm:h-8 bg-white/90 hover:bg-white shadow-lg rounded-full flex items-center justify-center text-gray-700 hover:text-indigo-600 transition-all duration-200 z-20"
-          >
-            <ChevronLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-          </button>
-          <button
-            onClick={() => paginate(1)}
-            className="absolute right-0 sm:right-0 top-1/2 -translate-y-1/2 translate-x-1/2 w-7 h-7 sm:w-8 sm:h-8 bg-white/90 hover:bg-white shadow-lg rounded-full flex items-center justify-center text-gray-700 hover:text-indigo-600 transition-all duration-200 z-20"
-          >
-            <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-          </button>
+          {!loading && courses.length > 0 && (
+            <>
+              <button
+                onClick={() => paginate(-1)}
+                className="absolute left-0 sm:left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 w-7 h-7 sm:w-8 sm:h-8 bg-white/90 hover:bg-white shadow-lg rounded-full flex items-center justify-center text-gray-700 hover:text-indigo-600 transition-all duration-200 z-20"
+              >
+                <ChevronLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              </button>
+              <button
+                onClick={() => paginate(1)}
+                className="absolute right-0 sm:right-0 top-1/2 -translate-y-1/2 translate-x-1/2 w-7 h-7 sm:w-8 sm:h-8 bg-white/90 hover:bg-white shadow-lg rounded-full flex items-center justify-center text-gray-700 hover:text-indigo-600 transition-all duration-200 z-20"
+              >
+                <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              </button>
+            </>
+          )}
         </div>
 
         {/* Dots Indicator */}
-        <div className="flex justify-center space-x-2 mt-4 sm:mt-5 md:mt-6">
-          {courses.map((course, index) => {
-            const handleDotClick = () => {
-              if (index === currentIndex) return;
+        {!loading && courses.length > 0 && (
+          <div className="flex justify-center space-x-2 mt-4 sm:mt-5 md:mt-6">
+            {courses.map((course, index) => {
+              const handleDotClick = () => {
+                if (index === currentIndex) return;
+                
+                // Consistent direction: right (next) = 1, left (prev) = -1
+                const direction = index > currentIndex ? 1 : -1;
+                setDirection(direction);
+                setCurrentIndex(index);
+              };
               
-              // Consistent direction: right (next) = 1, left (prev) = -1
-              const direction = index > currentIndex ? 1 : -1;
-              setDirection(direction);
-              setCurrentIndex(index);
-            };
-            
-            return (
-              <button
-                key={course.id}
-                onClick={handleDotClick}
-                className={`h-2 sm:h-3 rounded-full transition-all duration-200 ${
-                  index === currentIndex
-                    ? "bg-indigo-600 w-6 sm:w-8"
-                    : "bg-gray-300 hover:bg-gray-400 w-2 sm:w-3"
-                }`}
-              />
-            );
-          })}
-        </div>
+              return (
+                <button
+                  key={course.id}
+                  onClick={handleDotClick}
+                  className={`h-2 sm:h-3 rounded-full transition-all duration-200 ${
+                    index === currentIndex
+                      ? "bg-indigo-600 w-6 sm:w-8"
+                      : "bg-gray-300 hover:bg-gray-400 w-2 sm:w-3"
+                  }`}
+                />
+              );
+            })}
+          </div>
+        )}
 
       </PageContainer>
     </section>

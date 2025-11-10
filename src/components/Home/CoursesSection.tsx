@@ -235,82 +235,155 @@ export default function CoursesSection() {
     }
   };
 
-  if (loading) {
-    return (
-      <section className="py-16 bg-gradient-to-br from-gray-50 to-white">
-        <PageContainer size="lg">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
-            <p className="mt-4 text-gray-600">Đang tải khóa học...</p>
+  // Skeleton loading component
+  const SkeletonCard = () => (
+    <div className="rounded-2xl shadow-lg overflow-hidden border border-gray-100 h-full flex flex-col bg-[#f7f7f7] animate-pulse">
+      <div className="relative h-32 bg-gray-200 flex-shrink-0"></div>
+      <div className="p-4 flex-1 flex flex-col">
+        <div className="mb-3 flex-1">
+          <div className="h-5 w-3/4 bg-gray-200 rounded mb-2"></div>
+          <div className="h-4 w-full bg-gray-200 rounded mb-3"></div>
+        </div>
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center space-x-3">
+            <div className="h-4 w-12 bg-gray-200 rounded"></div>
+            <div className="h-4 w-16 bg-gray-200 rounded"></div>
           </div>
-        </PageContainer>
-      </section>
-    );
-  }
+          <div className="h-4 w-16 bg-gray-200 rounded"></div>
+        </div>
+        <div className="flex items-center justify-between">
+          <div className="h-6 w-24 bg-gray-200 rounded"></div>
+          <div className="h-6 w-16 bg-gray-200 rounded"></div>
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <section className="py-16 bg-gradient-to-br from-gray-50 to-white">
       <PageContainer size="lg">
-        {proCourses.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="mb-16"
-          >
-            <div className="flex items-center justify-between mb-8">
-              <div>
-                <h2 className="font-bold text-gray-900 mb-2">
-                  Khóa học Pro
-                  <span className="ml-3 text-sm font-semibold text-white bg-gradient-to-r from-indigo-600 to-purple-600 px-3 py-1 rounded-full">
-                     PRO
-                  </span>
-                </h2>
-                <p className="text-gray-600">Khóa học JavaScript chuyên sâu cho developer</p>
+        {loading ? (
+          <>
+            {/* PRO Courses Skeleton */}
+            <div className="mb-16">
+              <div className="flex items-center justify-between mb-8">
+                <div>
+                  <h2 className="font-bold text-gray-900 mb-2">
+                    Khóa học Pro
+                    <span className="ml-3 text-sm font-semibold text-white bg-gradient-to-r from-indigo-600 to-purple-600 px-3 py-1 rounded-full">
+                      PRO
+                    </span>
+                  </h2>
+                  <p className="text-gray-600">Khóa học JavaScript chuyên sâu cho developer</p>
+                </div>
+                <a href="/roadmap" className="hidden md:flex items-center text-primary font-semibold hover:text-primary/80 transition-colors duration-200">
+                  Xem lộ trình
+                  <ArrowRight className="w-4 h-4 ml-2" />
+                </a>
               </div>
-              <a href="/roadmap" className="hidden md:flex items-center text-primary font-semibold hover:text-primary/80 transition-colors duration-200">
-                Xem lộ trình
-                <ArrowRight className="w-4 h-4 ml-2" />
-              </a>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-              {proCourses.map((course, index) => (
-                <motion.div key={course.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: index * 0.1 }}>
-                  <CourseCard 
-                    course={course} 
-                    onEnroll={() => handleEnroll(course)} 
-                    onProClick={() => handleProCourseClick(course)}
-                    isEnrolling={enrollingCourse === course.id}
-                  />
-                </motion.div>
-              ))}
-            </div>
-          </motion.div>
-        )}
-        {freeCourses.length > 0 && (
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.3 }}>
-            <div className="flex items-center justify-between mb-8">
-              <div>
-                <h2 className="font-bold text-gray-900 mb-2">Khóa học miễn phí</h2>
-                <p className="text-gray-600">Học miễn phí với các khóa học chất lượng</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                {[...Array(4)].map((_, index) => (
+                  <SkeletonCard key={index} />
+                ))}
               </div>
-              <a href="/roadmap" className="hidden md:flex items-center text-primary font-semibold hover:text-primary/80 transition-colors duration-200">
-                Xem lộ trình
-                <ArrowRight className="w-4 h-4 ml-2" />
-              </a>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-              {freeCourses.map((course, index) => (
-                <motion.div key={course.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: index * 0.05 }}>
-                  <CourseCard 
-                    course={course} 
-                    onEnroll={() => handleEnroll(course)} 
-                    isEnrolling={enrollingCourse === course.id}
-                  />
-                </motion.div>
-              ))}
+            {/* FREE Courses Skeleton */}
+            <div>
+              <div className="flex items-center justify-between mb-8">
+                <div>
+                  <h2 className="font-bold text-gray-900 mb-2">Khóa học miễn phí</h2>
+                  <p className="text-gray-600">Học miễn phí với các khóa học chất lượng</p>
+                </div>
+                <a href="/roadmap" className="hidden md:flex items-center text-primary font-semibold hover:text-primary/80 transition-colors duration-200">
+                  Xem lộ trình
+                  <ArrowRight className="w-4 h-4 ml-2" />
+                </a>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                {[...Array(4)].map((_, index) => (
+                  <SkeletonCard key={index} />
+                ))}
+              </div>
             </div>
-          </motion.div>
+          </>
+        ) : (
+          <>
+            {proCourses.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.3 }}
+                className="mb-16"
+              >
+                <div className="flex items-center justify-between mb-8">
+                  <div>
+                    <h2 className="font-bold text-gray-900 mb-2">
+                      Khóa học Pro
+                      <span className="ml-3 text-sm font-semibold text-white bg-gradient-to-r from-indigo-600 to-purple-600 px-3 py-1 rounded-full">
+                        PRO
+                      </span>
+                    </h2>
+                    <p className="text-gray-600">Khóa học JavaScript chuyên sâu cho developer</p>
+                  </div>
+                  <a href="/roadmap" className="hidden md:flex items-center text-primary font-semibold hover:text-primary/80 transition-colors duration-200">
+                    Xem lộ trình
+                    <ArrowRight className="w-4 h-4 ml-2" />
+                  </a>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                  {proCourses.map((course, index) => (
+                    <motion.div 
+                      key={course.id} 
+                      initial={{ opacity: 0 }} 
+                      animate={{ opacity: 1 }} 
+                      transition={{ duration: 0.3, delay: index * 0.03 }}
+                    >
+                      <CourseCard 
+                        course={course} 
+                        onEnroll={() => handleEnroll(course)} 
+                        onProClick={() => handleProCourseClick(course)}
+                        isEnrolling={enrollingCourse === course.id}
+                      />
+                    </motion.div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+            {freeCourses.length > 0 && (
+              <motion.div 
+                initial={{ opacity: 0 }} 
+                animate={{ opacity: 1 }} 
+                transition={{ duration: 0.3 }}
+              >
+                <div className="flex items-center justify-between mb-8">
+                  <div>
+                    <h2 className="font-bold text-gray-900 mb-2">Khóa học miễn phí</h2>
+                    <p className="text-gray-600">Học miễn phí với các khóa học chất lượng</p>
+                  </div>
+                  <a href="/roadmap" className="hidden md:flex items-center text-primary font-semibold hover:text-primary/80 transition-colors duration-200">
+                    Xem lộ trình
+                    <ArrowRight className="w-4 h-4 ml-2" />
+                  </a>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                  {freeCourses.map((course, index) => (
+                    <motion.div 
+                      key={course.id} 
+                      initial={{ opacity: 0 }} 
+                      animate={{ opacity: 1 }} 
+                      transition={{ duration: 0.3, delay: index * 0.02 }}
+                    >
+                      <CourseCard 
+                        course={course} 
+                        onEnroll={() => handleEnroll(course)} 
+                        isEnrolling={enrollingCourse === course.id}
+                      />
+                    </motion.div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+          </>
         )}
       </PageContainer>
     </section>
