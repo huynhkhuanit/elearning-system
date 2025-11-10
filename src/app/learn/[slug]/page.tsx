@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/contexts/ToastContext";
+import { useLearnCourse } from "@/contexts/LearnCourseContext";
 import { usePageTitle, useLessonContent } from "@/lib/hooks";
 import VideoPlayer from "@/components/VideoPlayer";
 import LessonQAButton from "@/components/LessonQAButton";
@@ -19,6 +20,7 @@ import LessonQAModal from "@/components/LessonQAModal";
 import AskQuestionModal from "@/components/AskQuestionModal";
 import QuestionDetailModal from "@/components/QuestionDetailModal";
 import CodePlayground from "@/components/CodePlayground";
+import LearnCourseSidebar from "@/components/LearnCourseSidebar";
 import "@/app/markdown.css";
 import "@/app/markdown.css";
 
@@ -62,14 +64,25 @@ export default function LearnCoursePage() {
   const params = useParams();
   const router = useRouter();
   const slug = params?.slug as string;
-  const [course, setCourse] = useState<CourseData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [currentLesson, setCurrentLesson] = useState<Lesson | null>(null);
-  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
-  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [lessonContent, setLessonContent] = useState<string>("");
   const [isFreeCourseDetermined, setIsFreeCourseDetermined] = useState(false);
-  const [isFree, setIsFree] = useState(false);
+  
+  // Use context for shared state
+  const {
+    sidebarOpen,
+    setSidebarOpen,
+    course,
+    setCourse,
+    currentLesson,
+    setCurrentLesson,
+    expandedSections,
+    setExpandedSections,
+    toggleSection,
+    handleLessonClick,
+    isFree,
+    setIsFree,
+  } = useLearnCourse();
   const [isQAModalOpen, setIsQAModalOpen] = useState(false);
   const [isAskQuestionModalOpen, setIsAskQuestionModalOpen] = useState(false);
   const [selectedQuestionId, setSelectedQuestionId] = useState<string | null>(null);
@@ -231,6 +244,16 @@ export default function LearnCoursePage() {
       if (sections.length > 0) {
         setExpandedSections(new Set([sections[0].id]));
       }
+      
+      // Expand section containing current lesson
+      if (firstUncompletedLesson) {
+        const sectionContainingLesson = sections.find((s: any) =>
+          s.lessons.some((l: any) => l.id === firstUncompletedLesson.id)
+        );
+        if (sectionContainingLesson) {
+          setExpandedSections((prev) => new Set(prev).add(sectionContainingLesson.id));
+        }
+      }
     } catch (error) {
       console.error("[LEARN PAGE] Error fetching course:", error);
       toast.error("Đã có lỗi xảy ra khi tải khóa học. Vui lòng thử lại");
@@ -241,21 +264,7 @@ export default function LearnCoursePage() {
     }
   };
 
-  const toggleSection = (sectionId: string) => {
-    setExpandedSections(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(sectionId)) {
-        newSet.delete(sectionId);
-      } else {
-        newSet.add(sectionId);
-      }
-      return newSet;
-    });
-  };
-
-  const handleLessonClick = (lesson: Lesson) => {
-    setCurrentLesson(lesson);
-  };
+  // toggleSection and handleLessonClick are now from context
 
   const markAsCompleted = async () => {
     if (!currentLesson) return;
@@ -582,10 +591,10 @@ export default function LearnCoursePage() {
         </div>
       </div>
 
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex overflow-hidden relative">
         {/* Main Content Area */}
         <div className={`flex-1 flex flex-col overflow-hidden justify-center items-center transition-all duration-300 ${
-          isCodePlaygroundOpen ? 'mr-[40vw]' : 'mr-0'
+          isCodePlaygroundOpen ? 'mr-[40vw]' : sidebarOpen ? 'mr-96' : 'mr-0'
         }`}>
           {/* Video and Lesson Content */}
           <div className={`w-full flex-1 overflow-y-auto ${isDarkTheme ? 'bg-gray-900' : 'bg-gradient-to-br from-gray-50 to-white'} flex flex-col`}>
@@ -688,8 +697,9 @@ export default function LearnCoursePage() {
                 <p className={`text-sm font-medium truncate max-w-xs ${isDarkTheme ? 'text-gray-300' : 'text-gray-900'}`}>{currentLesson?.title}</p>
               </div>
               <button
-                onClick={() => setSidebarOpen(true)}
+                onClick={() => setSidebarOpen(!sidebarOpen)}
                 className={`p-2 rounded-lg transition-colors z-10 backdrop-blur-sm ${isDarkTheme ? 'bg-gray-700/50 hover:bg-gray-600/70 text-gray-300' : 'bg-indigo-100/50 hover:bg-indigo-200/70 text-indigo-600'}`}
+                title={sidebarOpen ? "Ẩn nội dung khóa học" : "Hiển thị nội dung khóa học"}
               >
                 <Menu className="w-5 h-5" />
               </button>
@@ -697,124 +707,17 @@ export default function LearnCoursePage() {
           </div>
         </div>
 
-        {/* Sidebar - Course Content Modal */}
-        <>
-          {/* Backdrop */}
-          <div
-            className={`fixed inset-0 z-30 ${
-              sidebarOpen
-                ? 'bg-black/50 animate-in fade-in duration-200 pointer-events-auto'
-                : 'bg-black/0 animate-out fade-out duration-200 pointer-events-none'
-            }`}
-            onClick={() => setSidebarOpen(false)}
-          />
-
-          {/* Modal Panel */}
-          <div className={`fixed right-0 top-0 h-screen w-96 ${sidebarBgClass} border-l flex flex-col overflow-hidden z-40 transition-all duration-300 ease-in-out ${
-            sidebarOpen
-              ? 'translate-x-0 opacity-100 pointer-events-auto'
-              : 'translate-x-full opacity-0 pointer-events-none'
-          }`}>
-              <div className={`p-5 border-b ${isDarkTheme ? 'border-gray-700' : 'border-gray-200'} flex-shrink-0`}>
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className={`text-lg font-bold ${isDarkTheme ? 'text-gray-200' : 'text-gray-900'}`}>Nội dung khoá học</h2>
-                  <button
-                    onClick={() => setSidebarOpen(false)}
-                    className={`transition-colors ${isDarkTheme ? 'text-gray-400 hover:text-gray-300' : 'text-gray-500 hover:text-gray-900'}`}
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
-                </div>
-                
-                <div className={`flex items-center space-x-4 text-sm ${isDarkTheme ? 'text-gray-500' : 'text-gray-600'}`}>
-                  <div className="flex items-center space-x-1">
-                    <BookOpen className="w-4 h-4" />
-                    <span>{course.totalLessons} bài học</span>
-                  </div>
-                  <div className="flex items-center space-x-1">
-                    <Clock className="w-4 h-4" />
-                    <span>{course.totalDuration}</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Sections & Lessons */}
-              <div className="flex-1 overflow-y-auto custom-scrollbar">
-                {course.sections.map((section, sectionIndex) => (
-                  <div key={section.id} className={`border-b ${isDarkTheme ? 'border-gray-700' : 'border-gray-200'}`}>
-                    <button
-                      onClick={() => toggleSection(section.id)}
-                      className={`w-full px-5 py-4 flex items-center justify-between transition-colors ${isDarkTheme ? 'hover:bg-gray-700/50' : 'hover:bg-gray-100'}`}
-                    >
-                      <div className="flex items-center space-x-3 flex-1">
-                        <span className={`flex-shrink-0 w-8 h-8 rounded-full ${isDarkTheme ? 'bg-gray-700 text-orange-400' : 'bg-indigo-100 text-indigo-600'} flex items-center justify-center text-sm font-bold`}>
-                          {sectionIndex + 1}
-                        </span>
-                        <div className="text-left">
-                          <h3 className={`font-semibold text-sm ${isDarkTheme ? 'text-gray-200' : 'text-gray-900'}`}>{section.title}</h3>
-                          <p className={`text-xs ${isDarkTheme ? 'text-gray-500' : 'text-gray-500'}`}>{section.lessons.length} bài học • {section.duration}</p>
-                        </div>
-                      </div>
-                      {expandedSections.has(section.id) ? (
-                        <ChevronDown className={`w-5 h-5 flex-shrink-0 ${isDarkTheme ? 'text-gray-400' : 'text-gray-500'}`} />
-                      ) : (
-                        <ChevronRight className={`w-5 h-5 flex-shrink-0 ${isDarkTheme ? 'text-gray-400' : 'text-gray-500'}`} />
-                      )}
-                    </button>
-
-                    {expandedSections.has(section.id) && (
-                      <div className={isDarkTheme ? "bg-gray-900/50" : "bg-gray-50"}>
-                        {section.lessons.map((lesson, lessonIndex) => (
-                          <button
-                            key={lesson.id}
-                            onClick={() => {
-                              handleLessonClick(lesson);
-                              setSidebarOpen(false);
-                            }}
-                            className={`w-full px-5 py-3 flex items-center space-x-3 transition-colors border-r-4 ${
-                              currentLesson?.id === lesson.id 
-                                ? isDarkTheme 
-                                  ? 'bg-orange-500/10 border-orange-500' 
-                                  : 'bg-indigo-50 border-indigo-600'
-                                : `${isDarkTheme ? 'hover:bg-gray-700/30 border-transparent' : 'hover:bg-gray-100 border-transparent'}`
-                            }`}
-                          >
-                            <span className={`flex-shrink-0 text-xs font-medium w-6 ${isDarkTheme ? 'text-gray-500' : 'text-gray-600'}`}>
-                              {sectionIndex + 1}.{lessonIndex + 1}
-                            </span>
-                            <div className="flex-shrink-0">
-                              {lesson.isCompleted ? (
-                                <CheckCircle className={`w-5 h-5 ${isDarkTheme ? 'text-green-400' : 'text-emerald-500'}`} />
-                              ) : (
-                                <div className={`w-5 h-5 rounded-full border-2 ${isDarkTheme ? 'border-gray-600' : 'border-gray-400'}`}></div>
-                              )}
-                            </div>
-                            <div className="flex-1 text-left">
-                              <p className={`text-sm font-medium ${
-                                currentLesson?.id === lesson.id 
-                                  ? isDarkTheme 
-                                    ? 'text-orange-400' 
-                                    : 'text-indigo-600'
-                                  : isDarkTheme ? 'text-gray-400' : 'text-gray-700'
-                              }`}>
-                                {lesson.title}
-                              </p>
-                              <div className="flex items-center space-x-2 mt-0.5">
-                                <div className={isDarkTheme ? 'text-gray-600' : 'text-gray-500'}>
-                                  {getLessonIcon(lesson.type)}
-                                </div>
-                                <span className={`text-xs ${isDarkTheme ? 'text-gray-600' : 'text-gray-600'}`}>{lesson.duration}</span>
-                              </div>
-                            </div>
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-        </>
+        {/* Sidebar - Part of page layout */}
+        <LearnCourseSidebar
+          isOpen={sidebarOpen}
+          onClose={() => setSidebarOpen(false)}
+          course={course}
+          currentLesson={currentLesson}
+          expandedSections={expandedSections}
+          toggleSection={toggleSection}
+          handleLessonClick={handleLessonClick}
+          isFree={isFree}
+        />
       </div>
 
       {/* Q&A Button - Fixed on bottom left */}

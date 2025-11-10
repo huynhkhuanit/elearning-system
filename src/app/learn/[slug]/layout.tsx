@@ -1,13 +1,12 @@
-import type { Metadata } from "next";
-import { ReactNode } from "react";
+"use client";
 
-export const metadata: Metadata = {
-  title: "Học tập - DHV LearnX",
-  description: "Nền tảng học lập trình trực tuyến",
-};
+import { ReactNode } from "react";
+import { LearnCourseProvider } from "@/contexts/LearnCourseContext";
 
 export default function LearnCourseLayout({ children }: { children: ReactNode }) {
-  // Layout cho trang học tập - không cần html/body vì đã có ở root layout
-  // LayoutWrapper sẽ xử lý việc ẩn Menu, Header, Footer
-  return <>{children}</>;
+  return (
+    <LearnCourseProvider>
+      {children}
+    </LearnCourseProvider>
+  );
 }
