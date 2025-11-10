@@ -38,7 +38,7 @@ interface TableOfContentsItem {
 export default function ArticlePage() {
   const params = useParams()
   const router = useRouter()
-  const { user } = useAuth()
+  const { user, isAuthenticated } = useAuth()
   const toast = useToast()
   const slug = params.slug as string
   const contentRef = useRef<HTMLDivElement>(null)
@@ -47,6 +47,7 @@ export default function ArticlePage() {
   const [isLoading, setIsLoading] = useState(true)
   const [isLiked, setIsLiked] = useState(false)
   const [isBookmarked, setIsBookmarked] = useState(false)
+  const [isBookmarking, setIsBookmarking] = useState(false)
   const [readingProgress, setReadingProgress] = useState(0)
   const [showShareMenu, setShowShareMenu] = useState(false)
   const [copied, setCopied] = useState(false)
@@ -80,6 +81,15 @@ export default function ArticlePage() {
       })
       .finally(() => setIsLoading(false))
   }, [slug, toast, router])
+
+  // Check bookmark status when post is loaded and user is authenticated
+  useEffect(() => {
+    if (post && isAuthenticated && user) {
+      checkBookmarkStatus()
+    } else {
+      setIsBookmarked(false)
+    }
+  }, [post, isAuthenticated, user, slug])
 
   useEffect(() => {
     if (post && contentRef.current) {
@@ -167,6 +177,64 @@ export default function ArticlePage() {
       const elementPosition = element.getBoundingClientRect().top + window.scrollY
       window.scrollTo({ top: elementPosition - offset, behavior: "smooth" })
       setShowTOC(false)
+    }
+  }
+
+  const checkBookmarkStatus = async () => {
+    if (!slug || !isAuthenticated) return
+
+    try {
+      const res = await fetch(`/api/blog/posts/${slug}/bookmark`, {
+        credentials: "include",
+      })
+      const result = await res.json()
+
+      if (result.success) {
+        setIsBookmarked(result.data.bookmarked)
+      }
+    } catch (error) {
+      console.error("Error checking bookmark status:", error)
+    }
+  }
+
+  const handleBookmark = async () => {
+    if (!isAuthenticated) {
+      toast.error("Vui lòng đăng nhập để lưu bài viết")
+      router.push("/auth/login")
+      return
+    }
+
+    if (!slug || isBookmarking) return
+
+    try {
+      setIsBookmarking(true)
+      const res = await fetch(`/api/blog/posts/${slug}/bookmark`, {
+        method: "POST",
+        credentials: "include",
+      })
+      const result = await res.json()
+
+      if (result.success) {
+        setIsBookmarked(result.data.bookmarked)
+        toast.success(result.message || (result.data.bookmarked ? "Đã lưu bài viết" : "Đã bỏ lưu bài viết"))
+        
+        // Update bookmark count in post
+        if (post) {
+          setPost({
+            ...post,
+            bookmark_count: result.data.bookmarked
+              ? post.bookmark_count + 1
+              : Math.max(0, post.bookmark_count - 1),
+          })
+        }
+      } else {
+        toast.error(result.message || "Không thể lưu bài viết")
+      }
+    } catch (error) {
+      console.error("Error toggling bookmark:", error)
+      toast.error("Không thể lưu bài viết")
+    } finally {
+      setIsBookmarking(false)
     }
   }
 
@@ -275,15 +343,18 @@ export default function ArticlePage() {
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => setIsBookmarked(!isBookmarked)}
+                onClick={handleBookmark}
+                disabled={isBookmarking}
                 className={`flex flex-col items-center gap-1.5 p-3 rounded-xl transition-all shadow-sm ${
                   isBookmarked
-                    ? "bg-gradient-to-br from-yellow-50 to-amber-50 text-yellow-600 shadow-md"
+                    ? "bg-gradient-to-br from-indigo-50 to-indigo-100 text-indigo-600 shadow-md"
                     : "bg-white text-gray-600 hover:bg-gray-50"
-                }`}
+                } ${isBookmarking ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
               >
                 <Bookmark className={`w-6 h-6 ${isBookmarked ? "fill-current" : ""}`} />
-                <span className="text-xs font-bold">Lưu</span>
+                <span className="text-xs font-bold">
+                  {isBookmarking ? "Đang xử lý..." : "Lưu"}
+                </span>
               </motion.button>
 
               <div className="relative">

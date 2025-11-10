@@ -1,12 +1,14 @@
 "use client";
 
-import { Eye, MessageCircle, BookOpen, Search, Heart, Grid3x3, List } from "lucide-react";
+import { Eye, MessageCircle, BookOpen, Search, Heart, Grid3x3, List, Bookmark } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Badge from "@/components/Badge";
 import PageContainer from "@/components/PageContainer";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useToast } from "@/contexts/ToastContext";
+import { useAuth } from "@/contexts/AuthContext";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 
 interface Article {
@@ -37,12 +39,16 @@ type ViewMode = "grid" | "list";
 
 export default function ArticlesPage() {
   const toast = useToast();
+  const { isAuthenticated } = useAuth();
+  const router = useRouter();
   const [articles, setArticles] = useState<Article[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
+  const [bookmarkedPosts, setBookmarkedPosts] = useState<Set<number>>(new Set());
+  const [bookmarkingPosts, setBookmarkingPosts] = useState<Set<number>>(new Set());
   const [pagination, setPagination] = useState({
     total: 0,
     limit: 12,
@@ -57,6 +63,45 @@ export default function ArticlesPage() {
   useEffect(() => {
     fetchArticles();
   }, [selectedCategory, searchQuery]);
+
+  // Check bookmark status for all articles when they are loaded
+  useEffect(() => {
+    if (articles.length > 0 && isAuthenticated) {
+      checkBookmarkStatuses();
+    } else {
+      setBookmarkedPosts(new Set());
+    }
+  }, [articles, isAuthenticated]);
+
+  const checkBookmarkStatuses = async () => {
+    if (!isAuthenticated || articles.length === 0) return;
+
+    try {
+      // Check bookmark status for all articles
+      const bookmarkPromises = articles.map(async (article) => {
+        try {
+          const res = await fetch(`/api/blog/posts/${article.slug}/bookmark`, {
+            credentials: "include",
+          });
+          const result = await res.json();
+          if (result.success && result.data.bookmarked) {
+            return article.id;
+          }
+        } catch (error) {
+          console.error(`Error checking bookmark for article ${article.id}:`, error);
+        }
+        return null;
+      });
+
+      const bookmarkedIds = (await Promise.all(bookmarkPromises)).filter(
+        (id): id is number => id !== null
+      );
+
+      setBookmarkedPosts(new Set(bookmarkedIds));
+    } catch (error) {
+      console.error("Error checking bookmark statuses:", error);
+    }
+  };
 
   const fetchCategories = async () => {
     try {
@@ -168,6 +213,68 @@ export default function ArticlesPage() {
       .split(", ")
       .filter((t) => t)
       .slice(0, 3);
+  };
+
+  const handleBookmark = async (e: React.MouseEvent, article: Article) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!isAuthenticated) {
+      toast.error("Vui lòng đăng nhập để lưu bài viết");
+      router.push("/auth/login");
+      return;
+    }
+
+    if (bookmarkingPosts.has(article.id)) return;
+
+    try {
+      setBookmarkingPosts((prev) => new Set(prev).add(article.id));
+      const res = await fetch(`/api/blog/posts/${article.slug}/bookmark`, {
+        method: "POST",
+        credentials: "include",
+      });
+      const result = await res.json();
+
+      if (result.success) {
+        const isBookmarked = result.data.bookmarked;
+        setBookmarkedPosts((prev) => {
+          const newSet = new Set(prev);
+          if (isBookmarked) {
+            newSet.add(article.id);
+          } else {
+            newSet.delete(article.id);
+          }
+          return newSet;
+        });
+
+        // Update bookmark count in article
+        setArticles((prev) =>
+          prev.map((a) =>
+            a.id === article.id
+              ? {
+                  ...a,
+                  bookmark_count: isBookmarked
+                    ? a.bookmark_count + 1
+                    : Math.max(0, a.bookmark_count - 1),
+                }
+              : a
+          )
+        );
+
+        toast.success(result.message || (isBookmarked ? "Đã lưu bài viết" : "Đã bỏ lưu bài viết"));
+      } else {
+        toast.error(result.message || "Không thể lưu bài viết");
+      }
+    } catch (error) {
+      console.error("Error toggling bookmark:", error);
+      toast.error("Không thể lưu bài viết");
+    } finally {
+      setBookmarkingPosts((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(article.id);
+        return newSet;
+      });
+    }
   };
 
   return (
@@ -290,7 +397,7 @@ export default function ArticlesPage() {
                 >
                   <Link href={`/articles/${article.slug}`}>
                     {viewMode === "grid" ? (
-                      <div className="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow duration-200 overflow-hidden h-full flex flex-col cursor-pointer">
+                      <div className="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow duration-200 overflow-hidden h-full flex flex-col cursor-pointer group">
                         <div className="h-48 bg-gradient-to-r from-indigo-500 to-purple-600 relative overflow-hidden">
                           {article.cover_image ? (
                             <Image
@@ -304,6 +411,21 @@ export default function ArticlesPage() {
                               <BookOpen className="w-16 h-16 text-white opacity-50" />
                             </div>
                           )}
+                          {/* Bookmark button */}
+                          <button
+                            onClick={(e) => handleBookmark(e, article)}
+                            disabled={bookmarkingPosts.has(article.id)}
+                            className={`absolute top-3 right-3 p-2 rounded-full backdrop-blur-sm transition-all ${
+                              bookmarkedPosts.has(article.id)
+                                ? "bg-indigo-600/90 text-white"
+                                : "bg-white/90 text-gray-600 hover:bg-white"
+                            } ${bookmarkingPosts.has(article.id) ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
+                            title={bookmarkedPosts.has(article.id) ? "Bỏ lưu" : "Lưu bài viết"}
+                          >
+                            <Bookmark
+                              className={`w-4 h-4 ${bookmarkedPosts.has(article.id) ? "fill-current" : ""}`}
+                            />
+                          </button>
                         </div>
 
                         <div className="p-6 flex-1 flex flex-col">
@@ -370,7 +492,7 @@ export default function ArticlesPage() {
                         </div>
                       </div>
                     ) : (
-                      <div className="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow duration-200 overflow-hidden flex flex-col sm:flex-row cursor-pointer">
+                      <div className="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow duration-200 overflow-hidden flex flex-col sm:flex-row cursor-pointer group">
                         <div className="sm:w-64 h-48 sm:h-auto bg-gradient-to-r from-indigo-500 to-purple-600 relative overflow-hidden flex-shrink-0">
                           {article.cover_image ? (
                             <Image
@@ -384,6 +506,21 @@ export default function ArticlesPage() {
                               <BookOpen className="w-16 h-16 text-white opacity-50" />
                             </div>
                           )}
+                          {/* Bookmark button */}
+                          <button
+                            onClick={(e) => handleBookmark(e, article)}
+                            disabled={bookmarkingPosts.has(article.id)}
+                            className={`absolute top-3 right-3 p-2 rounded-full backdrop-blur-sm transition-all ${
+                              bookmarkedPosts.has(article.id)
+                                ? "bg-indigo-600/90 text-white"
+                                : "bg-white/90 text-gray-600 hover:bg-white"
+                            } ${bookmarkingPosts.has(article.id) ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
+                            title={bookmarkedPosts.has(article.id) ? "Bỏ lưu" : "Lưu bài viết"}
+                          >
+                            <Bookmark
+                              className={`w-4 h-4 ${bookmarkedPosts.has(article.id) ? "fill-current" : ""}`}
+                            />
+                          </button>
                         </div>
 
                         <div className="p-6 flex-1 flex flex-col">

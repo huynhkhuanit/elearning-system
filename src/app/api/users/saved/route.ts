@@ -71,6 +71,7 @@ export async function GET(request: NextRequest) {
     const postIds = bookmarks.map((b: any) => b.post_id);
 
     // Get blog posts with full details
+    // Use explicit foreign key relationship to avoid ambiguity
     const { data: posts, error: postsError } = await supabaseAdmin!
       .from("blog_posts")
       .select(`
@@ -85,7 +86,7 @@ export async function GET(request: NextRequest) {
         created_at,
         updated_at,
         user_id,
-        users!inner (
+        users!blog_posts_user_id_fkey (
           id,
           username,
           full_name,
