@@ -834,3 +834,82 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
 .code-playground:not(.open) .code-playground-content {
   opacity: 0;
 }
+
+/* ========== DEV MODE TOGGLE SWITCH ANIMATION ========== */
+.dev-mode-toggle {
+  position: relative;
+}
+
+.dev-mode-toggle-thumb {
+  transition: transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
+              background-color 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              box-shadow 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  will-change: transform, background-color;
+}
+
+.dev-mode-toggle-thumb.off {
+  transform: translateX(0);
+  background-color: #000000 !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.dev-mode-toggle-thumb.on {
+  transform: translateX(28px);
+  background-color: #8b5cf6 !important;
+  box-shadow: 0 4px 8px rgba(139, 92, 246, 0.4);
+}
+
+/* Animation khi chuyển từ OFF sang ON - Chỉ trượt mượt mà */
+@keyframes switchToOn {
+  0% {
+    transform: translateX(0);
+    background-color: #000000;
+  }
+  30% {
+    background-color: #4c1d95;
+  }
+  70% {
+    background-color: #7c3aed;
+  }
+  100% {
+    transform: translateX(28px);
+    background-color: #8b5cf6;
+  }
+}
+
+/* Animation khi chuyển từ ON sang OFF - Chỉ trượt mượt mà */
+@keyframes switchToOff {
+  0% {
+    transform: translateX(28px);
+    background-color: #8b5cf6;
+  }
+  30% {
+    background-color: #7c3aed;
+  }
+  70% {
+    background-color: #4c1d95;
+  }
+  100% {
+    transform: translateX(0);
+    background-color: #000000;
+  }
+}
+
+.dev-mode-toggle-thumb.switching-on {
+  animation: switchToOn 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  transition: none !important;
+}
+
+.dev-mode-toggle-thumb.switching-off {
+  animation: switchToOff 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  transition: none !important;
+}
+
+/* Hiệu ứng pulse khi hover */
+.dev-mode-toggle:hover .dev-mode-toggle-thumb.off {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+}
+
+.dev-mode-toggle:hover .dev-mode-toggle-thumb.on {
+  box-shadow: 0 6px 12px rgba(139, 92, 246, 0.5);
+}

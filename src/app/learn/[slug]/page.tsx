@@ -89,6 +89,8 @@ export default function LearnCoursePage() {
   const [isCodePlaygroundOpen, setIsCodePlaygroundOpen] = useState(false);
   const [isDevMode, setIsDevMode] = useState(false);
   const [showModeTooltip, setShowModeTooltip] = useState(false);
+  const [isSwitching, setIsSwitching] = useState(false);
+  const [switchDirection, setSwitchDirection] = useState<'on' | 'off' | null>(null);
   const { isAuthenticated, isLoading: authLoading } = useAuth();
   const toast = useToast();
   
@@ -459,20 +461,39 @@ export default function LearnCoursePage() {
             {/* Toggle Switch */}
             <button
               onClick={() => {
-                setIsDevMode(!isDevMode);
-                setIsCodePlaygroundOpen(!isDevMode);
+                if (isSwitching) return;
+                const newState = !isDevMode;
+                const direction = newState ? 'on' : 'off';
+                
+                setIsSwitching(true);
+                setSwitchDirection(direction);
+                
+                // Update state sau khi animation bắt đầu
+                setTimeout(() => {
+                  setIsDevMode(newState);
+                  setIsCodePlaygroundOpen(newState);
+                }, 175); // Nửa chừng animation
+                
+                setTimeout(() => {
+                  setIsSwitching(false);
+                  setSwitchDirection(null);
+                }, 350);
               }}
-              className={`relative w-[62px] h-[34px] rounded-full transition-all duration-300 ${
+              className={`dev-mode-toggle relative w-[62px] h-[34px] rounded-full ${
                 isDarkTheme ? 'bg-[#282a36]' : 'bg-[#282a36]'
               } flex items-center px-[5px]`}
               title={isDevMode ? "Tắt Dev Mode" : "Bật Dev Mode"}
             >
               {/* Toggle Thumb */}
-              <div className={`absolute w-6 h-6 rounded-full transition-all duration-300 flex items-center justify-center ${
-                isDevMode 
-                  ? 'bg-[#8b5cf6] translate-x-[28px]' 
-                  : 'bg-black translate-x-0'
-              } shadow-lg`}>
+              <div className={`dev-mode-toggle-thumb absolute w-6 h-6 rounded-full flex items-center justify-center ${
+                isSwitching && switchDirection
+                  ? switchDirection === 'on'
+                    ? 'switching-on'
+                    : 'switching-off'
+                  : isDevMode
+                    ? 'on'
+                    : 'off'
+              }`}>
                 {/* Code Icon from lucide-react */}
                 <Code2 className="w-3.5 h-3.5 text-white" strokeWidth={2.5} />
               </div>
