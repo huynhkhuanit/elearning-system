@@ -143,8 +143,6 @@ export default function LearnCoursePage() {
     try {
       setLoading(true);
       
-      // ✅ FIX: No need to check authentication here anymore
-      // Authentication is already checked in useEffect
 
       // Fetch course details, chapters, and progress
       const [courseResponse, chaptersResponse, progressResponse] = await Promise.all([
@@ -433,8 +431,8 @@ export default function LearnCoursePage() {
   return (
     <div className={`h-screen ${bgClass} flex flex-col overflow-hidden`}>
       {/* Top Header Bar */}
-      <div className={`${headerBgClass} border-b px-6 py-1.5 flex items-center justify-between flex-shrink-0`}>
-        <div className="flex items-center space-x-4 flex-1 min-w-0">
+      <div className={`${headerBgClass} border-b px-6 flex items-center justify-between flex-shrink-0`} style={{ height: '45px', minHeight: '45px' }}>
+        <div className="flex items-center space-x-4 flex-1 min-w-0 h-full">
           <button
             onClick={() => router.push("/")}
             className={`flex items-center space-x-2 ${isDarkTheme ? 'text-gray-300 hover:opacity-80' : 'text-gray-600 hover:opacity-80'} transition-opacity flex-shrink-0`}
@@ -448,6 +446,36 @@ export default function LearnCoursePage() {
           <div className={`h-5 w-px ${isDarkTheme ? 'bg-gray-600' : 'bg-gray-300'} flex-shrink-0`}></div>
           <div className={`font-[900] ${headerTextClass} truncate`} style={{ fontSize: '16px' }}>
             {course?.title}
+          </div>
+          
+          {/* Circular Progress - Bên cạnh Title */}
+          <div className="relative w-8 h-8 flex-shrink-0">
+            <svg className="transform -rotate-90 w-8 h-8">
+              <circle
+                cx="16"
+                cy="16"
+                r="14"
+                stroke="var(--primary)"
+                strokeWidth="2.5"
+                fill="none"
+                strokeOpacity="0.2"
+              />
+              <circle
+                cx="16"
+                cy="16"
+                r="14"
+                stroke="var(--primary)"
+                strokeWidth="2.5"
+                fill="none"
+                strokeDasharray={`${2 * Math.PI * 14}`}
+                strokeDashoffset={`${2 * Math.PI * 14 * (1 - (course?.progress || 0) / 100)}`}
+                className="transition-all duration-500"
+                strokeLinecap="round"
+              />
+            </svg>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <span className="text-[9px] font-bold text-white">{course?.progress}%</span>
+            </div>
           </div>
         </div>
 
@@ -515,52 +543,6 @@ export default function LearnCoursePage() {
                 )}
               </div>
             )}
-          </div>
-          
-          {/* Circular Progress */}
-          <div className="flex items-center space-x-2">
-            <div className="relative w-10 h-10">
-              <svg className="transform -rotate-90 w-10 h-10">
-                <circle
-                  cx="20"
-                  cy="20"
-                  r="18"
-                  stroke="currentColor"
-                  strokeWidth="3"
-                  fill="none"
-                  className={isDarkTheme ? "text-gray-700" : "text-gray-300"}
-                />
-                <circle
-                  cx="20"
-                  cy="20"
-                  r="18"
-                  stroke={isDarkTheme ? "url(#gradient)" : "url(#gradientFree)"}
-                  strokeWidth="3"
-                  fill="none"
-                  strokeDasharray={`${2 * Math.PI * 18}`}
-                  strokeDashoffset={`${2 * Math.PI * 18 * (1 - (course?.progress || 0) / 100)}`}
-                  className="transition-all duration-500"
-                  strokeLinecap="round"
-                />
-                <defs>
-                  <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stopColor="#f97316" />
-                    <stop offset="100%" stopColor="#facc15" />
-                  </linearGradient>
-                  <linearGradient id="gradientFree" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stopColor="#6366f1" />
-                    <stop offset="100%" stopColor="#8b5cf6" />
-                  </linearGradient>
-                </defs>
-              </svg>
-              <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-[10px] font-bold text-gray-600">{course?.progress}%</span>
-              </div>
-            </div>
-            <div className="text-left hidden sm:block">
-              <p className={`text-xs font-semibold ${isDarkTheme ? 'text-gray-200' : 'text-gray-700'}`}>{course?.completedLessons}/{course?.totalLessons}</p>
-              <p className={`text-[10px] ${isDarkTheme ? 'text-gray-400' : 'text-gray-500'}`}>hoàn thành</p>
-            </div>
           </div>
           
           <button className={`p-1.5 rounded-lg transition-colors flex-shrink-0 ${isDarkTheme ? 'text-gray-400 hover:text-orange-400 hover:bg-gray-700' : 'text-gray-500 hover:text-indigo-600 hover:bg-indigo-50'}`}>
