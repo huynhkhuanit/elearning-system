@@ -784,7 +784,9 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
   flex-direction: column;
   overflow: hidden;
   z-index: 40;
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease-in-out;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+              opacity 0.3s ease-in-out,
+              right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   transform: translateX(100%);
   opacity: 0;
   pointer-events: none;
@@ -794,6 +796,11 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
   transform: translateX(0);
   opacity: 1;
   pointer-events: auto;
+}
+
+/* Khi CodePlayground đang mở, sidebar sẽ nằm bên phải của CodePlayground */
+.learn-course-sidebar.code-playground-open {
+  right: 40vw;
 }
 
 .learn-course-sidebar-content {

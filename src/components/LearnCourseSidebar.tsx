@@ -11,6 +11,7 @@ interface LearnCourseSidebarProps {
   toggleSection: (sectionId: string) => void;
   handleLessonClick: (lesson: any) => void;
   isFree: boolean;
+  codePlaygroundOpen?: boolean;
 }
 
 export default function LearnCourseSidebar({
@@ -22,6 +23,7 @@ export default function LearnCourseSidebar({
   toggleSection,
   handleLessonClick,
   isFree,
+  codePlaygroundOpen = false,
 }: LearnCourseSidebarProps) {
   const isDarkTheme = !isFree;
   const sidebarBgClass = isDarkTheme ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200";
@@ -43,7 +45,7 @@ export default function LearnCourseSidebar({
 
   return (
     <aside
-      className={`learn-course-sidebar ${sidebarBgClass} border-l ${isOpen ? "open" : ""}`}
+      className={`learn-course-sidebar ${sidebarBgClass} border-l ${isOpen ? "open" : ""} ${codePlaygroundOpen ? "code-playground-open" : ""}`}
     >
         <div className={`learn-course-sidebar-content p-5 border-b ${isDarkTheme ? "border-gray-700" : "border-gray-200"} flex-shrink-0`}>
           <div className="flex items-center justify-between mb-4">

@@ -472,6 +472,10 @@ export default function LearnCoursePage() {
                 setTimeout(() => {
                   setIsDevMode(newState);
                   setIsCodePlaygroundOpen(newState);
+                  // Đóng sidebar khi mở CodePlayground
+                  if (newState && sidebarOpen) {
+                    setSidebarOpen(false);
+                  }
                 }, 175); // Nửa chừng animation
                 
                 setTimeout(() => {
@@ -697,6 +701,7 @@ export default function LearnCoursePage() {
           toggleSection={toggleSection}
           handleLessonClick={handleLessonClick}
           isFree={isFree}
+          codePlaygroundOpen={isCodePlaygroundOpen}
         />
 
         {/* Code Playground - Part of page layout */}
