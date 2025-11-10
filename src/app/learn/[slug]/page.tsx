@@ -412,7 +412,6 @@ export default function LearnCoursePage() {
   const buttonHoverClass = isDarkTheme
     ? ""
     : "";
-  const contentBgClass = isDarkTheme ? "bg-gray-800" : "bg-white";
   const textColorClass = isDarkTheme ? "text-gray-300" : "text-gray-700";
 
   const getLessonIcon = (type: string) => {
@@ -631,7 +630,7 @@ export default function LearnCoursePage() {
             </div>
 
             {/* Lesson Content Section */}
-            <div className={contentBgClass}>
+            <div>
               <div className="max-w-4xl mx-auto p-6">
                 {/* Markdown Content */}
                 <div className={`prose ${isDarkTheme ? 'prose-invert' : ''} max-w-none text-sm`}>
