@@ -714,6 +714,7 @@ export default function LearnCoursePage() {
             }}
             lessonId={currentLesson.id}
             initialLanguage="html"
+            sidebarOpen={sidebarOpen}
           />
         )}
       </div>

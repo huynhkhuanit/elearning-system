@@ -8,6 +8,7 @@ interface CodePlaygroundProps {
   onClose: () => void
   lessonId: string
   initialLanguage?: "html" | "css" | "javascript" | "cpp"
+  sidebarOpen?: boolean
 }
 
 interface CodeState {
@@ -44,7 +45,7 @@ interface AIReviewData {
   suggestions: string[]
 }
 
-export default function CodePlayground({ isOpen, onClose, lessonId, initialLanguage = "html" }: CodePlaygroundProps) {
+export default function CodePlayground({ isOpen, onClose, lessonId, initialLanguage = "html", sidebarOpen = false }: CodePlaygroundProps) {
   const [activeLanguage, setActiveLanguage] = useState<keyof CodeState>(initialLanguage)
   const [code, setCode] = useState<CodeState>(DEFAULT_CODE)
   const [showPreview, setShowPreview] = useState(true)
@@ -517,7 +518,7 @@ export default function CodePlayground({ isOpen, onClose, lessonId, initialLangu
   const lineNumberText = theme === "dark" ? "text-gray-600" : "text-gray-400"
 
   return (
-    <div className={`code-playground ${isOpen ? 'open' : ''}`}>
+    <div className={`code-playground ${isOpen ? 'open' : ''} ${sidebarOpen ? 'sidebar-open' : ''}`}>
       <div className={`code-playground-content ${bgPrimary} h-full shadow-2xl flex flex-col overflow-hidden border-l ${borderColor}`}>
         {/* Header - VS Code Style */}
         <div className={`flex items-center justify-between px-4 py-2 ${bgSecondary} border-b ${borderColor}`}>
