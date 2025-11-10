@@ -84,9 +84,10 @@ export default function LearnCourseSidebar({
               >
                 <div className="flex items-center space-x-3 flex-1">
                   <span
-                    className={`flex-shrink-0 w-8 h-8 rounded-full ${
-                      isDarkTheme ? "bg-gray-700 text-orange-400" : "bg-indigo-100 text-indigo-600"
-                    } flex items-center justify-center text-sm font-bold`}
+                    className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
+                      isDarkTheme ? "bg-gray-700" : ""
+                    }`}
+                    style={isDarkTheme ? { color: 'var(--primary)' } : { backgroundColor: 'rgba(99, 102, 241, 0.1)', color: 'var(--primary)' }}
                   >
                     {sectionIndex + 1}
                   </span>
@@ -114,11 +115,13 @@ export default function LearnCourseSidebar({
                       onClick={() => handleLessonClick(lesson)}
                       className={`w-full px-5 py-3 flex items-center space-x-3 transition-colors border-r-4 ${
                         currentLesson?.id === lesson.id
-                          ? isDarkTheme
-                            ? "bg-orange-500/10 border-orange-500"
-                            : "bg-indigo-50 border-indigo-600"
+                          ? ""
                           : `${isDarkTheme ? "hover:bg-gray-700/30 border-transparent" : "hover:bg-gray-100 border-transparent"}`
                       }`}
+                      style={currentLesson?.id === lesson.id ? {
+                        backgroundColor: isDarkTheme ? 'rgba(99, 102, 241, 0.1)' : 'rgba(99, 102, 241, 0.05)',
+                        borderRightColor: 'var(--primary)',
+                      } : {}}
                     >
                       <span className={`flex-shrink-0 text-xs font-medium w-6 ${isDarkTheme ? "text-gray-500" : "text-gray-600"}`}>
                         {sectionIndex + 1}.{lessonIndex + 1}
@@ -134,13 +137,12 @@ export default function LearnCourseSidebar({
                         <p
                           className={`text-sm font-medium ${
                             currentLesson?.id === lesson.id
-                              ? isDarkTheme
-                                ? "text-orange-400"
-                                : "text-indigo-600"
+                              ? ""
                               : isDarkTheme
                                 ? "text-gray-400"
                                 : "text-gray-700"
                           }`}
+                          style={currentLesson?.id === lesson.id ? { color: 'var(--primary)' } : {}}
                         >
                           {lesson.title}
                         </p>

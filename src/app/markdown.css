@@ -397,3 +397,104 @@
 .w-md-editor::-webkit-scrollbar-thumb:hover {
   background: #6b7280;
 }
+
+/* Light Theme Styling for FREE Courses - Override dark colors */
+.prose:not(.prose-invert) h1 {
+  color: #111827;
+}
+
+.prose:not(.prose-invert) h2 {
+  color: #6366f1;
+}
+
+.prose:not(.prose-invert) h3 {
+  color: #8b5cf6;
+}
+
+.prose:not(.prose-invert) p {
+  color: #374151;
+}
+
+.prose:not(.prose-invert) code {
+  background-color: #f3f4f6;
+  color: #059669;
+  border: 1px solid #e5e7eb;
+}
+
+.prose:not(.prose-invert) pre {
+  background-color: #1f2937;
+  border: 1px solid #374151;
+}
+
+.prose:not(.prose-invert) pre code {
+  background-color: transparent;
+  color: #86efac;
+}
+
+.prose:not(.prose-invert) strong,
+.prose:not(.prose-invert) b {
+  color: #111827;
+}
+
+.prose:not(.prose-invert) em,
+.prose:not(.prose-invert) i {
+  color: #4b5563;
+}
+
+.prose:not(.prose-invert) ul {
+  color: #374151;
+}
+
+.prose:not(.prose-invert) ol {
+  color: #374151;
+}
+
+.prose:not(.prose-invert) blockquote {
+  border-left-color: #6366f1;
+  background-color: #f3f4f6;
+  color: #4b5563;
+}
+
+.prose:not(.prose-invert) a {
+  color: #6366f1;
+}
+
+.prose:not(.prose-invert) a:hover {
+  color: #4f46e5;
+}
+
+.prose:not(.prose-invert) table {
+  border-color: #e5e7eb;
+}
+
+.prose:not(.prose-invert) th {
+  background-color: #f9fafb;
+  color: #111827;
+  border-color: #e5e7eb;
+}
+
+.prose:not(.prose-invert) td {
+  color: #374151;
+  border-color: #e5e7eb;
+}
+
+.prose:not(.prose-invert) tr:hover {
+  background-color: #f9fafb;
+}
+
+.prose:not(.prose-invert) hr {
+  border-top-color: #e5e7eb;
+}
+
+.prose:not(.prose-invert) mark {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.prose:not(.prose-invert) del {
+  color: #6b7280;
+}
+
+.prose:not(.prose-invert) ins {
+  color: #059669;
+}

@@ -387,7 +387,7 @@ export default function LearnCoursePage() {
         <div className="text-center">
           <div className="relative w-20 h-20 mx-auto mb-6">
             <div className="absolute inset-0 border-4 border-gray-300 rounded-full"></div>
-            <div className="absolute inset-0 border-4 border-t-indigo-600 border-r-indigo-400 rounded-full animate-spin"></div>
+            <div className="absolute inset-0 border-4 rounded-full animate-spin" style={{ borderTopColor: 'var(--primary)', borderRightColor: 'rgba(99, 102, 241, 0.5)' }}></div>
           </div>
           <p className="text-lg font-medium text-gray-700 mb-2">Đang tải khóa học...</p>
           <p className="text-sm text-gray-500">Vui lòng đợi trong giây lát</p>
@@ -407,11 +407,11 @@ export default function LearnCoursePage() {
   const headerTextClass = isDarkTheme ? "text-gray-200" : "text-gray-900";
   const sidebarBgClass = isDarkTheme ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200";
   const buttonBgClass = isDarkTheme 
-    ? "text-orange-500 bg-transparent border-[2px] border-orange-500" 
-    : "text-indigo-600 bg-transparent border-[2px] border-indigo-600";
+    ? "bg-transparent border-[2px]" 
+    : "bg-transparent border-[2px]";
   const buttonHoverClass = isDarkTheme
-    ? "hover:border-orange-500"
-    : "hover:border-indigo-600 hover:bg-indigo-50";
+    ? ""
+    : "";
   const contentBgClass = isDarkTheme ? "bg-gray-800" : "bg-white";
   const textColorClass = isDarkTheme ? "text-gray-300" : "text-gray-700";
 
@@ -474,7 +474,9 @@ export default function LearnCoursePage() {
               />
             </svg>
             <div className="absolute inset-0 flex items-center justify-center">
-              <span className="text-[9px] font-bold text-white">{course?.progress}%</span>
+              <span className={`text-[9px] font-bold ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>
+                {course?.progress}%
+              </span>
             </div>
           </div>
         </div>
@@ -545,7 +547,24 @@ export default function LearnCoursePage() {
             )}
           </div>
           
-          <button className={`p-1.5 rounded-lg transition-colors flex-shrink-0 ${isDarkTheme ? 'text-gray-400 hover:text-orange-400 hover:bg-gray-700' : 'text-gray-500 hover:text-indigo-600 hover:bg-indigo-50'}`}>
+          <button 
+            className={`p-1.5 rounded-lg transition-colors flex-shrink-0 ${isDarkTheme ? 'text-gray-400 hover:bg-gray-700' : 'text-gray-500'}`}
+            style={isDarkTheme ? {} : { 
+              '--hover-color': 'var(--primary)',
+            } as React.CSSProperties}
+            onMouseEnter={(e) => {
+              if (!isDarkTheme) {
+                e.currentTarget.style.color = 'var(--primary)';
+                e.currentTarget.style.backgroundColor = 'rgba(99, 102, 241, 0.1)';
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (!isDarkTheme) {
+                e.currentTarget.style.color = '';
+                e.currentTarget.style.backgroundColor = '';
+              }
+            }}
+          >
             <Share2 className="w-4 h-4" />
           </button>
         </div>
@@ -615,13 +634,16 @@ export default function LearnCoursePage() {
             <div className={contentBgClass}>
               <div className="max-w-4xl mx-auto p-6">
                 {/* Markdown Content */}
-                <div className={`prose ${isDarkTheme ? 'prose-invert' : 'prose'} max-w-none text-sm`}>
+                <div className={`prose ${isDarkTheme ? 'prose-invert' : ''} max-w-none text-sm`}>
                   {markdownContent ? (
                     <ReactMarkdown remarkPlugins={[remarkGfm]}>
                       {markdownContent}
                     </ReactMarkdown>
                   ) : (
-                    <div className={`rounded-lg p-6 border ${isDarkTheme ? 'bg-gray-700/30 border-gray-600 text-gray-300' : 'bg-indigo-50 border-indigo-200 text-gray-600'}`}>
+                    <div 
+                      className={`rounded-lg p-6 border ${isDarkTheme ? 'bg-gray-700/30 border-gray-600 text-gray-300' : 'border-gray-200 text-gray-600'}`}
+                      style={isDarkTheme ? {} : { backgroundColor: 'rgba(99, 102, 241, 0.05)', borderColor: 'rgba(99, 102, 241, 0.2)' }}
+                    >
                       <p className={isDarkTheme ? "text-gray-400 italic" : "text-gray-600 italic"}>
                         Chọn một bài học để xem nội dung chi tiết.
                       </p>
@@ -637,25 +659,28 @@ export default function LearnCoursePage() {
             <div className="flex-1"></div>
 
             <div className="flex items-center gap-6">
-              <button
-                onClick={goToPreviousLesson}
-                disabled={!course || !currentLesson || course.sections.flatMap((s: Section) => s.lessons)[0]?.id === currentLesson.id}
-                className={`px-6 py-2 ${isDarkTheme ? 'text-gray-200' : 'text-gray-700'} bg-transparent border-[2px] ${isDarkTheme ? 'border-gray-600 hover:border-orange-500' : 'border-gray-400 hover:border-indigo-600'} rounded-md transition-all font-medium text-sm flex items-center space-x-2 disabled:opacity-40 disabled:cursor-not-allowed`}
-              >
-                <ChevronRight className="w-4 h-4 rotate-180" />
-                <span>Bài trước</span>
-              </button>
+              {/* Button "Bài trước" */}
+              <div className="nav-button-wrapper-prev">
+                <button
+                  onClick={goToPreviousLesson}
+                  disabled={!course || !currentLesson || course.sections.flatMap((s: Section) => s.lessons)[0]?.id === currentLesson.id}
+                  className="px-6 py-2 rounded-md transition-all duration-300 font-bold text-sm flex items-center space-x-2 disabled:opacity-40 disabled:cursor-not-allowed text-white uppercase relative z-10"
+                >
+                  <ChevronRight className="w-4 h-4 rotate-180" />
+                  <span>BÀI TRƯỚC</span>
+                </button>
+              </div>
 
-              <button
-                onClick={goToNextLesson}
-                className={`px-6 py-2 rounded-md transition-all font-medium text-sm flex items-center space-x-2 ${isDarkTheme 
-                  ? 'text-orange-500 bg-transparent border-[2px] border-orange-500 hover:bg-gradient-to-r hover:from-orange-500 hover:to-yellow-500 hover:text-white hover:border-0' 
-                  : 'text-white bg-gradient-to-r from-indigo-600 to-indigo-700 border-[2px] border-transparent hover:from-indigo-700 hover:to-indigo-800'
-                }`}
-              >
-                <span>Bài tiếp theo</span>
-                <ChevronRight className="w-4 h-4" />
-              </button>
+              {/* Button "Bài tiếp theo" */}
+              <div className="nav-button-wrapper-next">
+                <button
+                  onClick={goToNextLesson}
+                  className="px-6 py-2 rounded-md transition-all duration-300 font-bold text-sm flex items-center space-x-2 text-white uppercase relative z-10"
+                >
+                  <span>BÀI TIẾP THEO</span>
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
             </div>
 
             <div className="flex-1 flex items-center justify-end gap-3">
@@ -664,7 +689,21 @@ export default function LearnCoursePage() {
               </div>
               <button
                 onClick={() => setSidebarOpen(!sidebarOpen)}
-                className={`p-2 rounded-lg transition-colors z-10 backdrop-blur-sm ${isDarkTheme ? 'bg-gray-700/50 hover:bg-gray-600/70 text-gray-300' : 'bg-indigo-100/50 hover:bg-indigo-200/70 text-indigo-600'}`}
+                className={`p-2 rounded-lg transition-colors z-10 backdrop-blur-sm ${isDarkTheme ? 'bg-gray-700/50 hover:bg-gray-600/70 text-gray-300' : ''}`}
+                style={isDarkTheme ? {} : { 
+                  color: 'var(--primary)',
+                  backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                }}
+                onMouseEnter={(e) => {
+                  if (!isDarkTheme) {
+                    e.currentTarget.style.backgroundColor = 'rgba(99, 102, 241, 0.2)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!isDarkTheme) {
+                    e.currentTarget.style.backgroundColor = 'rgba(99, 102, 241, 0.1)';
+                  }
+                }}
                 title={sidebarOpen ? "Ẩn nội dung khóa học" : "Hiển thị nội dung khóa học"}
               >
                 <Menu className="w-5 h-5" />
