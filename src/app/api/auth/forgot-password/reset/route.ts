@@ -80,9 +80,10 @@ export async function POST(request: NextRequest) {
     }
 
     // Verify reset token
+    const secret = process.env.JWT_SECRET || 'fallback-secret';
     const resetTokenHash = crypto
       .createHash('sha256')
-      .update(resetToken + process.env.JWT_SECRET || 'fallback-secret')
+      .update(resetToken + secret)
       .digest('hex');
 
     if (hash !== resetTokenHash) {
@@ -123,11 +124,11 @@ export async function POST(request: NextRequest) {
     await update(
       'users',
       {
-        password_hash: passwordHash,
-        updated_at: new Date().toISOString(),
+        id: user.id,
       },
       {
-        id: user.id,
+        password_hash: passwordHash,
+        updated_at: new Date().toISOString(),
       }
     );
 

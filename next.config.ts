@@ -42,6 +42,20 @@ const nextConfig: NextConfig = {
       sizeLimit: '500mb', // Allow 500MB file uploads
     },
   },
+  webpack: (config, { isServer }) => {
+    if (isServer) {
+      config.externals = config.externals || [];
+      if (Array.isArray(config.externals)) {
+        config.externals.push('@sendgrid/mail');
+      } else if (typeof config.externals === 'object') {
+        config.externals['@sendgrid/mail'] = 'commonjs @sendgrid/mail';
+      }
+      config.resolve = config.resolve || {};
+      config.resolve.fallback = config.resolve.fallback || {};
+      config.resolve.fallback['@sendgrid/mail'] = false;
+    }
+    return config;
+  },
 };
 
 export default nextConfig;

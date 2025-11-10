@@ -63,8 +63,9 @@ export async function POST(request: NextRequest) {
     const metaKey = `password_reset_otp_${method}`;
     const otpMeta = await queryOneBuilder<{
       meta_value: string;
+      updated_at: string;
     }>('user_metadata', {
-      select: 'meta_value',
+      select: 'meta_value, updated_at',
       filters: {
         user_id: user.id,
         meta_key: metaKey,
@@ -72,6 +73,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (!otpMeta) {
+      console.log('[VERIFY OTP] No OTP found for user:', user.id);
       return NextResponse.json(
         {
           success: false,
@@ -83,17 +85,63 @@ export async function POST(request: NextRequest) {
 
     const otpData = JSON.parse(otpMeta.meta_value);
     const { hash, expiresAt, attempts, maxAttempts } = otpData;
+    
+    console.log('[VERIFY OTP] Found OTP record:', {
+      updatedAt: otpMeta.updated_at,
+      expiresAt: expiresAt,
+      attempts,
+      maxAttempts,
+    });
 
     // Check if OTP expired
-    if (new Date(expiresAt) < new Date()) {
+    const expiresAtDate = new Date(expiresAt);
+    const now = new Date();
+    
+    // Ensure expiresAt is a valid date
+    if (isNaN(expiresAtDate.getTime())) {
+      console.error('[VERIFY OTP] Invalid expiresAt:', expiresAt);
       return NextResponse.json(
         {
           success: false,
-          message: 'Mã OTP đã hết hạn. Vui lòng yêu cầu mã mới',
+          message: 'Mã OTP không hợp lệ. Vui lòng yêu cầu mã mới',
         },
         { status: 400 }
       );
     }
+    
+    // Compare timestamps directly
+    if (now.getTime() > expiresAtDate.getTime()) {
+      const diffMinutes = Math.round((now.getTime() - expiresAtDate.getTime()) / 60000);
+      console.log('[VERIFY OTP] OTP expired:', {
+        expiresAt: expiresAt,
+        expiresAtDate: expiresAtDate.toISOString(),
+        now: now.toISOString(),
+        recordUpdatedAt: otpMeta.updated_at,
+        diffMs: now.getTime() - expiresAtDate.getTime(),
+        diffMinutes: diffMinutes,
+      });
+      
+      // Delete expired OTP
+      await deleteRows('user_metadata', {
+        user_id: user.id,
+        meta_key: metaKey,
+      });
+      
+      return NextResponse.json(
+        {
+          success: false,
+          message: `Mã OTP đã hết hạn ${diffMinutes} phút trước. Vui lòng yêu cầu mã mới`,
+        },
+        { status: 400 }
+      );
+    }
+    
+    console.log('[VERIFY OTP] OTP still valid:', {
+      expiresAt: expiresAtDate.toISOString(),
+      now: now.toISOString(),
+      remainingMs: expiresAtDate.getTime() - now.getTime(),
+      remainingMinutes: Math.round((expiresAtDate.getTime() - now.getTime()) / 60000),
+    });
 
     // Check attempts
     if (attempts >= maxAttempts) {
@@ -107,9 +155,10 @@ export async function POST(request: NextRequest) {
     }
 
     // Verify OTP
+    const secret = process.env.JWT_SECRET || 'fallback-secret';
     const otpHash = crypto
       .createHash('sha256')
-      .update(otp + process.env.JWT_SECRET || 'fallback-secret')
+      .update(otp + secret)
       .digest('hex');
 
     if (hash !== otpHash) {
@@ -122,12 +171,12 @@ export async function POST(request: NextRequest) {
       await update(
         'user_metadata',
         {
-          meta_value: updatedMetaValue,
-          updated_at: new Date().toISOString(),
-        },
-        {
           user_id: user.id,
           meta_key: metaKey,
+        },
+        {
+          meta_value: updatedMetaValue,
+          updated_at: new Date().toISOString(),
         }
       );
 
@@ -145,7 +194,7 @@ export async function POST(request: NextRequest) {
     const resetToken = crypto.randomBytes(32).toString('hex');
     const resetTokenHash = crypto
       .createHash('sha256')
-      .update(resetToken + process.env.JWT_SECRET || 'fallback-secret')
+      .update(resetToken + secret)
       .digest('hex');
 
     const resetExpiresAt = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes
@@ -170,12 +219,12 @@ export async function POST(request: NextRequest) {
       await update(
         'user_metadata',
         {
-          meta_value: resetTokenMetaValue,
-          updated_at: new Date().toISOString(),
-        },
-        {
           user_id: user.id,
           meta_key: 'password_reset_token',
+        },
+        {
+          meta_value: resetTokenMetaValue,
+          updated_at: new Date().toISOString(),
         }
       );
     } else {

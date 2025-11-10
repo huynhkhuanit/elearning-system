@@ -13,6 +13,7 @@
   "dependencies": {
     "@ai-sdk/openai": "^2.0.59",
     "@reduxjs/toolkit": "^2.9.0",
+    "@supabase/supabase-js": "^2.45.4",
     "@tanstack/react-query": "^5.90.2",
     "@tiptap/extension-code-block-lowlight": "^3.10.1",
     "@tiptap/extension-image": "^3.10.1",
@@ -20,6 +21,7 @@
     "@tiptap/extension-placeholder": "^3.10.1",
     "@tiptap/react": "^3.10.1",
     "@tiptap/starter-kit": "^3.10.1",
+    "@types/nodemailer": "^7.0.3",
     "@types/prismjs": "^1.26.5",
     "@uiw/react-markdown-preview": "^5.1.5",
     "@uiw/react-md-editor": "^4.0.8",
@@ -35,9 +37,9 @@
     "lowlight": "^3.3.0",
     "lucide-react": "^0.544.0",
     "mermaid": "^11.12.0",
-    "@supabase/supabase-js": "^2.45.4",
     "next": "15.5.4",
     "next-themes": "^0.4.6",
+    "nodemailer": "^7.0.10",
     "prismjs": "^1.30.0",
     "react": "19.1.0",
     "react-dom": "19.1.0",
@@ -45,6 +47,7 @@
     "react-redux": "^9.2.0",
     "reactflow": "^11.11.4",
     "remark-gfm": "^4.0.1",
+    "resend": "^6.4.2",
     "zod": "^4.1.11"
   },
   "devDependencies": {

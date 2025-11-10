@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { queryOneBuilder, insert, update, queryBuilder } from '@/lib/db';
+import { sendEmail, generateOTPEmailHTML, generateOTPEmailText } from '@/lib/email';
 import crypto from 'crypto';
 
 /**
@@ -93,11 +94,19 @@ export async function POST(request: NextRequest) {
     // Generate 6-digit OTP
     const otp = crypto.randomInt(100000, 999999).toString();
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+    
+    console.log('[SEND OTP] Generated OTP:', {
+      otp,
+      expiresAt: expiresAt.toISOString(),
+      expiresIn: '10 minutes',
+      now: new Date().toISOString(),
+    });
 
     // Hash OTP for storage
+    const secret = process.env.JWT_SECRET || 'fallback-secret';
     const otpHash = crypto
       .createHash('sha256')
-      .update(otp + process.env.JWT_SECRET || 'fallback-secret')
+      .update(otp + secret)
       .digest('hex');
 
     // Store OTP in user_metadata
@@ -110,8 +119,11 @@ export async function POST(request: NextRequest) {
     });
 
     // Check if OTP already exists
-    const existingOtp = await queryOneBuilder<{ id: string }>('user_metadata', {
-      select: 'id',
+    const existingOtp = await queryOneBuilder<{ 
+      id: string;
+      meta_value: string;
+    }>('user_metadata', {
+      select: 'id, meta_value',
       filters: {
         user_id: user.id,
         meta_key: metaKey,
@@ -119,11 +131,31 @@ export async function POST(request: NextRequest) {
     });
 
     if (existingOtp) {
+      // Log old OTP info before updating
+      try {
+        const oldOtpData = JSON.parse(existingOtp.meta_value);
+        const oldExpiresAt = new Date(oldOtpData.expiresAt);
+        const now = new Date();
+        console.log('[SEND OTP] Replacing existing OTP:', {
+          oldExpiresAt: oldExpiresAt.toISOString(),
+          now: now.toISOString(),
+          oldExpired: now.getTime() > oldExpiresAt.getTime(),
+        });
+      } catch (e) {
+        console.log('[SEND OTP] Could not parse old OTP data');
+      }
+      
       // Update existing OTP
-      await update('user_metadata', 
-        { meta_value: metaValue, updated_at: new Date().toISOString() },
-        { user_id: user.id, meta_key: metaKey }
+      // Note: update(table, filters, data) - filters first, then data
+      const updateResult = await update('user_metadata', 
+        { user_id: user.id, meta_key: metaKey },
+        { meta_value: metaValue, updated_at: new Date().toISOString() }
       );
+      console.log('[SEND OTP] Updated existing OTP record:', {
+        rowsUpdated: updateResult.length,
+        newExpiresAt: expiresAt.toISOString(),
+        updatedAt: new Date().toISOString(),
+      });
     } else {
       // Insert new OTP
       await insert('user_metadata', {
@@ -133,21 +165,49 @@ export async function POST(request: NextRequest) {
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       });
+      console.log('[SEND OTP] Created new OTP record');
     }
 
-    // TODO: Send OTP via email/SMS service
-    // For now, log it (in production, use email/SMS service)
-    if (process.env.NODE_ENV === 'development') {
-      console.log(`[DEV] OTP for ${method === 'email' ? email : phone}: ${otp}`);
-      console.log(`[DEV] OTP expires at: ${expiresAt.toISOString()}`);
-    }
+    // Send OTP via email/SMS service
+    if (method === 'email') {
+      try {
+        // Get user's full name for personalized email
+        const userWithName = await queryOneBuilder<{
+          full_name: string | null;
+        }>('users', {
+          select: 'full_name',
+          filters: { id: user.id },
+        });
 
-    // In production, integrate with email/SMS service:
-    // if (method === 'email') {
-    //   await sendEmail(email, 'Mã xác thực đặt lại mật khẩu', `Mã OTP của bạn là: ${otp}`);
-    // } else {
-    //   await sendSMS(phone, `Mã OTP của bạn là: ${otp}`);
-    // }
+        const userName = userWithName?.full_name || undefined;
+
+        // Send email with OTP
+        await sendEmail({
+          to: email,
+          subject: 'Mã xác thực đặt lại mật khẩu - DHV LearnX',
+          html: generateOTPEmailHTML(otp, userName),
+          text: generateOTPEmailText(otp, userName),
+        });
+
+        console.log(`✅ OTP email sent to ${email}`);
+      } catch (emailError: any) {
+        console.error('[FORGOT PASSWORD SEND OTP] Email error:', emailError);
+        // Don't fail the request if email fails (for development)
+        // In production, you might want to throw or log to monitoring service
+        if (process.env.NODE_ENV === 'development') {
+          console.log(`[DEV] Email failed, OTP: ${otp}`);
+        }
+      }
+    } else if (method === 'phone') {
+      // TODO: Implement SMS service (Twilio, AWS SNS, etc.)
+      // For now, log it in development
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`[DEV] SMS OTP for ${phone}: ${otp}`);
+        console.log(`[DEV] OTP expires at: ${expiresAt.toISOString()}`);
+      }
+      // In production, integrate with SMS service:
+      // await sendSMS(phone, `Mã OTP của bạn là: ${otp}`);
+    }
 
     return NextResponse.json(
       {
