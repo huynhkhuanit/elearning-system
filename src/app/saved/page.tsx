@@ -33,7 +33,7 @@ interface SavedPost {
 }
 
 export default function SavedPage() {
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, user, isLoading: authLoading } = useAuth();
   const router = useRouter();
   const toast = useToast();
   const [posts, setPosts] = useState<SavedPost[]>([]);
@@ -46,12 +46,20 @@ export default function SavedPage() {
   });
 
   useEffect(() => {
+    // Wait for auth check to complete before deciding what to do
+    if (authLoading) {
+      return;
+    }
+
+    // Only redirect if auth check is complete and user is not authenticated
     if (!isAuthenticated) {
       router.push("/auth/login");
       return;
     }
+
+    // Fetch posts only when authenticated
     fetchSavedPosts();
-  }, [isAuthenticated]);
+  }, [isAuthenticated, authLoading]);
 
   const fetchSavedPosts = async () => {
     try {
@@ -103,6 +111,25 @@ export default function SavedPage() {
     });
   };
 
+  // Show loading state while checking authentication
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
+        <PageContainer size="lg" className="py-12">
+          <div className="flex items-center justify-center min-h-[60vh]">
+            <div className="text-center">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-indigo-100 mb-4 animate-pulse">
+                <Bookmark className="w-8 h-8 text-indigo-600" />
+              </div>
+              <p className="text-gray-600">Đang kiểm tra xác thực...</p>
+            </div>
+          </div>
+        </PageContainer>
+      </div>
+    );
+  }
+
+  // Don't render anything if not authenticated (will redirect)
   if (!isAuthenticated) {
     return null;
   }
