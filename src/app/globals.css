@@ -803,3 +803,34 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
 .learn-course-sidebar:not(.open) .learn-course-sidebar-content {
   opacity: 0;
 }
+
+/* ========== CODE PLAYGROUND SLIDE ANIMATION ========== */
+.code-playground {
+  position: absolute;
+  right: 0;
+  top: 0;
+  height: 100%;
+  width: 40vw;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  z-index: 50;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease-in-out;
+  transform: translateX(100%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.code-playground.open {
+  transform: translateX(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.code-playground-content {
+  transition: opacity 0.2s ease-in-out;
+}
+
+.code-playground:not(.open) .code-playground-content {
+  opacity: 0;
+}

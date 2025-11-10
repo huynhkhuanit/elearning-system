@@ -594,7 +594,13 @@ export default function LearnCoursePage() {
       <div className="flex-1 flex overflow-hidden relative">
         {/* Main Content Area */}
         <div className={`flex-1 flex flex-col overflow-hidden justify-center items-center transition-all duration-300 ${
-          isCodePlaygroundOpen ? 'mr-[40vw]' : sidebarOpen ? 'mr-96' : 'mr-0'
+          isCodePlaygroundOpen && sidebarOpen 
+            ? 'mr-[calc(40vw+24rem)]' 
+            : isCodePlaygroundOpen 
+              ? 'mr-[40vw]' 
+              : sidebarOpen 
+                ? 'mr-96' 
+                : 'mr-0'
         }`}>
           {/* Video and Lesson Content */}
           <div className={`w-full flex-1 overflow-y-auto ${isDarkTheme ? 'bg-gray-900' : 'bg-gradient-to-br from-gray-50 to-white'} flex flex-col`}>
@@ -718,6 +724,19 @@ export default function LearnCoursePage() {
           handleLessonClick={handleLessonClick}
           isFree={isFree}
         />
+
+        {/* Code Playground - Part of page layout */}
+        {currentLesson && (
+          <CodePlayground
+            isOpen={isCodePlaygroundOpen}
+            onClose={() => {
+              setIsCodePlaygroundOpen(false);
+              setIsDevMode(false);
+            }}
+            lessonId={currentLesson.id}
+            initialLanguage="html"
+          />
+        )}
       </div>
 
       {/* Q&A Button - Fixed on bottom left */}
@@ -786,16 +805,6 @@ export default function LearnCoursePage() {
         />
       )}
 
-      {/* Code Playground Modal */}
-      <CodePlayground
-        isOpen={isCodePlaygroundOpen}
-        onClose={() => {
-          setIsCodePlaygroundOpen(false);
-          setIsDevMode(false);
-        }}
-        lessonId={currentLesson?.id || ""}
-        initialLanguage="html"
-      />
     </div>
   );
 }

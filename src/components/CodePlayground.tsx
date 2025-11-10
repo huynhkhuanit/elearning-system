@@ -517,14 +517,8 @@ export default function CodePlayground({ isOpen, onClose, lessonId, initialLangu
   const lineNumberText = theme === "dark" ? "text-gray-600" : "text-gray-400"
 
   return (
-    <div className={`fixed top-0 right-0 h-screen z-50 transition-all duration-300 ease-in-out ${
-      isOpen ? 'w-[40vw]' : 'w-0'
-    } ${isOpen ? 'pointer-events-auto' : 'pointer-events-none'}`}>
-      <div
-        className={`${bgPrimary} h-full shadow-2xl flex flex-col overflow-hidden border-l ${borderColor} transition-all duration-300 transform ${
-          isOpen ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'
-        }`}
-      >
+    <div className={`code-playground ${isOpen ? 'open' : ''}`}>
+      <div className={`code-playground-content ${bgPrimary} h-full shadow-2xl flex flex-col overflow-hidden border-l ${borderColor}`}>
         {/* Header - VS Code Style */}
         <div className={`flex items-center justify-between px-4 py-2 ${bgSecondary} border-b ${borderColor}`}>
           <div className="flex items-center space-x-3">
