@@ -6,12 +6,13 @@ import { useToast } from '@/contexts/ToastContext';
 import { useRouter } from 'next/navigation';
 import PageContainer from '@/components/PageContainer';
 import AvatarWithProBadge from '@/components/AvatarWithProBadge';
-import { User, Lock, Bell, Wand2, Camera, Globe, Linkedin, Github, Twitter, Facebook } from 'lucide-react';
+import SettingsSkeleton from '@/components/SettingsSkeleton';
+import { User, Lock, Bell, Wand2, Camera, Globe, Linkedin, Github, Twitter, Facebook, Phone } from 'lucide-react';
 
 type SettingsTab = 'profile' | 'password' | 'notifications' | 'ai';
 
 export default function SettingsPage() {
-  const { user, isAuthenticated, isLoading: authLoading } = useAuth();
+  const { user, isAuthenticated, isLoading: authLoading, refreshUser } = useAuth();
   const toast = useToast();
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -26,6 +27,7 @@ export default function SettingsPage() {
     full_name: '',
     username: '',
     bio: '',
+    phone: '',
     avatar_url: '',
     website: '',
     linkedin: '',
@@ -70,6 +72,7 @@ export default function SettingsPage() {
             full_name: profile.full_name || '',
             username: profile.username || '',
             bio: profile.bio || '',
+            phone: profile.phone || '',
             avatar_url: profile.avatar_url || '',
             website: profile.website || '',
             linkedin: profile.linkedin || '',
@@ -170,8 +173,26 @@ export default function SettingsPage() {
 
       toast.success('Cập nhật thông tin thành công!');
       
-      // Refresh page to update user data
-      window.location.reload();
+      // Update form with response data (API returns updated profile)
+      if (data.data) {
+        const profile = data.data;
+        setProfileForm({
+          full_name: profile.full_name || '',
+          username: profile.username || '',
+          bio: profile.bio || '',
+          phone: profile.phone || '',
+          avatar_url: profile.avatar_url || '',
+          website: profile.website || '',
+          linkedin: profile.linkedin || '',
+          github: profile.github || '',
+          twitter: profile.twitter || '',
+          facebook: profile.facebook || '',
+        });
+        setAvatarPreview(profile.avatar_url || '');
+      }
+      
+      // Refresh user data from AuthContext to update global state
+      await refreshUser();
     } catch (error: any) {
       toast.error(error.message || 'Có lỗi xảy ra!');
     } finally {
@@ -232,14 +253,30 @@ export default function SettingsPage() {
     { id: 'ai' as SettingsTab, label: 'AI Assistant', icon: Wand2 },
   ];
 
-  // Hiển thị loading khi đang check authentication
+  // Hiển thị skeleton khi đang check authentication
   if (authLoading) {
     return (
       <PageContainer>
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary mx-auto mb-4"></div>
-            <p className="text-gray-600">Đang tải...</p>
+        <div className="max-w-7xl mx-auto py-8 px-4">
+          <div className="mb-8">
+            <div className="h-9 w-64 bg-gray-200 rounded animate-pulse mb-2"></div>
+            <div className="h-5 w-96 bg-gray-200 rounded animate-pulse"></div>
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            {/* Sidebar Skeleton */}
+            <div className="lg:col-span-1">
+              <div className="bg-white rounded-xl border border-gray-200 p-2">
+                {[1, 2, 3, 4].map((i) => (
+                  <div key={i} className="h-12 bg-gray-200 rounded-lg mb-2 animate-pulse"></div>
+                ))}
+              </div>
+            </div>
+            {/* Content Skeleton */}
+            <div className="lg:col-span-3">
+              <div className="bg-white rounded-xl border border-gray-200 p-6">
+                <SettingsSkeleton />
+              </div>
+            </div>
           </div>
         </div>
       </PageContainer>
@@ -299,9 +336,7 @@ export default function SettingsPage() {
                   </p>
 
                   {initialLoading ? (
-                    <div className="flex items-center justify-center py-12">
-                      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-                    </div>
+                    <SettingsSkeleton />
                   ) : (
                     <form onSubmit={handleProfileSubmit} className="space-y-6">
                     {/* Avatar Upload */}
@@ -383,6 +418,28 @@ export default function SettingsPage() {
                       />
                       <p className="text-xs text-gray-500 mt-1">
                         Tên người dùng của bạn sẽ xuất hiện trong URL profile
+                      </p>
+                    </div>
+
+                    {/* Phone */}
+                    <div>
+                      <label className="flex items-center gap-2 text-sm font-semibold text-gray-900 mb-2">
+                        <Phone className="w-4 h-4" />
+                        Số điện thoại
+                      </label>
+                      <input
+                        type="tel"
+                        value={profileForm.phone}
+                        onChange={(e) => {
+                          // Chỉ cho phép số và một số ký tự đặc biệt như +, -, khoảng trắng
+                          const value = e.target.value.replace(/[^\d+\-\s()]/g, '');
+                          setProfileForm({ ...profileForm, phone: value });
+                        }}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                        placeholder="0123456789 hoặc +84..."
+                      />
+                      <p className="text-xs text-gray-500 mt-1">
+                        Số điện thoại sẽ được sử dụng để khôi phục mật khẩu và nhận mã OTP
                       </p>
                     </div>
 
