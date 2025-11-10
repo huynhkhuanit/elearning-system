@@ -281,20 +281,20 @@ export default function LearnCoursePage() {
         toast.success("Đã đánh dấu hoàn thành bài học");
         
         // Update local state
-        setCourse(prev => {
+        setCourse((prev: CourseData | null) => {
           if (!prev) return prev;
           
-          const updatedSections = prev.sections.map(section => ({
+          const updatedSections = prev.sections.map((section: Section) => ({
             ...section,
-            lessons: section.lessons.map(lesson => 
+            lessons: section.lessons.map((lesson: Lesson) => 
               lesson.id === currentLesson.id 
                 ? { ...lesson, isCompleted: true }
                 : lesson
             )
           }));
 
-          const completedLessons = updatedSections.reduce((acc, section) => 
-            acc + section.lessons.filter(l => l.isCompleted).length, 0
+          const completedLessons = updatedSections.reduce((acc: number, section: Section) => 
+            acc + section.lessons.filter((l: Lesson) => l.isCompleted).length, 0
           );
 
           return {
@@ -330,20 +330,20 @@ export default function LearnCoursePage() {
 
       if (data.success) {
         // Update local state
-        setCourse(prev => {
+        setCourse((prev: CourseData | null) => {
           if (!prev) return prev;
           
-          const updatedSections = prev.sections.map(section => ({
+          const updatedSections = prev.sections.map((section: Section) => ({
             ...section,
-            lessons: section.lessons.map(lesson => 
+            lessons: section.lessons.map((lesson: Lesson) => 
               lesson.id === currentLesson.id 
                 ? { ...lesson, isCompleted: true }
                 : lesson
             )
           }));
 
-          const completedLessons = updatedSections.reduce((acc, section) => 
-            acc + section.lessons.filter(l => l.isCompleted).length, 0
+          const completedLessons = updatedSections.reduce((acc: number, section: Section) => 
+            acc + section.lessons.filter((l: Lesson) => l.isCompleted).length, 0
           );
 
           return {
@@ -356,8 +356,8 @@ export default function LearnCoursePage() {
       }
 
       // Navigate to next lesson
-      const allLessons = course.sections.flatMap(s => s.lessons);
-      const currentIndex = allLessons.findIndex(l => l.id === currentLesson.id);
+      const allLessons = course.sections.flatMap((s: Section) => s.lessons);
+      const currentIndex = allLessons.findIndex((l: Lesson) => l.id === currentLesson.id);
       
       if (currentIndex < allLessons.length - 1) {
         setCurrentLesson(allLessons[currentIndex + 1]);
@@ -373,8 +373,8 @@ export default function LearnCoursePage() {
   const goToPreviousLesson = () => {
     if (!course || !currentLesson) return;
 
-    const allLessons = course.sections.flatMap(s => s.lessons);
-    const currentIndex = allLessons.findIndex(l => l.id === currentLesson.id);
+    const allLessons = course.sections.flatMap((s: Section) => s.lessons);
+    const currentIndex = allLessons.findIndex((l: Lesson) => l.id === currentLesson.id);
     
     if (currentIndex > 0) {
       setCurrentLesson(allLessons[currentIndex - 1]);
@@ -461,79 +461,32 @@ export default function LearnCoursePage() {
               onClick={() => {
                 setIsDevMode(!isDevMode);
                 setIsCodePlaygroundOpen(!isDevMode);
-                toast.success(!isDevMode ? 'Đã bật DEV MODE' : 'Đã tắt DEV MODE');
               }}
-              className={`relative flex items-center space-x-3 px-4 py-2 rounded-full transition-all duration-300 font-medium text-sm shadow-lg hover:shadow-xl transform hover:scale-105 ${
-                isDevMode
-                  ? isDarkTheme
-                    ? 'bg-gradient-to-r from-orange-500 to-yellow-500 text-white'
-                    : 'bg-gradient-to-r from-orange-500 to-yellow-500 text-white'
-                  : isDarkTheme
-                    ? 'bg-gradient-to-r from-gray-700 to-gray-600 text-gray-300'
-                    : 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white'
-              }`}
-              title={isDevMode ? "DEV MODE" : "DEFAULT MODE"}
+              className={`relative w-[62px] h-[34px] rounded-full transition-all duration-300 ${
+                isDarkTheme ? 'bg-[#282a36]' : 'bg-[#282a36]'
+              } flex items-center px-[5px]`}
+              title={isDevMode ? "Tắt Dev Mode" : "Bật Dev Mode"}
             >
-              {/* Mode Icon */}
-              <div className="flex items-center space-x-2">
-                {isDevMode ? (
-                  <Code2 className="w-4 h-4 animate-pulse" />
-                ) : (
-                  <PlayCircle className="w-4 h-4" />
-                )}
-                <span className="hidden sm:inline font-bold">
-                  {isDevMode ? 'DEV MODE' : 'DEFAULT'}
-                </span>
-              </div>
-
-              {/* Toggle Indicator */}
-              <div className={`relative w-12 h-6 rounded-full transition-all duration-300 ${
+              {/* Toggle Thumb */}
+              <div className={`absolute w-6 h-6 rounded-full transition-all duration-300 flex items-center justify-center ${
                 isDevMode 
-                  ? 'bg-white/30' 
-                  : isDarkTheme 
-                    ? 'bg-white/20' 
-                    : 'bg-white/30'
-              }`}>
-                <div className={`absolute top-1 w-4 h-4 rounded-full transition-all duration-300 ${
-                  isDevMode 
-                    ? 'right-1 bg-white shadow-md' 
-                    : 'left-1 bg-white shadow-md'
-                }`}></div>
+                  ? 'bg-[#8b5cf6] translate-x-[28px]' 
+                  : 'bg-black translate-x-0'
+              } shadow-lg`}>
+                {/* Code Icon from lucide-react */}
+                <Code2 className="w-3.5 h-3.5 text-white" strokeWidth={2.5} />
               </div>
             </button>
 
-            {/* Tooltip - Hiển thị ở dưới */}
+            {/* Tooltip */}
             {showModeTooltip && (
-              <div className={`absolute top-full left-1/2 -translate-x-1/2 mt-2 px-3 py-2 rounded-lg text-xs font-medium whitespace-nowrap z-50 transition-all duration-200 ${
-                isDarkTheme 
-                  ? 'bg-gray-700 text-gray-200 shadow-xl' 
-                  : 'bg-gray-800 text-white shadow-lg'
-              }`}>
-                {/* Tooltip Arrow - Ở trên */}
-                <div className={`absolute bottom-full left-1/2 -translate-x-1/2 w-2 h-2 rotate-45 ${
-                  isDarkTheme ? 'bg-gray-700' : 'bg-gray-800'
-                }`}></div>
-                
+              <div className="absolute right-full top-1/2 -translate-y-1/2 mr-3 px-3 py-2 rounded-lg text-xs font-medium whitespace-nowrap z-50 transition-all duration-200 bg-white text-gray-800 shadow-lg border border-gray-200">
+                {/* Arrow pointer - pointing right */}
+                <div className="absolute left-full top-1/2 -translate-y-1/2 w-0 h-0 border-t-[6px] border-t-transparent border-b-[6px] border-b-transparent border-l-[6px] border-l-white"></div>
                 {isDevMode ? (
-                  <>
-                    <div className="flex items-center space-x-1.5">
-                      <Code2 className="w-3.5 h-3.5 text-orange-400" />
-                      <span>DEV MODE - Code Playground Active</span>
-                    </div>
-                    <div className={`text-[10px] mt-1 ${isDarkTheme ? 'text-gray-400' : 'text-gray-300'}`}>
-                      Click để tắt chế độ lập trình
-                    </div>
-                  </>
+                  <span>DEV MODE</span>
                 ) : (
-                  <>
-                    <div className="flex items-center space-x-1.5">
-                      <PlayCircle className="w-3.5 h-3.5 text-indigo-400" />
-                      <span>DEFAULT MODE - Learning View</span>
-                    </div>
-                    <div className={`text-[10px] mt-1 ${isDarkTheme ? 'text-gray-400' : 'text-gray-300'}`}>
-                      Click để bật Code Editor
-                    </div>
-                  </>
+                  <span>DEV MODE</span>
                 )}
               </div>
             )}
@@ -679,7 +632,7 @@ export default function LearnCoursePage() {
             <div className="flex items-center gap-6">
               <button
                 onClick={goToPreviousLesson}
-                disabled={!course || !currentLesson || course.sections.flatMap(s => s.lessons)[0]?.id === currentLesson.id}
+                disabled={!course || !currentLesson || course.sections.flatMap((s: Section) => s.lessons)[0]?.id === currentLesson.id}
                 className={`px-6 py-2 ${isDarkTheme ? 'text-gray-200' : 'text-gray-700'} bg-transparent border-[2px] ${isDarkTheme ? 'border-gray-600 hover:border-orange-500' : 'border-gray-400 hover:border-indigo-600'} rounded-md transition-all font-medium text-sm flex items-center space-x-2 disabled:opacity-40 disabled:cursor-not-allowed`}
               >
                 <ChevronRight className="w-4 h-4 rotate-180" />
