@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { queryOneBuilder, insert, update } from "@/lib/db";
+import { queryOneBuilder, insert, update, db as supabaseAdmin } from "@/lib/db";
 import { cookies } from "next/headers";
 import jwt from "jsonwebtoken";
 
@@ -97,23 +97,65 @@ export async function POST(
       );
     }
 
-    // Create answer
-    await insert(
-      "lesson_answers",
-      {
+    // Create answer and get the created answer with user info
+    // Explicitly set created_at and updated_at to current UTC time
+    // This ensures consistent timestamp regardless of database timezone settings
+    const now = new Date();
+    const nowISO = now.toISOString();
+    
+    const { data: newAnswer, error: insertError } = await supabaseAdmin!
+      .from("lesson_answers")
+      .insert({
         question_id: questionId,
         user_id: userId,
-        content
-      }
-    );
+        content,
+        created_at: nowISO,
+        updated_at: nowISO
+      })
+      .select(`
+        id,
+        content,
+        is_accepted,
+        likes_count,
+        created_at,
+        updated_at,
+        users!inner(id, username, full_name, avatar_url)
+      `)
+      .single();
+
+    if (insertError || !newAnswer) {
+      throw insertError || new Error("Failed to create answer");
+    }
 
     // Note: answers_count and status columns don't exist in Supabase
     // They are calculated dynamically from lesson_answers table
     // No need to update them here
 
+    // Use the timestamp we explicitly set (nowISO) to ensure accuracy
+    // This avoids timezone conversion issues from database
+    const createdAt = nowISO;
+    const updatedAt = nowISO;
+
     return NextResponse.json({
       success: true,
       message: "Answer created successfully",
+      data: {
+        answer: {
+          id: newAnswer.id,
+          content: newAnswer.content,
+          isAccepted: Boolean(newAnswer.is_accepted),
+          likesCount: newAnswer.likes_count || 0,
+          isLiked: false, // User just created it, so not liked yet
+          createdAt: createdAt,
+          updatedAt: updatedAt,
+          user: {
+            id: (newAnswer.users as any).id,
+            username: (newAnswer.users as any).username,
+            fullName: (newAnswer.users as any).full_name,
+            avatarUrl: (newAnswer.users as any).avatar_url,
+          },
+        },
+      },
     });
   } catch (error) {
     console.error("Error creating answer:", error);

@@ -115,19 +115,56 @@ export default function DiscussionPage() {
     }
   };
 
-  const formatTimeAgo = (dateString: string) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffInMs = now.getTime() - date.getTime();
-    const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
-    const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
-    const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
+  const formatTimeAgo = (dateString: string | undefined | null) => {
+    if (!dateString) return "Vừa xong";
+    
+    try {
+      // Parse the date string - handle both ISO string and timestamp
+      // Ensure we're parsing as UTC if it's an ISO string
+      let date: Date;
+      
+      if (dateString.includes('T') || dateString.includes('Z')) {
+        // ISO string format - parse directly
+        date = new Date(dateString);
+      } else if (dateString.match(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/)) {
+        // MySQL datetime format (YYYY-MM-DD HH:MM:SS) - treat as UTC
+        date = new Date(dateString + 'Z');
+      } else {
+        // Try parsing as-is
+        date = new Date(dateString);
+      }
+      
+      // Check if date is valid
+      if (isNaN(date.getTime())) {
+        console.error("Invalid date string:", dateString);
+        return "Vừa xong";
+      }
+      
+      const now = new Date();
+      const diffInMs = now.getTime() - date.getTime();
+      
+      // Debug: Log for troubleshooting (can be removed in production)
+      // Temporarily keep for debugging timezone issues
+      
+      // Handle negative difference (future dates) - should show "Vừa xong"
+      if (diffInMs < 0) {
+        return "Vừa xong";
+      }
+      
+      const diffInSeconds = Math.floor(diffInMs / 1000);
+      const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
+      const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
+      const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
 
-    if (diffInMinutes < 1) return "Vừa xong";
-    if (diffInMinutes < 60) return `${diffInMinutes} phút trước`;
-    if (diffInHours < 24) return `${diffInHours} giờ trước`;
-    if (diffInDays < 7) return `${diffInDays} ngày trước`;
-    return date.toLocaleDateString("vi-VN");
+      if (diffInSeconds < 60) return "Vừa xong";
+      if (diffInMinutes < 60) return `${diffInMinutes} phút trước`;
+      if (diffInHours < 24) return `${diffInHours} giờ trước`;
+      if (diffInDays < 7) return `${diffInDays} ngày trước`;
+      return date.toLocaleDateString("vi-VN");
+    } catch (error) {
+      console.error("Error formatting time:", error, dateString);
+      return "Vừa xong";
+    }
   };
 
   const handleLikeQuestion = async () => {
@@ -201,7 +238,19 @@ export default function DiscussionPage() {
 
       const data = await response.json();
       if (data.success) {
-        fetchQuestionDetail();
+        // Optimize: Update state instead of reloading
+        setQuestion((prev) => {
+          if (!prev) return null;
+          return {
+            ...prev,
+            answers: prev.answers.map((answer) =>
+              answer.id === answerId
+                ? { ...answer, isAccepted: true }
+                : { ...answer, isAccepted: false }
+            ),
+            status: "RESOLVED" as const,
+          };
+        });
         toast.success("Đã chọn câu trả lời tốt nhất");
       } else {
         toast.error(data.message || "Không thể chọn câu trả lời");
@@ -238,7 +287,47 @@ export default function DiscussionPage() {
       if (data.success) {
         toast.success("Đã đăng câu trả lời thành công!");
         setAnswerContent("");
-        fetchQuestionDetail();
+        
+        // Optimize: Add answer to state instead of reloading
+        if (data.data?.answer && question) {
+          const newAnswer = data.data.answer;
+          
+          // Use timestamp from API - it should be the exact UTC timestamp we set
+          // The API returns nowISO which is the current UTC time
+          // Ensure createdAt is valid ISO string
+          if (!newAnswer.createdAt || isNaN(new Date(newAnswer.createdAt).getTime())) {
+            console.error("Invalid createdAt from API:", newAnswer.createdAt);
+            // Fallback: reload to get correct data
+            fetchQuestionDetail();
+            return;
+          }
+          
+          // Debug: Log timestamp comparison
+          const apiTime = new Date(newAnswer.createdAt);
+          const clientTime = new Date();
+          const diffMs = clientTime.getTime() - apiTime.getTime();
+          console.log("Timestamp check:", {
+            apiCreatedAt: newAnswer.createdAt,
+            apiTime: apiTime.toISOString(),
+            clientTime: clientTime.toISOString(),
+            diffMs: diffMs,
+            diffSeconds: Math.floor(diffMs / 1000)
+          });
+          
+          setQuestion((prev) => {
+            if (!prev) return null;
+            return {
+              ...prev,
+              answers: [...prev.answers, newAnswer],
+              answersCount: prev.answersCount + 1,
+              status: prev.status === "OPEN" ? "ANSWERED" : prev.status,
+              participants: prev.participants + (prev.answers.some(a => a.user.id === newAnswer.user.id) ? 0 : 1),
+            };
+          });
+        } else {
+          // Fallback: reload if no answer data returned
+          fetchQuestionDetail();
+        }
       } else {
         toast.error(data.message || "Không thể đăng câu trả lời");
       }
@@ -409,8 +498,9 @@ export default function DiscussionPage() {
               <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
                 <div className="flex items-center gap-2 text-green-800">
                   <CheckCircle2 className="w-5 h-5 flex-shrink-0" />
-                  <span className="font-medium flex-1">
-                    Vấn đề đã được giải quyết bởi câu trả lời của {bestAnswer.user.fullName}
+                  <span className="flex-1">
+                    Vấn đề đã được giải quyết bởi câu trả lời của{" "}
+                    <span className="font-bold text-green-900">{bestAnswer.user.fullName}</span>
                   </span>
                   <span className="text-sm text-green-600">
                     {formatTimeAgo(bestAnswer.createdAt)}

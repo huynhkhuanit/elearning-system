@@ -132,6 +132,50 @@ export async function GET(
     const chapter = lesson?.chapters as any;
     const course = chapter?.courses as any;
 
+    // Format question timestamps - handle MySQL datetime format
+    let questionCreatedAt: string;
+    let questionUpdatedAt: string;
+    
+    if (questionData.created_at) {
+      let createdDate: Date;
+      if (typeof questionData.created_at === 'string') {
+        if (questionData.created_at.match(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/) && !questionData.created_at.includes('T') && !questionData.created_at.includes('Z')) {
+          createdDate = new Date(questionData.created_at + 'Z');
+        } else if (questionData.created_at.includes('T') && questionData.created_at.includes('Z')) {
+          createdDate = new Date(questionData.created_at);
+        } else if (questionData.created_at.includes('T') && !questionData.created_at.includes('Z')) {
+          createdDate = new Date(questionData.created_at.endsWith('+00:00') || questionData.created_at.endsWith('+0000') ? questionData.created_at : questionData.created_at + 'Z');
+        } else {
+          createdDate = new Date(questionData.created_at);
+        }
+      } else {
+        createdDate = new Date(questionData.created_at);
+      }
+      questionCreatedAt = createdDate.toISOString();
+    } else {
+      questionCreatedAt = new Date().toISOString();
+    }
+    
+    if (questionData.updated_at) {
+      let updatedDate: Date;
+      if (typeof questionData.updated_at === 'string') {
+        if (questionData.updated_at.match(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/) && !questionData.updated_at.includes('T') && !questionData.updated_at.includes('Z')) {
+          updatedDate = new Date(questionData.updated_at + 'Z');
+        } else if (questionData.updated_at.includes('T') && questionData.updated_at.includes('Z')) {
+          updatedDate = new Date(questionData.updated_at);
+        } else if (questionData.updated_at.includes('T') && !questionData.updated_at.includes('Z')) {
+          updatedDate = new Date(questionData.updated_at.endsWith('+00:00') || questionData.updated_at.endsWith('+0000') ? questionData.updated_at : questionData.updated_at + 'Z');
+        } else {
+          updatedDate = new Date(questionData.updated_at);
+        }
+      } else {
+        updatedDate = new Date(questionData.updated_at);
+      }
+      questionUpdatedAt = updatedDate.toISOString();
+    } else {
+      questionUpdatedAt = questionCreatedAt;
+    }
+
     const question = {
       id: questionData.id,
       title: questionData.title,
@@ -140,8 +184,8 @@ export async function GET(
       answersCount: answersCount,
       likesCount: questionData.likes_count || 0,
       viewsCount: 0, // views_count column doesn't exist
-      createdAt: questionData.created_at,
-      updatedAt: questionData.updated_at,
+      createdAt: questionCreatedAt,
+      updatedAt: questionUpdatedAt,
       isLiked: !!userLike,
       user: {
         id: (questionData.users as any).id,
@@ -163,21 +207,81 @@ export async function GET(
         title: course.title,
         slug: course.slug,
       } : null,
-      answers: (answersData || []).map((row: any) => ({
-        id: row.id,
-        content: row.content,
-        isAccepted: Boolean(row.is_accepted),
-        likesCount: row.likes_count || 0,
-        isLiked: likedAnswerIds.has(row.id),
-        createdAt: row.created_at,
-        updatedAt: row.updated_at,
-        user: {
-          id: (row.users as any).id,
-          username: (row.users as any).username,
-          fullName: (row.users as any).full_name,
-          avatarUrl: (row.users as any).avatar_url,
-        },
-      })),
+      answers: (answersData || []).map((row: any) => {
+        // Ensure timestamps are in ISO string format
+        // Handle MySQL datetime format (YYYY-MM-DD HH:MM:SS) as UTC
+        let createdAt: string;
+        let updatedAt: string;
+        
+        if (row.created_at) {
+          let createdDate: Date;
+          if (typeof row.created_at === 'string') {
+            // Debug: Log raw timestamp from database
+            console.log("Raw created_at from DB:", row.created_at, "Type:", typeof row.created_at);
+            
+            // Check if it's MySQL datetime format (no timezone)
+            if (row.created_at.match(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/) && !row.created_at.includes('T') && !row.created_at.includes('Z')) {
+              // MySQL datetime - treat as UTC
+              createdDate = new Date(row.created_at + 'Z');
+            } else if (row.created_at.includes('T') && row.created_at.includes('Z')) {
+              // ISO string with Z - already UTC, parse directly
+              createdDate = new Date(row.created_at);
+            } else if (row.created_at.includes('T') && !row.created_at.includes('Z')) {
+              // ISO string without Z - might be local time, but Supabase should return UTC
+              // Parse as UTC by adding Z if it doesn't have timezone info
+              createdDate = new Date(row.created_at.endsWith('+00:00') || row.created_at.endsWith('+0000') ? row.created_at : row.created_at + 'Z');
+            } else {
+              // Other format - try parsing as-is
+              createdDate = new Date(row.created_at);
+            }
+          } else {
+            createdDate = new Date(row.created_at);
+          }
+          
+          // Debug: Log parsed date
+          console.log("Parsed created_at:", createdDate.toISOString(), "Original:", row.created_at);
+          
+          createdAt = createdDate.toISOString();
+        } else {
+          createdAt = new Date().toISOString();
+        }
+        
+        if (row.updated_at) {
+          let updatedDate: Date;
+          if (typeof row.updated_at === 'string') {
+            if (row.updated_at.match(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/) && !row.updated_at.includes('T') && !row.updated_at.includes('Z')) {
+              updatedDate = new Date(row.updated_at + 'Z');
+            } else if (row.updated_at.includes('T') && row.updated_at.includes('Z')) {
+              updatedDate = new Date(row.updated_at);
+            } else if (row.updated_at.includes('T') && !row.updated_at.includes('Z')) {
+              updatedDate = new Date(row.updated_at.endsWith('+00:00') || row.updated_at.endsWith('+0000') ? row.updated_at : row.updated_at + 'Z');
+            } else {
+              updatedDate = new Date(row.updated_at);
+            }
+          } else {
+            updatedDate = new Date(row.updated_at);
+          }
+          updatedAt = updatedDate.toISOString();
+        } else {
+          updatedAt = createdAt;
+        }
+        
+        return {
+          id: row.id,
+          content: row.content,
+          isAccepted: Boolean(row.is_accepted),
+          likesCount: row.likes_count || 0,
+          isLiked: likedAnswerIds.has(row.id),
+          createdAt: createdAt,
+          updatedAt: updatedAt,
+          user: {
+            id: (row.users as any).id,
+            username: (row.users as any).username,
+            fullName: (row.users as any).full_name,
+            avatarUrl: (row.users as any).avatar_url,
+          },
+        };
+      }),
       participants: Array.from(participantIds).length,
     };
 
