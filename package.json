@@ -48,6 +48,7 @@
     "reactflow": "^11.11.4",
     "remark-gfm": "^4.0.1",
     "resend": "^6.4.2",
+    "twilio": "^5.3.5",
     "zod": "^4.1.11"
   },
   "devDependencies": {

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { queryOneBuilder, insert, update, queryBuilder } from '@/lib/db';
 import { sendEmail, generateOTPEmailHTML, generateOTPEmailText } from '@/lib/email';
+import { sendSMS, generateOTPSMSMessage } from '@/lib/sms';
 import crypto from 'crypto';
 
 /**
@@ -199,14 +200,34 @@ export async function POST(request: NextRequest) {
         }
       }
     } else if (method === 'phone') {
-      // TODO: Implement SMS service (Twilio, AWS SNS, etc.)
-      // For now, log it in development
-      if (process.env.NODE_ENV === 'development') {
-        console.log(`[DEV] SMS OTP for ${phone}: ${otp}`);
-        console.log(`[DEV] OTP expires at: ${expiresAt.toISOString()}`);
+      try {
+        // Normalize phone number and send SMS
+        const smsMessage = generateOTPSMSMessage(otp);
+        await sendSMS({
+          to: phone,
+          message: smsMessage,
+        });
+
+        console.log(`✅ OTP SMS sent to ${phone}`);
+      } catch (smsError: any) {
+        console.error('[FORGOT PASSWORD SEND OTP] SMS error:', smsError);
+        
+        // In development, log OTP even if SMS fails
+        if (process.env.NODE_ENV === 'development') {
+          console.log(`[DEV] SMS failed, OTP for ${phone}: ${otp}`);
+          console.log(`[DEV] OTP expires at: ${expiresAt.toISOString()}`);
+          // In development, continue even if SMS fails
+        } else {
+          // In production, return error response
+          return NextResponse.json(
+            {
+              success: false,
+              message: `Không thể gửi SMS: ${smsError.message || 'Lỗi không xác định'}`,
+            },
+            { status: 500 }
+          );
+        }
       }
-      // In production, integrate with SMS service:
-      // await sendSMS(phone, `Mã OTP của bạn là: ${otp}`);
     }
 
     return NextResponse.json(
