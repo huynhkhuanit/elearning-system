@@ -38,7 +38,7 @@ export async function GET(
         likes_count,
         created_at,
         updated_at,
-        users!inner(id, username, full_name, avatar_url)
+        users!inner(id, username, full_name, avatar_url, membership_type)
       `)
       .eq("id", questionId)
       .single();
@@ -68,7 +68,7 @@ export async function GET(
         likes_count,
         created_at,
         updated_at,
-        users!inner(id, username, full_name, avatar_url)
+        users!inner(id, username, full_name, avatar_url, membership_type)
       `)
       .eq("question_id", questionId)
       .order("is_accepted", { ascending: false })
@@ -155,6 +155,7 @@ export async function GET(
         username: (questionData.users as any).username,
         fullName: (questionData.users as any).full_name,
         avatarUrl: (questionData.users as any).avatar_url,
+        membershipType: (questionData.users as any).membership_type || 'FREE',
       },
       answers: (answersData || []).map((row: any) => {
         // Ensure timestamps are in ISO string format
@@ -228,6 +229,7 @@ export async function GET(
             username: (row.users as any).username,
             fullName: (row.users as any).full_name,
             avatarUrl: (row.users as any).avatar_url,
+            membershipType: (row.users as any).membership_type || 'FREE',
           },
         };
       }),

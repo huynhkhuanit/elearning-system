@@ -14,7 +14,7 @@ import {
   CheckCircle
 } from "lucide-react";
 import PageContainer from "@/components/PageContainer";
-import Avatar from "@/components/Avatar";
+import AvatarWithProBadge from "@/components/AvatarWithProBadge";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/contexts/ToastContext";
 
@@ -33,11 +33,13 @@ interface Question {
     username: string;
     fullName: string;
     avatarUrl: string | null;
+    membershipType?: 'FREE' | 'PRO';
   };
   answerUsers?: Array<{
     id: string;
     fullName: string;
     avatarUrl: string | null;
+    membershipType?: 'FREE' | 'PRO';
   }>;
   lesson: {
     id: string;
@@ -53,6 +55,7 @@ interface MostHelpfulUser {
   avatarUrl: string | null;
   contributions: number;
   isVerified: boolean;
+  membershipType: 'FREE' | 'PRO';
 }
 
 const categories = [
@@ -62,15 +65,6 @@ const categories = [
   { id: "other", label: "Các loại bài tập khác", icon: List, color: "text-orange-600" },
   { id: "challenge", label: "Bài học thử thách", icon: BookOpen, color: "text-blue-600" },
   { id: "theory", label: "Bài học lý thuyết", icon: BookOpenText, color: "text-orange-600" },
-];
-
-// Mock data for Most Helpful users (will be replaced with API call later)
-const mockMostHelpfulUsers: MostHelpfulUser[] = [
-  { id: "1", username: "vuquocdung", fullName: "Vũ Quốc Dũng", avatarUrl: null, contributions: 16, isVerified: true },
-  { id: "2", username: "vuthingochuyen", fullName: "Vũ Thị Ngọc Huyền", avatarUrl: null, contributions: 7, isVerified: true },
-  { id: "3", username: "sondang", fullName: "Sơn Đặng", avatarUrl: null, contributions: 6, isVerified: true },
-  { id: "4", username: "ngocdai", fullName: "Ngọc Đại Nguyễn", avatarUrl: null, contributions: 1, isVerified: true },
-  { id: "5", username: "hoangan", fullName: "Hoàng An", avatarUrl: null, contributions: 1, isVerified: false },
 ];
 
 export default function QAPage() {
@@ -84,12 +78,45 @@ export default function QAPage() {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [loading, setLoading] = useState(true);
   const [courseSlug, setCourseSlug] = useState<string | null>(null);
+  const [mostHelpfulUsers, setMostHelpfulUsers] = useState<MostHelpfulUser[]>([]);
+  const [loadingMostHelpful, setLoadingMostHelpful] = useState(true);
 
   // Get course slug from URL params if available
   useEffect(() => {
     const slug = searchParams.get("course");
     setCourseSlug(slug);
   }, [searchParams]);
+
+  // Fetch most helpful users
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setLoadingMostHelpful(false);
+      return;
+    }
+
+    const fetchMostHelpfulUsers = async () => {
+      try {
+        const response = await fetch("/api/qa/most-helpful", {
+          credentials: "include",
+        });
+
+        const data = await response.json();
+        if (data.success) {
+          setMostHelpfulUsers(data.data.users || []);
+        } else {
+          console.error("Error fetching most helpful users:", data.message);
+          setMostHelpfulUsers([]);
+        }
+      } catch (error) {
+        console.error("Error fetching most helpful users:", error);
+        setMostHelpfulUsers([]);
+      } finally {
+        setLoadingMostHelpful(false);
+      }
+    };
+
+    fetchMostHelpfulUsers();
+  }, [isAuthenticated]);
 
   // Fetch questions
   useEffect(() => {
@@ -248,38 +275,65 @@ export default function QAPage() {
             </div>
 
             {/* Most Helpful */}
-            <div>
-              <div className="flex items-center justify-between mb-3">
+            <div className="bg-white border border-gray-200 rounded-lg p-4">
+              <div className="flex items-center justify-between mb-4">
                 <h2 className="text-sm font-semibold text-gray-700">Hữu ích nhất</h2>
                 <span className="text-xs text-gray-500">30 ngày qua</span>
               </div>
-              <div className="space-y-3">
-                {mockMostHelpfulUsers.map((user) => (
-                  <div
-                    key={user.id}
-                    className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 transition-colors"
-                  >
-                    <Avatar
-                      avatarUrl={user.avatarUrl}
-                      fullName={user.fullName}
-                      size="sm"
-                    />
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-sm font-medium text-gray-900 truncate">
-                          {user.fullName}
-                        </span>
-                        {user.isVerified && (
-                          <CheckCircle className="w-4 h-4 text-blue-600 flex-shrink-0" />
-                        )}
+              {loadingMostHelpful ? (
+                <div className="space-y-3">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <div
+                      key={i}
+                      className="flex items-center gap-3 animate-pulse"
+                    >
+                      <div className="w-8 h-8 rounded-full bg-gray-200" />
+                      <div className="flex-1">
+                        <div className="h-4 bg-gray-200 rounded w-24 mb-2" />
+                        <div className="h-3 bg-gray-200 rounded w-16" />
                       </div>
-                      <span className="text-xs text-gray-500">
-                        {user.contributions} đóng góp
-                      </span>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              ) : mostHelpfulUsers.length > 0 ? (
+                <div className="space-y-3">
+                  {mostHelpfulUsers.map((user) => (
+                    <div
+                      key={user.id}
+                      className="flex items-center gap-3"
+                    >
+                      <AvatarWithProBadge
+                        avatarUrl={user.avatarUrl}
+                        fullName={user.fullName}
+                        isPro={user.membershipType === 'PRO'}
+                        size="sm"
+                      />
+                      <div className="flex-1 min-w-0 flex items-center justify-between">
+                        <div className="flex items-center gap-1.5 min-w-0">
+                          <span className="text-sm font-medium text-gray-900 truncate">
+                            {user.fullName}
+                          </span>
+                          {user.isVerified && (
+                            <CheckCircle className="w-4 h-4 text-blue-600 flex-shrink-0" />
+                          )}
+                        </div>
+                        <div className="flex items-center gap-1.5 flex-shrink-0 ml-2">
+                          <span className="text-sm text-gray-900 font-medium">
+                            {user.contributions}
+                          </span>
+                          <div className="w-5 h-5 rounded-full bg-gray-200 flex items-center justify-center">
+                            <CheckCircle className="w-3 h-3 text-gray-500" />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-4">
+                  <p className="text-sm text-gray-500">Chưa có dữ liệu</p>
+                </div>
+              )}
             </div>
           </aside>
 
@@ -327,9 +381,10 @@ export default function QAPage() {
                           {question.title}
                         </h3>
                         <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
-                          <Avatar
+                          <AvatarWithProBadge
                             avatarUrl={question.user.avatarUrl}
                             fullName={question.user.fullName}
+                            isPro={(question.user.membershipType || 'FREE') === 'PRO'}
                             size="xs"
                           />
                           <span className="font-medium">{question.user.fullName}</span>
@@ -357,10 +412,11 @@ export default function QAPage() {
                             <div className="flex -space-x-2">
                               {question.answerUsers && question.answerUsers.length > 0 ? (
                                 question.answerUsers.map((answerUser, i) => (
-                                  <Avatar
+                                  <AvatarWithProBadge
                                     key={answerUser.id}
                                     avatarUrl={answerUser.avatarUrl}
                                     fullName={answerUser.fullName}
+                                    isPro={(answerUser.membershipType || 'FREE') === 'PRO'}
                                     size="xs"
                                     className="border-2 border-white"
                                   />

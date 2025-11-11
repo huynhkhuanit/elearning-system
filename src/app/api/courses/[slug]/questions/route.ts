@@ -81,7 +81,7 @@ export async function GET(
         .from("lesson_answers")
         .select(`
           question_id,
-          users!inner(id, full_name, avatar_url)
+          users!inner(id, full_name, avatar_url, membership_type)
         `)
         .order("created_at", { ascending: true })
     ]);
@@ -125,7 +125,7 @@ export async function GET(
 
     // Count answers per question and collect answer users (max 2 per question)
     const answersCountMap = new Map<string, number>();
-    const answerUsersMap = new Map<string, Array<{ id: string; fullName: string; avatarUrl: string | null }>>();
+    const answerUsersMap = new Map<string, Array<{ id: string; fullName: string; avatarUrl: string | null; membershipType: 'FREE' | 'PRO' }>>();
     
     (answersData || []).forEach((answer: any) => {
       const count = answersCountMap.get(answer.question_id) || 0;
@@ -144,6 +144,7 @@ export async function GET(
             id: answer.users.id,
             fullName: answer.users.full_name,
             avatarUrl: answer.users.avatar_url,
+            membershipType: answer.users.membership_type || 'FREE',
           });
         }
       }
@@ -161,7 +162,7 @@ export async function GET(
         likes_count,
         created_at,
         updated_at,
-        users!inner(id, username, full_name, avatar_url)
+        users!inner(id, username, full_name, avatar_url, membership_type)
       `)
       .in("lesson_id", validLessonIds);
 
@@ -272,6 +273,7 @@ export async function GET(
           username: row.users.username,
           fullName: row.users.full_name,
           avatarUrl: row.users.avatar_url,
+          membershipType: row.users.membership_type || 'FREE',
         },
         answerUsers: answerUsersMap.get(row.id) || [],
         lesson: lesson ? {

@@ -20,7 +20,7 @@ import '@uiw/react-md-editor/markdown-editor.css';
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/contexts/ToastContext";
 import PageContainer from "@/components/PageContainer";
-import Avatar from "@/components/Avatar";
+import AvatarWithProBadge from "@/components/AvatarWithProBadge";
 import "@/app/markdown.css";
 
 interface Answer {
@@ -36,6 +36,7 @@ interface Answer {
     username: string;
     fullName: string;
     avatarUrl?: string;
+    membershipType?: 'FREE' | 'PRO';
   };
 }
 
@@ -55,12 +56,14 @@ interface QuestionDetail {
     id: string;
     fullName: string;
     avatarUrl: string | null;
+    membershipType?: 'FREE' | 'PRO';
   }>;
   user: {
     id: string;
     username: string;
     fullName: string;
     avatarUrl?: string;
+    membershipType?: 'FREE' | 'PRO';
   };
   lesson: {
     id: string;
@@ -347,6 +350,7 @@ export default function DiscussionPage() {
                   id: newAnswer.user.id,
                   fullName: newAnswer.user.fullName,
                   avatarUrl: newAnswer.user.avatarUrl || null,
+                  membershipType: newAnswer.user.membershipType || 'FREE',
                 }
               ];
             }
@@ -500,9 +504,10 @@ export default function DiscussionPage() {
             {/* Question Content */}
             <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
               <div className="flex items-start gap-4 mb-4">
-                <Avatar
+                <AvatarWithProBadge
                   avatarUrl={question.user.avatarUrl}
                   fullName={question.user.fullName}
+                  isPro={(question.user.membershipType || 'FREE') === 'PRO'}
                   size="md"
                 />
                 <div className="flex-1">
@@ -577,9 +582,10 @@ export default function DiscussionPage() {
                   </div>
                   
                   <div className="flex items-start gap-4">
-                    <Avatar
+                    <AvatarWithProBadge
                       avatarUrl={bestAnswer.user.avatarUrl}
                       fullName={bestAnswer.user.fullName}
+                      isPro={(bestAnswer.user.membershipType || 'FREE') === 'PRO'}
                       size="md"
                     />
                     <div className="flex-1">
@@ -640,9 +646,10 @@ export default function DiscussionPage() {
                   {otherAnswers.slice(0, visibleAnswersCount).map((answer) => (
                     <div key={answer.id} className="bg-white border border-gray-200 rounded-lg p-6">
                       <div className="flex items-start gap-4">
-                        <Avatar
+                        <AvatarWithProBadge
                           avatarUrl={answer.user.avatarUrl}
                           fullName={answer.user.fullName}
+                          isPro={(answer.user.membershipType || 'FREE') === 'PRO'}
                           size="md"
                         />
                         <div className="flex-1">
@@ -795,10 +802,11 @@ export default function DiscussionPage() {
                 <div className="flex -space-x-2">
                   {question.participantsList && question.participantsList.length > 0 ? (
                     question.participantsList.slice(0, 5).map((participant) => (
-                      <Avatar
+                      <AvatarWithProBadge
                         key={participant.id}
                         avatarUrl={participant.avatarUrl}
                         fullName={participant.fullName}
+                        isPro={(participant.membershipType || 'FREE') === 'PRO'}
                         size="sm"
                         className="border-2 border-white"
                       />

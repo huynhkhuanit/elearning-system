@@ -41,7 +41,7 @@ export async function GET(
           likes_count,
           created_at,
           updated_at,
-          users!inner(id, username, full_name, avatar_url),
+          users!inner(id, username, full_name, avatar_url, membership_type),
           lessons!inner(
             id,
             title,
@@ -71,7 +71,7 @@ export async function GET(
           likes_count,
           created_at,
           updated_at,
-          users!inner(id, username, full_name, avatar_url)
+          users!inner(id, username, full_name, avatar_url, membership_type)
         `)
         .eq("question_id", questionId)
         .order("is_accepted", { ascending: false })
@@ -108,13 +108,14 @@ export async function GET(
     }
 
     // Get unique participants (users who answered) with their info
-    const participantMap = new Map<string, { id: string; fullName: string; avatarUrl: string | null }>();
+    const participantMap = new Map<string, { id: string; fullName: string; avatarUrl: string | null; membershipType: 'FREE' | 'PRO' }>();
     
     // Add question author
     participantMap.set((questionData.users as any).id, {
       id: (questionData.users as any).id,
       fullName: (questionData.users as any).full_name,
       avatarUrl: (questionData.users as any).avatar_url,
+      membershipType: (questionData.users as any).membership_type || 'FREE',
     });
     
     // Add answer authors
@@ -125,6 +126,7 @@ export async function GET(
           id: userId,
           fullName: (answer.users as any).full_name,
           avatarUrl: (answer.users as any).avatar_url,
+          membershipType: (answer.users as any).membership_type || 'FREE',
         });
       }
     });
@@ -210,6 +212,7 @@ export async function GET(
         username: (questionData.users as any).username,
         fullName: (questionData.users as any).full_name,
         avatarUrl: (questionData.users as any).avatar_url,
+        membershipType: (questionData.users as any).membership_type || 'FREE',
       },
       lesson: lesson ? {
         id: lesson.id,
@@ -297,6 +300,7 @@ export async function GET(
             username: (row.users as any).username,
             fullName: (row.users as any).full_name,
             avatarUrl: (row.users as any).avatar_url,
+            membershipType: (row.users as any).membership_type || 'FREE',
           },
         };
       }),

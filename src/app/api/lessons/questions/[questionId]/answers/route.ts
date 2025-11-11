@@ -119,7 +119,7 @@ export async function POST(
         likes_count,
         created_at,
         updated_at,
-        users!inner(id, username, full_name, avatar_url)
+        users!inner(id, username, full_name, avatar_url, membership_type)
       `)
       .single();
 
@@ -153,6 +153,7 @@ export async function POST(
             username: (newAnswer.users as any).username,
             fullName: (newAnswer.users as any).full_name,
             avatarUrl: (newAnswer.users as any).avatar_url,
+            membershipType: (newAnswer.users as any).membership_type || 'FREE',
           },
         },
       },
