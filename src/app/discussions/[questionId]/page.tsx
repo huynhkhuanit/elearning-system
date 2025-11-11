@@ -15,9 +15,12 @@ import {
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import MDEditor from '@uiw/react-md-editor';
+import '@uiw/react-md-editor/markdown-editor.css';
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/contexts/ToastContext";
 import PageContainer from "@/components/PageContainer";
+import Avatar from "@/components/Avatar";
 import "@/app/markdown.css";
 
 interface Answer {
@@ -315,10 +318,10 @@ export default function DiscussionPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      <PageContainer size="full" className="py-8">
+      <PageContainer size="lg" className="py-8">
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Main Content */}
-          <main className="flex-1 min-w-0 lg:max-w-3xl">
+          <main className="flex-1 min-w-0 max-w-4xl">
             {/* Header */}
             <div className="mb-6">
               <button
@@ -350,9 +353,11 @@ export default function DiscussionPage() {
             {/* Question Content */}
             <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
               <div className="flex items-start gap-4 mb-4">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center text-white font-semibold flex-shrink-0">
-                  {question.user.fullName.charAt(0)}
-                </div>
+                <Avatar
+                  avatarUrl={question.user.avatarUrl}
+                  fullName={question.user.fullName}
+                  size="md"
+                />
                 <div className="flex-1">
                   <div className="flex items-center justify-between mb-2">
                     <div>
@@ -424,9 +429,11 @@ export default function DiscussionPage() {
                   </div>
                   
                   <div className="flex items-start gap-4">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-semibold flex-shrink-0">
-                      {bestAnswer.user.fullName.charAt(0)}
-                    </div>
+                    <Avatar
+                      avatarUrl={bestAnswer.user.avatarUrl}
+                      fullName={bestAnswer.user.fullName}
+                      size="md"
+                    />
                     <div className="flex-1">
                       <div className="flex items-center justify-between mb-2">
                         <div>
@@ -485,9 +492,11 @@ export default function DiscussionPage() {
                   {otherAnswers.map((answer) => (
                     <div key={answer.id} className="bg-white border border-gray-200 rounded-lg p-6">
                       <div className="flex items-start gap-4">
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-semibold flex-shrink-0">
-                          {answer.user.fullName.charAt(0)}
-                        </div>
+                        <Avatar
+                          avatarUrl={answer.user.avatarUrl}
+                          fullName={answer.user.fullName}
+                          size="md"
+                        />
                         <div className="flex-1">
                           <div className="flex items-center justify-between mb-2">
                             <div>
@@ -554,13 +563,26 @@ export default function DiscussionPage() {
                 Nhập bình luận mới của bạn
               </h3>
               <form onSubmit={handleSubmitAnswer}>
-                <textarea
-                  value={answerContent}
-                  onChange={(e) => setAnswerContent(e.target.value)}
-                  placeholder="Nhập câu trả lời của bạn (hỗ trợ Markdown)..."
-                  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none text-sm"
-                  rows={6}
-                />
+                <div className="border border-gray-300 rounded-lg overflow-hidden" data-color-mode="light">
+                  <MDEditor
+                    value={answerContent}
+                    onChange={(val) => setAnswerContent(val || '')}
+                    preview="edit"
+                    hideToolbar={false}
+                    visibleDragbar={true}
+                    height={300}
+                    textareaProps={{
+                      placeholder: "Nhập câu trả lời của bạn (hỗ trợ Markdown)...",
+                      style: {
+                        backgroundColor: '#ffffff',
+                        color: '#111827',
+                        fontSize: '14px',
+                        fontFamily: "'SF Mono', Monaco, Inconsolata, 'Roboto Mono', monospace",
+                        lineHeight: '1.6',
+                      }
+                    }}
+                  />
+                </div>
                 <div className="flex items-center justify-between mt-4">
                   <p className="text-xs text-gray-500">
                     Hỗ trợ định dạng Markdown: **bold**, *italic*, `code`

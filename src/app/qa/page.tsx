@@ -14,6 +14,7 @@ import {
   CheckCircle
 } from "lucide-react";
 import PageContainer from "@/components/PageContainer";
+import Avatar from "@/components/Avatar";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/contexts/ToastContext";
 
@@ -33,6 +34,11 @@ interface Question {
     fullName: string;
     avatarUrl: string | null;
   };
+  answerUsers?: Array<{
+    id: string;
+    fullName: string;
+    avatarUrl: string | null;
+  }>;
   lesson: {
     id: string;
     title: string;
@@ -190,7 +196,7 @@ export default function QAPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      <PageContainer size="full" className="py-8">
+      <PageContainer size="lg" className="py-8">
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Left Sidebar */}
           <aside className="w-full lg:w-80 flex-shrink-0">
@@ -253,9 +259,11 @@ export default function QAPage() {
                     key={user.id}
                     className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 transition-colors"
                   >
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center text-white text-xs font-semibold flex-shrink-0">
-                      {user.fullName.charAt(0)}
-                    </div>
+                    <Avatar
+                      avatarUrl={user.avatarUrl}
+                      fullName={user.fullName}
+                      size="sm"
+                    />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-1.5">
                         <span className="text-sm font-medium text-gray-900 truncate">
@@ -276,7 +284,7 @@ export default function QAPage() {
           </aside>
 
           {/* Main Content */}
-          <main className="flex-1 min-w-0 lg:max-w-3xl">
+          <main className="flex-1 min-w-0">
             <div className="mb-6">
               <h2 className="text-xl font-semibold text-gray-900">Câu hỏi</h2>
             </div>
@@ -319,6 +327,11 @@ export default function QAPage() {
                           {question.title}
                         </h3>
                         <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
+                          <Avatar
+                            avatarUrl={question.user.avatarUrl}
+                            fullName={question.user.fullName}
+                            size="xs"
+                          />
                           <span className="font-medium">{question.user.fullName}</span>
                           <span>đăng</span>
                           <span>{formatTimeAgo(question.createdAt)}</span>
@@ -342,12 +355,24 @@ export default function QAPage() {
                         {question.answersCount > 0 ? (
                           <>
                             <div className="flex -space-x-2">
-                              {Array.from({ length: Math.min(question.answersCount, 2) }).map((_, i) => (
-                                <div
-                                  key={i}
-                                  className="w-6 h-6 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 border-2 border-white"
-                                />
-                              ))}
+                              {question.answerUsers && question.answerUsers.length > 0 ? (
+                                question.answerUsers.map((answerUser, i) => (
+                                  <Avatar
+                                    key={answerUser.id}
+                                    avatarUrl={answerUser.avatarUrl}
+                                    fullName={answerUser.fullName}
+                                    size="xs"
+                                    className="border-2 border-white"
+                                  />
+                                ))
+                              ) : (
+                                Array.from({ length: Math.min(question.answersCount, 2) }).map((_, i) => (
+                                  <div
+                                    key={i}
+                                    className="w-6 h-6 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 border-2 border-white"
+                                  />
+                                ))
+                              )}
                             </div>
                             <span className="text-sm font-medium text-gray-700">
                               {question.answersCount}

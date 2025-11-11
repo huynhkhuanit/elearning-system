@@ -76,10 +76,14 @@ export async function GET(
           )
         `)
         .eq("is_published", true),
-      // Get all answers (we'll filter after)
+      // Get all answers with user info (we'll filter after)
       supabaseAdmin!
         .from("lesson_answers")
-        .select("question_id")
+        .select(`
+          question_id,
+          users!inner(id, full_name, avatar_url)
+        `)
+        .order("created_at", { ascending: true })
     ]);
 
     const { data: chapters } = chaptersResult;
@@ -119,11 +123,30 @@ export async function GET(
       });
     }
 
-    // Count answers per question
+    // Count answers per question and collect answer users (max 2 per question)
     const answersCountMap = new Map<string, number>();
+    const answerUsersMap = new Map<string, Array<{ id: string; fullName: string; avatarUrl: string | null }>>();
+    
     (answersData || []).forEach((answer: any) => {
       const count = answersCountMap.get(answer.question_id) || 0;
       answersCountMap.set(answer.question_id, count + 1);
+      
+      // Collect answer users (max 2 per question)
+      if (!answerUsersMap.has(answer.question_id)) {
+        answerUsersMap.set(answer.question_id, []);
+      }
+      const users = answerUsersMap.get(answer.question_id)!;
+      if (users.length < 2 && answer.users) {
+        // Check if user already added (avoid duplicates)
+        const userExists = users.some(u => u.id === answer.users.id);
+        if (!userExists) {
+          users.push({
+            id: answer.users.id,
+            fullName: answer.users.full_name,
+            avatarUrl: answer.users.avatar_url,
+          });
+        }
+      }
     });
 
     // Now get questions for valid lessons only
@@ -250,6 +273,7 @@ export async function GET(
           fullName: row.users.full_name,
           avatarUrl: row.users.avatar_url,
         },
+        answerUsers: answerUsersMap.get(row.id) || [],
         lesson: lesson ? {
           id: lesson.id,
           title: lesson.title,
