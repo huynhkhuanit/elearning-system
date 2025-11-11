@@ -11,12 +11,17 @@ import {
   Shield,
   BookOpen,
   Users,
-  AlertTriangle
+  AlertTriangle,
+  Bold,
+  Italic,
+  Code,
+  List,
+  ListOrdered,
+  Link as LinkIcon,
+  Image as ImageIcon
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import MDEditor from '@uiw/react-md-editor';
-import '@uiw/react-md-editor/markdown-editor.css';
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/contexts/ToastContext";
 import PageContainer from "@/components/PageContainer";
@@ -379,6 +384,61 @@ export default function DiscussionPage() {
     }
   };
 
+  const insertMarkdown = (before: string, after = "") => {
+    const textarea = document.getElementById("answer-content") as HTMLTextAreaElement;
+    if (!textarea) return;
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selectedText = answerContent.substring(start, end);
+    const newText = answerContent.substring(0, start) + before + selectedText + after + answerContent.substring(end);
+
+    setAnswerContent(newText);
+
+    setTimeout(() => {
+      textarea.focus();
+      textarea.setSelectionRange(start + before.length, end + before.length);
+    }, 0);
+  };
+
+  const toolbarButtons = [
+    {
+      icon: Bold,
+      label: "Bold",
+      action: () => insertMarkdown("**", "**"),
+    },
+    {
+      icon: Italic,
+      label: "Italic",
+      action: () => insertMarkdown("*", "*"),
+    },
+    {
+      icon: Code,
+      label: "Code",
+      action: () => insertMarkdown("`", "`"),
+    },
+    {
+      icon: List,
+      label: "Bullet List",
+      action: () => insertMarkdown("\n- ", ""),
+    },
+    {
+      icon: ListOrdered,
+      label: "Numbered List",
+      action: () => insertMarkdown("\n1. ", ""),
+    },
+    {
+      icon: LinkIcon,
+      label: "Link",
+      action: () => insertMarkdown("[", "](url)"),
+    },
+    {
+      icon: ImageIcon,
+      label: "Image",
+      action: () => insertMarkdown("![alt text](", ")"),
+    },
+  ];
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "RESOLVED":
@@ -730,36 +790,37 @@ export default function DiscussionPage() {
                 Nhập bình luận mới của bạn
               </h3>
               <form onSubmit={handleSubmitAnswer}>
-                <div className="border border-gray-300 rounded-lg overflow-hidden" data-color-mode="light">
-                  <MDEditor
-                    value={answerContent}
-                    onChange={(val) => setAnswerContent(val || '')}
-                    preview="edit"
-                    hideToolbar={false}
-                    visibleDragbar={true}
-                    height={300}
-                    textareaProps={{
-                      placeholder: "Nhập câu trả lời của bạn (hỗ trợ Markdown)...",
-                      style: {
-                        backgroundColor: '#ffffff',
-                        color: '#111827',
-                        fontSize: '14px',
-                        fontFamily: "'SF Mono', Monaco, Inconsolata, 'Roboto Mono', monospace",
-                        lineHeight: '1.6',
-                      }
-                    }}
-                  />
+                {/* Markdown Toolbar */}
+                <div className="flex items-center space-x-1 p-2 bg-gray-50 border border-gray-300 rounded-t-lg border-b-0">
+                  {toolbarButtons.map((button, index) => (
+                    <button
+                      key={index}
+                      type="button"
+                      onClick={button.action}
+                      className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-200 rounded transition-colors"
+                      title={button.label}
+                    >
+                      <button.icon className="w-4 h-4" />
+                    </button>
+                  ))}
                 </div>
-                <div className="flex items-center justify-between mt-4">
-                  <p className="text-xs text-gray-500">
-                    Hỗ trợ định dạng Markdown: **bold**, *italic*, `code`
-                  </p>
+
+                {/* Textarea */}
+                <textarea
+                  id="answer-content"
+                  value={answerContent}
+                  onChange={(e) => setAnswerContent(e.target.value)}
+                  placeholder="Nhập câu trả lời của bạn (hỗ trợ Markdown)..."
+                  className="w-full bg-white border border-gray-300 border-t-0 text-gray-900 placeholder-gray-400 rounded-b-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none font-mono text-sm"
+                  rows={6}
+                />
+                <div className="flex items-center justify-between mt-3">
+                  <p className="text-xs text-gray-500">Hỗ trợ định dạng Markdown: **bold**, *italic*, `code`</p>
                   <button
                     type="submit"
                     disabled={isSubmitting || !answerContent.trim()}
                     className="flex items-center space-x-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    <Send className="w-4 h-4" />
                     <span>{isSubmitting ? "Đang gửi..." : "Gửi câu trả lời"}</span>
                   </button>
                 </div>
