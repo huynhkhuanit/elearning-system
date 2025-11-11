@@ -1,323 +1,374 @@
 "use client";
 
-import { MessageCircle, User, Calendar, ThumbsUp, Eye, Search, Plus, Filter, Tag } from "lucide-react";
-import { motion } from "framer-motion";
-import Badge from "@/components/Badge";
+import { useState, useEffect } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
+import { 
+  Search, 
+  Infinity, 
+  Bug, 
+  CheckCircle2, 
+  List, 
+  BookOpen, 
+  BookOpenText,
+  MessageCircle,
+  CheckCircle
+} from "lucide-react";
 import PageContainer from "@/components/PageContainer";
-import { useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/contexts/ToastContext";
 
 interface Question {
-  id: number;
+  id: string;
   title: string;
   content: string;
-  author: string;
-  publishDate: string;
-  views: number;
-  likes: number;
-  answers: number;
-  tags: string[];
-  status: "open" | "answered" | "closed";
+  status: "OPEN" | "ANSWERED" | "RESOLVED";
+  answersCount: number;
+  likesCount: number;
+  viewsCount: number;
+  createdAt: string;
+  updatedAt: string;
+  user: {
+    id: string;
+    username: string;
+    fullName: string;
+    avatarUrl: string | null;
+  };
+  lesson: {
+    id: string;
+    title: string;
+    type: "theory" | "challenge";
+  } | null;
 }
 
-const questionsData: Question[] = [
-  {
-    id: 1,
-    title: "Làm thế nào để tối ưu hiệu suất React app?",
-    content: "Tôi có một React app khá lớn và đang gặp vấn đề về hiệu suất. App load chậm và có lag khi user tương tác. Có những cách nào để tối ưu không? Tôi đã thử React.memo nhưng vẫn chưa cải thiện được nhiều.",
-    author: "developer123",
-    publishDate: "2 giờ trước",
-    views: 45,
-    likes: 12,
-    answers: 3,
-    tags: ["React", "Performance", "Optimization"],
-    status: "answered"
-  },
-  {
-    id: 2,
-    title: "Sự khác biệt giữa var, let và const trong JavaScript?",
-    content: "Mình mới học JS và chưa hiểu rõ sự khác biệt giữa 3 cách khai báo biến này. Khi nào thì dùng var, let hay const? Có thể giải thích kèm ví dụ được không?",
-    author: "newbie_coder",
-    publishDate: "5 giờ trước",
-    views: 128,
-    likes: 8,
-    answers: 5,
-    tags: ["JavaScript", "Variables", "ES6"],
-    status: "answered"
-  },
-  {
-    id: 3,
-    title: "Cách kết nối MongoDB với Node.js như thế nào?",
-    content: "Tôi đang học backend và muốn kết nối MongoDB với Node.js app. Có hướng dẫn chi tiết nào không? Tôi đã cài đặt MongoDB và mongoose rồi nhưng vẫn gặp lỗi khi connect.",
-    author: "backend_learner",
-    publishDate: "1 ngày trước",
-    views: 89,
-    likes: 15,
-    answers: 2,
-    tags: ["Node.js", "MongoDB", "Database"],
-    status: "open"
-  },
-  {
-    id: 4,
-    title: "CSS Grid hay Flexbox cho responsive design?",
-    content: "Mình đang phân vân nên sử dụng CSS Grid hay Flexbox cho layout responsive. Dự án hiện tại cần responsive từ mobile đến desktop, khi nào thì nên dùng cái nào?",
-    author: "ui_designer",
-    publishDate: "2 ngày trước",
-    views: 67,
-    likes: 6,
-    answers: 4,
-    tags: ["CSS", "Grid", "Flexbox", "Responsive"],
-    status: "answered"
-  },
-  {
-    id: 5,
-    title: "TypeScript có cần thiết cho dự án nhỏ không?",
-    content: "Mình đang làm một dự án web nhỏ với vanilla JavaScript. Có nên migrate sang TypeScript không? Lợi ích thực sự của TypeScript so với JavaScript là gì?",
-    author: "js_enthusiast",
-    publishDate: "3 ngày trước",
-    views: 156,
-    likes: 11,
-    answers: 7,
-    tags: ["TypeScript", "JavaScript", "Best Practices"],
-    status: "answered"
-  },
-  {
-    id: 6,
-    title: "Cách deploy ứng dụng Next.js lên Vercel?",
-    content: "Mình vừa hoàn thành project Next.js đầu tiên và muốn deploy lên Vercel. Có ai hướng dẫn step by step được không? Có cần config gì đặc biệt không?",
-    author: "nextjs_newbie",
-    publishDate: "1 tuần trước",
-    views: 203,
-    likes: 9,
-    answers: 1,
-    tags: ["Next.js", "Deployment", "Vercel"],
-    status: "open"
-  }
+interface MostHelpfulUser {
+  id: string;
+  username: string;
+  fullName: string;
+  avatarUrl: string | null;
+  contributions: number;
+  isVerified: boolean;
+}
+
+const categories = [
+  { id: "all", label: "Tất cả", icon: Infinity, color: "text-blue-600" },
+  { id: "off-topic", label: "Chủ đề ngoài khóa học", icon: Bug, color: "text-red-600" },
+  { id: "flashcards", label: "Ứng dụng Flashcards", icon: CheckCircle2, color: "text-blue-600" },
+  { id: "other", label: "Các loại bài tập khác", icon: List, color: "text-orange-600" },
+  { id: "challenge", label: "Bài học thử thách", icon: BookOpen, color: "text-blue-600" },
+  { id: "theory", label: "Bài học lý thuyết", icon: BookOpenText, color: "text-orange-600" },
 ];
 
-const statusOptions = ["Tất cả", "Đang mở", "Đã trả lời", "Đã đóng"];
-const sortOptions = ["Mới nhất", "Cũ nhất", "Nhiều lượt xem", "Nhiều like"];
+// Mock data for Most Helpful users (will be replaced with API call later)
+const mockMostHelpfulUsers: MostHelpfulUser[] = [
+  { id: "1", username: "vuquocdung", fullName: "Vũ Quốc Dũng", avatarUrl: null, contributions: 16, isVerified: true },
+  { id: "2", username: "vuthingochuyen", fullName: "Vũ Thị Ngọc Huyền", avatarUrl: null, contributions: 7, isVerified: true },
+  { id: "3", username: "sondang", fullName: "Sơn Đặng", avatarUrl: null, contributions: 6, isVerified: true },
+  { id: "4", username: "ngocdai", fullName: "Ngọc Đại Nguyễn", avatarUrl: null, contributions: 1, isVerified: true },
+  { id: "5", username: "hoangan", fullName: "Hoàng An", avatarUrl: null, contributions: 1, isVerified: false },
+];
 
 export default function QAPage() {
+  const { isAuthenticated } = useAuth();
+  const toast = useToast();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedStatus, setSelectedStatus] = useState("Tất cả");
-  const [sortBy, setSortBy] = useState("Mới nhất");
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [questions, setQuestions] = useState<Question[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [courseSlug, setCourseSlug] = useState<string | null>(null);
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "answered":
-        return "bg-green-100 text-green-800";
-      case "open":
-        return "bg-blue-100 text-blue-800";
-      case "closed":
-        return "bg-gray-100 text-gray-800";
-      default:
-        return "bg-gray-100 text-gray-800";
+  // Get course slug from URL params if available
+  useEffect(() => {
+    const slug = searchParams.get("course");
+    setCourseSlug(slug);
+  }, [searchParams]);
+
+  // Fetch questions
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setLoading(false);
+      return;
     }
+
+    fetchQuestions();
+  }, [selectedCategory, searchQuery, courseSlug, isAuthenticated]);
+
+  const fetchQuestions = async () => {
+    if (!isAuthenticated) return;
+
+    setLoading(true);
+    try {
+      // Use general questions endpoint or course-specific endpoint
+      const url = courseSlug 
+        ? `/api/courses/${courseSlug}/questions?category=${selectedCategory}&search=${encodeURIComponent(searchQuery)}&status=all`
+        : `/api/questions?category=${selectedCategory}&search=${encodeURIComponent(searchQuery)}&status=all${courseSlug ? `&courseSlug=${courseSlug}` : ''}`;
+
+      const response = await fetch(url, {
+        credentials: "include",
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setQuestions(data.data.questions || []);
+      } else {
+        toast.error(data.message || "Không thể tải câu hỏi");
+        setQuestions([]);
+      }
+    } catch (error) {
+      console.error("Error fetching questions:", error);
+      toast.error("Đã có lỗi xảy ra khi tải câu hỏi");
+      setQuestions([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const formatTimeAgo = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInMs = now.getTime() - date.getTime();
+    const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
+    const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
+    const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
+
+    if (diffInMinutes < 1) return "Vừa xong";
+    if (diffInMinutes < 60) return `${diffInMinutes} phút trước`;
+    if (diffInHours < 24) return `${diffInHours} giờ trước`;
+    if (diffInDays < 7) return `${diffInDays} ngày trước`;
+    return date.toLocaleDateString("vi-VN");
+  };
+
+  const getQuestionIcon = (lessonType: string | null) => {
+    if (lessonType === "challenge") {
+      return <BookOpen className="w-5 h-5 text-blue-600" />;
+    }
+    return <BookOpenText className="w-5 h-5 text-orange-600" />;
   };
 
   const getStatusText = (status: string) => {
     switch (status) {
-      case "answered":
+      case "RESOLVED":
+        return "Đã giải quyết";
+      case "ANSWERED":
         return "Đã trả lời";
-      case "open":
-        return "Đang mở";
-      case "closed":
-        return "Đã đóng";
+      case "OPEN":
       default:
-        return "Không xác định";
+        return "Chờ trả lời";
     }
   };
 
-  const filteredQuestions = questionsData.filter(question => {
-    const matchesSearch = question.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         question.content.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus = selectedStatus === "Tất cả" || 
-                         (selectedStatus === "Đang mở" && question.status === "open") ||
-                         (selectedStatus === "Đã trả lời" && question.status === "answered") ||
-                         (selectedStatus === "Đã đóng" && question.status === "closed");
-    return matchesSearch && matchesStatus;
-  });
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "RESOLVED":
+        return "text-green-600";
+      case "ANSWERED":
+        return "text-blue-600";
+      case "OPEN":
+      default:
+        return "text-gray-600";
+    }
+  };
+
+  const getCategoryLabel = (categoryId: string) => {
+    const category = categories.find(c => c.id === categoryId);
+    return category?.label || "Tất cả";
+  };
+
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Vui lòng đăng nhập</h2>
+          <p className="text-gray-600">Bạn cần đăng nhập để xem câu hỏi</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
-      <PageContainer size="lg" className="py-12">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-12"
-        >
-          <h1 className="font-[900] text-gray-900 mb-4">
-            Hỏi đáp <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">lập trình</span>
-          </h1>
-          <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto mb-8">
-            Đặt câu hỏi và nhận được câu trả lời từ cộng đồng developer
-          </p>
-          
-          {/* Search and Actions */}
-          <div className="flex flex-col lg:flex-row gap-4 max-w-4xl mx-auto mb-8">
-            <div className="flex-1 relative">
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+    <div className="min-h-screen bg-white">
+      <PageContainer size="full" className="py-8">
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Left Sidebar */}
+          <aside className="w-full lg:w-80 flex-shrink-0">
+            {/* Header */}
+            <div className="mb-6">
+              <h1 className="text-3xl font-[900] text-gray-900 mb-2">
+                Hỏi và đáp
+              </h1>
+              <p className="text-sm text-gray-600">
+                Kênh hỏi đáp riêng tư dành riêng cho học viên Pro.
+              </p>
+            </div>
+
+            {/* Search */}
+            <div className="relative mb-6">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
               <input
                 type="text"
                 placeholder="Tìm kiếm câu hỏi..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
               />
             </div>
-            <button className="px-6 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-semibold rounded-full hover:from-indigo-600 hover:to-purple-700 transition-all duration-200 flex items-center space-x-2">
-              <Plus className="w-5 h-5" />
-              <span>Đặt câu hỏi</span>
-            </button>
-          </div>
 
-          {/* Filters */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <div className="flex gap-2 flex-wrap">
-              <span className="text-sm font-medium text-gray-600">Trạng thái:</span>
-              {statusOptions.map((status) => (
-                <button
-                  key={status}
-                  onClick={() => setSelectedStatus(status)}
-                  className={`px-3 py-1 rounded-full text-sm font-medium transition-all duration-200 ${
-                    selectedStatus === status
-                      ? "bg-indigo-500 text-white"
-                      : "bg-white text-gray-600 hover:bg-gray-100 border border-gray-200"
-                  }`}
-                >
-                  {status}
-                </button>
-              ))}
-            </div>
-            
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-medium text-gray-600">Sắp xếp:</span>
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="px-3 py-1 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              >
-                {sortOptions.map((option) => (
-                  <option key={option} value={option}>{option}</option>
-                ))}
-              </select>
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Questions List */}
-        <div className="space-y-6">
-          {filteredQuestions.map((question, index) => (
-            <motion.div
-              key={question.id}
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: index * 0.1 }}
-              className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer group"
-            >
-              <div className="p-6">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-3 mb-3">
-                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(question.status)}`}>
-                        {getStatusText(question.status)}
-                      </span>
-                      <div className="flex items-center space-x-2 flex-wrap">
-                        {question.tags.map((tag, idx) => (
-                          <Badge key={idx} variant="secondary" size="sm">{tag}</Badge>
-                        ))}
-                      </div>
-                    </div>
-                    
-                    <h3 className="font-bold text-gray-900 mb-3 hover:text-indigo-600 transition-colors group-hover:text-indigo-600">
-                      {question.title}
-                    </h3>
-                    
-                    <p className="text-gray-600 mb-4 line-clamp-2">
-                      {question.content}
-                    </p>
-                    
-                    <div className="flex items-center space-x-6 text-small text-gray-500">
-                      <div className="flex items-center space-x-1">
-                        <User className="w-4 h-4" />
-                        <span className="font-medium">{question.author}</span>
-                      </div>
-                      <div className="flex items-center space-x-1">
-                        <Calendar className="w-4 h-4" />
-                        <span>{question.publishDate}</span>
-                      </div>
-                      <div className="flex items-center space-x-1">
-                        <Eye className="w-4 h-4" />
-                        <span>{question.views} lượt xem</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                  <div className="flex items-center space-x-6">
-                    <div className="flex items-center space-x-1 text-gray-600">
-                      <ThumbsUp className="w-4 h-4" />
-                      <span className="font-medium">{question.likes}</span>
-                      <span className="text-sm">likes</span>
-                    </div>
-                    <div className="flex items-center space-x-1 text-gray-600">
-                      <MessageCircle className="w-4 h-4" />
-                      <span className="font-medium">{question.answers}</span>
-                      <span className="text-sm">câu trả lời</span>
-                    </div>
-                  </div>
-                  
-                  <button className="px-4 py-2 text-indigo-600 hover:text-indigo-700 font-medium transition-colors hover:bg-indigo-50 rounded-lg">
-                    Xem chi tiết →
-                  </button>
-                </div>
+            {/* Categories */}
+            <div className="mb-8">
+              <h2 className="text-sm font-semibold text-gray-700 mb-3">Danh mục</h2>
+              <div className="space-y-1">
+                {categories.map((category) => {
+                  const Icon = category.icon;
+                  const isSelected = selectedCategory === category.id;
+                  return (
+                    <button
+                      key={category.id}
+                      onClick={() => setSelectedCategory(category.id)}
+                      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                        isSelected
+                          ? "bg-blue-600 text-white"
+                          : "text-gray-700 hover:bg-gray-100"
+                      }`}
+                    >
+                      <Icon className={`w-5 h-5 ${isSelected ? "text-white" : category.color}`} />
+                      <span className="flex-1 text-left">{category.label}</span>
+                    </button>
+                  );
+                })}
               </div>
-            </motion.div>
-          ))}
+            </div>
+
+            {/* Most Helpful */}
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="text-sm font-semibold text-gray-700">Hữu ích nhất</h2>
+                <span className="text-xs text-gray-500">30 ngày qua</span>
+              </div>
+              <div className="space-y-3">
+                {mockMostHelpfulUsers.map((user) => (
+                  <div
+                    key={user.id}
+                    className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 transition-colors"
+                  >
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center text-white text-xs font-semibold flex-shrink-0">
+                      {user.fullName.charAt(0)}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-sm font-medium text-gray-900 truncate">
+                          {user.fullName}
+                        </span>
+                        {user.isVerified && (
+                          <CheckCircle className="w-4 h-4 text-blue-600 flex-shrink-0" />
+                        )}
+                      </div>
+                      <span className="text-xs text-gray-500">
+                        {user.contributions} đóng góp
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </aside>
+
+          {/* Main Content */}
+          <main className="flex-1 min-w-0 lg:max-w-3xl">
+            <div className="mb-6">
+              <h2 className="text-xl font-semibold text-gray-900">Câu hỏi</h2>
+            </div>
+
+            {loading ? (
+              <div className="flex items-center justify-center py-12">
+                <div className="text-gray-500">Đang tải...</div>
+              </div>
+            ) : questions.length === 0 ? (
+              <div className="text-center py-12">
+                <MessageCircle className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  Không có câu hỏi nào
+                </h3>
+                <p className="text-gray-600">
+                  {searchQuery
+                    ? "Thử thay đổi từ khóa tìm kiếm"
+                    : "Chưa có câu hỏi nào trong danh mục này"}
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {questions.map((question) => (
+                  <div
+                    key={question.id}
+                    className="bg-white border border-gray-200 rounded-lg p-4 hover:border-gray-300 transition-colors cursor-pointer"
+                    onClick={() => {
+                      router.push(`/discussions/${question.id}`);
+                    }}
+                  >
+                    <div className="flex items-start gap-4">
+                      {/* Icon */}
+                      <div className="flex-shrink-0 mt-1">
+                        {getQuestionIcon(question.lesson?.type || null)}
+                      </div>
+
+                      {/* Content */}
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2">
+                          {question.title}
+                        </h3>
+                        <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
+                          <span className="font-medium">{question.user.fullName}</span>
+                          <span>đăng</span>
+                          <span>{formatTimeAgo(question.createdAt)}</span>
+                          {question.lesson && (
+                            <>
+                              <span>trong</span>
+                              <span className="font-medium">
+                                {getCategoryLabel(question.lesson.type === "challenge" ? "challenge" : "theory")}
+                              </span>
+                            </>
+                          )}
+                          <span className="ml-2">.</span>
+                          <span className={getStatusColor(question.status)}>
+                            {getStatusText(question.status)}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Answer Count */}
+                      <div className="flex-shrink-0 flex items-center gap-2">
+                        {question.answersCount > 0 ? (
+                          <>
+                            <div className="flex -space-x-2">
+                              {Array.from({ length: Math.min(question.answersCount, 2) }).map((_, i) => (
+                                <div
+                                  key={i}
+                                  className="w-6 h-6 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 border-2 border-white"
+                                />
+                              ))}
+                            </div>
+                            <span className="text-sm font-medium text-gray-700">
+                              {question.answersCount}
+                            </span>
+                          </>
+                        ) : (
+                          <>
+                            <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center">
+                              <CheckCircle className="w-4 h-4 text-blue-600" />
+                            </div>
+                            <span className="text-sm font-medium text-gray-700">0</span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </main>
         </div>
-
-        {filteredQuestions.length === 0 && (
-          <div className="text-center py-12">
-            <MessageCircle className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">Không tìm thấy câu hỏi</h3>
-            <p className="text-gray-600">Thử thay đổi từ khóa tìm kiếm hoặc bộ lọc của bạn</p>
-          </div>
-        )}
-
-        {/* Stats Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.8 }}
-          className="mt-16 bg-white rounded-2xl shadow-lg p-8"
-        >
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-            <div>
-              <div className="text-3xl font-bold text-indigo-600 mb-2">1,234</div>
-              <div className="text-gray-600">Câu hỏi</div>
-            </div>
-            <div>
-              <div className="text-3xl font-bold text-green-600 mb-2">956</div>
-              <div className="text-gray-600">Câu trả lời</div>
-            </div>
-            <div>
-              <div className="text-3xl font-bold text-purple-600 mb-2">2,890</div>
-              <div className="text-gray-600">Thành viên</div>
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Load More Button */}
-        {filteredQuestions.length > 0 && (
-          <div className="text-center mt-12">
-            <button className="px-8 py-3 border-2 border-indigo-500 text-indigo-600 font-semibold rounded-full hover:bg-indigo-50 transition-all duration-200">
-              Xem thêm câu hỏi
-            </button>
-          </div>
-        )}
       </PageContainer>
     </div>
   );
