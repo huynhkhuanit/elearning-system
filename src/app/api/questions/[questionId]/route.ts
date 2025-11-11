@@ -107,12 +107,30 @@ export async function GET(
       throw answersError;
     }
 
-    // Get unique participants (users who answered)
-    const participantIds = new Set<string>();
-    participantIds.add((questionData.users as any).id);
-    (answersData || []).forEach((answer: any) => {
-      participantIds.add((answer.users as any).id);
+    // Get unique participants (users who answered) with their info
+    const participantMap = new Map<string, { id: string; fullName: string; avatarUrl: string | null }>();
+    
+    // Add question author
+    participantMap.set((questionData.users as any).id, {
+      id: (questionData.users as any).id,
+      fullName: (questionData.users as any).full_name,
+      avatarUrl: (questionData.users as any).avatar_url,
     });
+    
+    // Add answer authors
+    (answersData || []).forEach((answer: any) => {
+      const userId = (answer.users as any).id;
+      if (!participantMap.has(userId)) {
+        participantMap.set(userId, {
+          id: userId,
+          fullName: (answer.users as any).full_name,
+          avatarUrl: (answer.users as any).avatar_url,
+        });
+      }
+    });
+
+    const participantIds = Array.from(participantMap.keys());
+    const participants = Array.from(participantMap.values());
 
     const likedAnswerIds = new Set((answerLikes || []).map((l: any) => l.answer_id));
 
@@ -282,7 +300,8 @@ export async function GET(
           },
         };
       }),
-      participants: Array.from(participantIds).length,
+      participants: participants.length,
+      participantsList: participants, // Danh sách participants với avatar
     };
 
     return NextResponse.json({

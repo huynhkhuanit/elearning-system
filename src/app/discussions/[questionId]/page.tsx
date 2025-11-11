@@ -51,6 +51,11 @@ interface QuestionDetail {
   createdAt: string;
   updatedAt: string;
   participants: number;
+  participantsList?: Array<{
+    id: string;
+    fullName: string;
+    avatarUrl: string | null;
+  }>;
   user: {
     id: string;
     username: string;
@@ -77,7 +82,7 @@ interface QuestionDetail {
 export default function DiscussionPage() {
   const params = useParams();
   const router = useRouter();
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, isLoading: authLoading } = useAuth();
   const toast = useToast();
   
   const questionId = params.questionId as string;
@@ -85,6 +90,7 @@ export default function DiscussionPage() {
   const [loading, setLoading] = useState(true);
   const [answerContent, setAnswerContent] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [visibleAnswersCount, setVisibleAnswersCount] = useState(2); // Hiển thị 2 câu trả lời mới nhất ban đầu
 
   useEffect(() => {
     if (questionId) {
@@ -316,12 +322,42 @@ export default function DiscussionPage() {
           
           setQuestion((prev) => {
             if (!prev) return null;
+            
+            // Tăng số lượng hiển thị để đảm bảo câu trả lời mới được hiển thị
+            // Câu trả lời mới sẽ được thêm vào và sắp xếp lên đầu danh sách
+            // Nên cần đảm bảo visibleAnswersCount đủ để hiển thị nó
+            const currentOtherAnswersCount = prev.answers.filter(a => !a.isAccepted).length;
+            const newOtherAnswersCount = currentOtherAnswersCount + 1;
+            
+            // Nếu số lượng hiển thị hiện tại nhỏ hơn số lượng câu trả lời mới, tăng lên
+            if (visibleAnswersCount <= currentOtherAnswersCount) {
+              setVisibleAnswersCount(Math.min(newOtherAnswersCount, visibleAnswersCount + 1));
+            }
+            
+            // Kiểm tra xem user đã tham gia chưa
+            const isNewParticipant = !prev.answers.some(a => a.user.id === newAnswer.user.id) && 
+                                     prev.user.id !== newAnswer.user.id;
+            
+            // Cập nhật participantsList nếu là participant mới
+            let updatedParticipantsList = prev.participantsList || [];
+            if (isNewParticipant) {
+              updatedParticipantsList = [
+                ...updatedParticipantsList,
+                {
+                  id: newAnswer.user.id,
+                  fullName: newAnswer.user.fullName,
+                  avatarUrl: newAnswer.user.avatarUrl || null,
+                }
+              ];
+            }
+            
             return {
               ...prev,
               answers: [...prev.answers, newAnswer],
               answersCount: prev.answersCount + 1,
               status: prev.status === "OPEN" ? "ANSWERED" : prev.status,
-              participants: prev.participants + (prev.answers.some(a => a.user.id === newAnswer.user.id) ? 0 : 1),
+              participants: prev.participants + (isNewParticipant ? 1 : 0),
+              participantsList: updatedParticipantsList,
             };
           });
         } else {
@@ -364,12 +400,31 @@ export default function DiscussionPage() {
     }
   };
 
+  // Đợi auth context load xong trước khi kiểm tra authentication
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Đang kiểm tra đăng nhập...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Chỉ hiển thị thông báo đăng nhập khi auth đã load xong và user chưa đăng nhập
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Vui lòng đăng nhập</h2>
-          <p className="text-gray-600">Bạn cần đăng nhập để xem câu hỏi</p>
+          <p className="text-gray-600 mb-4">Bạn cần đăng nhập để xem câu hỏi</p>
+          <button
+            onClick={() => router.push("/auth/login")}
+            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Đăng nhập
+          </button>
         </div>
       </div>
     );
@@ -403,7 +458,10 @@ export default function DiscussionPage() {
   }
 
   const bestAnswer = question.answers.find((a) => a.isAccepted);
-  const otherAnswers = question.answers.filter((a) => !a.isAccepted);
+  // Sắp xếp otherAnswers theo thời gian mới nhất trước (descending)
+  const otherAnswers = question.answers
+    .filter((a) => !a.isAccepted)
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
   return (
     <div className="min-h-screen bg-white">
@@ -579,7 +637,7 @@ export default function DiscussionPage() {
                   {otherAnswers.length} {otherAnswers.length === 1 ? "bình luận" : "bình luận"}
                 </h3>
                 <div className="space-y-4">
-                  {otherAnswers.map((answer) => (
+                  {otherAnswers.slice(0, visibleAnswersCount).map((answer) => (
                     <div key={answer.id} className="bg-white border border-gray-200 rounded-lg p-6">
                       <div className="flex items-start gap-4">
                         <Avatar
@@ -644,6 +702,18 @@ export default function DiscussionPage() {
                     </div>
                   ))}
                 </div>
+                
+                {/* Xem thêm button */}
+                {visibleAnswersCount < otherAnswers.length && (
+                  <div className="mt-4 flex justify-center">
+                    <button
+                      onClick={() => setVisibleAnswersCount(prev => Math.min(prev + 3, otherAnswers.length))}
+                      className="px-6 py-2.5 text-sm font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors border border-blue-200"
+                    >
+                      Xem thêm {Math.min(3, otherAnswers.length - visibleAnswersCount)} bình luận
+                    </button>
+                  </div>
+                )}
               </div>
             )}
 
@@ -723,12 +793,25 @@ export default function DiscussionPage() {
                   {question.participants} {question.participants === 1 ? "người tham gia" : "người tham gia"}
                 </h4>
                 <div className="flex -space-x-2">
-                  {Array.from({ length: Math.min(question.participants, 5) }).map((_, i) => (
-                    <div
-                      key={i}
-                      className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 border-2 border-white"
-                    />
-                  ))}
+                  {question.participantsList && question.participantsList.length > 0 ? (
+                    question.participantsList.slice(0, 5).map((participant) => (
+                      <Avatar
+                        key={participant.id}
+                        avatarUrl={participant.avatarUrl}
+                        fullName={participant.fullName}
+                        size="sm"
+                        className="border-2 border-white"
+                      />
+                    ))
+                  ) : (
+                    // Fallback nếu chưa có participantsList
+                    Array.from({ length: Math.min(question.participants, 5) }).map((_, i) => (
+                      <div
+                        key={i}
+                        className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 border-2 border-white"
+                      />
+                    ))
+                  )}
                 </div>
               </div>
 
