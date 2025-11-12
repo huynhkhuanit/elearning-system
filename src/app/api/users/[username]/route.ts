@@ -39,6 +39,21 @@ export async function GET(
       metadata[row.meta_key] = row.meta_value;
     }
 
+    // Calculate total_courses_completed based on new logic:
+    // A course is completed if progress_percentage >= 100 OR completed_at IS NOT NULL
+    let totalCoursesCompleted = 0;
+    try {
+      const courses = await rpc<any[]>('get_user_enrolled_courses', { p_user_id: user.id });
+      totalCoursesCompleted = (courses || []).filter((course: any) => {
+        const progressPercentage = parseFloat(course.progress_percentage || 0);
+        return progressPercentage >= 100 || Boolean(course.completed_at);
+      }).length;
+    } catch (error) {
+      console.error('Error calculating completed courses:', error);
+      // Fallback to database value if calculation fails
+      totalCoursesCompleted = Number(user.total_courses_completed) || 0;
+    }
+
     const userProfile: UserProfile = {
       id: user.id,
       email: user.email,
@@ -54,7 +69,7 @@ export async function GET(
       is_verified: user.is_verified,
       created_at: user.created_at,
       total_courses_enrolled: Number(user.total_courses_enrolled) || 0,
-      total_courses_completed: Number(user.total_courses_completed) || 0,
+      total_courses_completed: totalCoursesCompleted,
       total_articles_published: Number(user.total_articles_published) || 0,
       total_forum_posts: Number(user.total_forum_posts) || 0,
       followers_count: Number(user.followers_count) || 0,
