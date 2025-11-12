@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Mail, Phone, Key, ArrowLeft, ArrowRight, Shield, Lock } from "lucide-react";
+import { Mail, Key, ArrowLeft, ArrowRight, Shield, Lock } from "lucide-react";
 import Modal from "./Modal";
 import { useToast } from "@/contexts/ToastContext";
 
@@ -16,9 +16,8 @@ type Step = 'method' | 'input' | 'otp' | 'reset' | 'recovery';
 export default function ForgotPasswordModal({ isOpen, onClose }: ForgotPasswordModalProps) {
   const toast = useToast();
   const [step, setStep] = useState<Step>('method');
-  const [method, setMethod] = useState<'email' | 'phone' | null>(null);
+  const [method, setMethod] = useState<'email' | null>(null);
   const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
   const [otp, setOtp] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -42,18 +41,14 @@ export default function ForgotPasswordModal({ isOpen, onClose }: ForgotPasswordM
     }, 1000);
   };
 
-  const handleMethodSelect = (selectedMethod: 'email' | 'phone') => {
-    setMethod(selectedMethod);
+  const handleMethodSelect = () => {
+    setMethod('email');
     setStep('input');
   };
 
   const handleSendOTP = async () => {
-    if (method === 'email' && !email) {
+    if (!email) {
       toast.error('Vui lòng nhập email');
-      return;
-    }
-    if (method === 'phone' && !phone) {
-      toast.error('Vui lòng nhập số điện thoại');
       return;
     }
 
@@ -63,9 +58,8 @@ export default function ForgotPasswordModal({ isOpen, onClose }: ForgotPasswordM
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          method,
-          email: method === 'email' ? email : undefined,
-          phone: method === 'phone' ? phone : undefined,
+          method: 'email',
+          email,
         }),
       });
 
@@ -101,9 +95,8 @@ export default function ForgotPasswordModal({ isOpen, onClose }: ForgotPasswordM
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          method,
-          email: method === 'email' ? email : undefined,
-          phone: method === 'phone' ? phone : undefined,
+          method: 'email',
+          email,
           otp,
         }),
       });
@@ -228,7 +221,6 @@ export default function ForgotPasswordModal({ isOpen, onClose }: ForgotPasswordM
     setStep('method');
     setMethod(null);
     setEmail('');
-    setPhone('');
     setOtp('');
     setNewPassword('');
     setConfirmPassword('');
@@ -286,8 +278,8 @@ export default function ForgotPasswordModal({ isOpen, onClose }: ForgotPasswordM
           </h2>
           <p className="text-gray-600 text-sm">
             {step === 'method' && 'Chọn phương thức khôi phục mật khẩu'}
-            {step === 'input' && `Nhập ${method === 'email' ? 'email' : 'số điện thoại'} của bạn`}
-            {step === 'otp' && `Nhập mã OTP 6 số đã được gửi đến ${method === 'email' ? 'email' : 'số điện thoại'} của bạn`}
+            {step === 'input' && 'Nhập email của bạn'}
+            {step === 'otp' && 'Nhập mã OTP 6 số đã được gửi đến email của bạn'}
             {step === 'reset' && 'Nhập mật khẩu mới của bạn'}
             {step === 'recovery' && 'Nhập recovery key và email để khôi phục mật khẩu'}
           </p>
@@ -332,25 +324,13 @@ export default function ForgotPasswordModal({ isOpen, onClose }: ForgotPasswordM
               className="space-y-4"
             >
               <button
-                onClick={() => handleMethodSelect('email')}
+                onClick={handleMethodSelect}
                 className="w-full p-4 border-2 border-gray-200 rounded-xl hover:border-indigo-500 hover:bg-indigo-50 transition-all flex items-center space-x-4"
               >
                 <Mail className="w-6 h-6 text-indigo-600" />
                 <div className="text-left flex-1">
                   <div className="font-semibold text-gray-900">Gửi mã qua Email</div>
                   <div className="text-sm text-gray-600">Nhận mã OTP qua email</div>
-                </div>
-                <ArrowRight className="w-5 h-5 text-gray-400" />
-              </button>
-
-              <button
-                onClick={() => handleMethodSelect('phone')}
-                className="w-full p-4 border-2 border-gray-200 rounded-xl hover:border-indigo-500 hover:bg-indigo-50 transition-all flex items-center space-x-4"
-              >
-                <Phone className="w-6 h-6 text-indigo-600" />
-                <div className="text-left flex-1">
-                  <div className="font-semibold text-gray-900">Gửi mã qua SMS</div>
-                  <div className="text-sm text-gray-600">Nhận mã OTP qua số điện thoại</div>
                 </div>
                 <ArrowRight className="w-5 h-5 text-gray-400" />
               </button>
@@ -371,14 +351,14 @@ export default function ForgotPasswordModal({ isOpen, onClose }: ForgotPasswordM
                 <Shield className="w-6 h-6 text-purple-600" />
                 <div className="text-left flex-1">
                   <div className="font-semibold text-gray-900">Sử dụng Recovery Key</div>
-                  <div className="text-sm text-gray-600">Nếu bạn mất cả email và số điện thoại</div>
+                  <div className="text-sm text-gray-600">Nếu bạn không thể truy cập email</div>
                 </div>
                 <ArrowRight className="w-5 h-5 text-gray-400" />
               </button>
             </motion.div>
           )}
 
-          {/* Step 2: Input Email/Phone */}
+          {/* Step 2: Input Email */}
           {step === 'input' && (
             <motion.div
               key="input"
@@ -389,19 +369,15 @@ export default function ForgotPasswordModal({ isOpen, onClose }: ForgotPasswordM
             >
               <div>
                 <label className="block text-sm font-semibold text-gray-900 mb-2">
-                  {method === 'email' ? 'Email' : 'Số điện thoại'}
+                  Email
                 </label>
                 <div className="relative">
-                  {method === 'email' ? (
-                    <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                  ) : (
-                    <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                  )}
+                  <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                   <input
-                    type={method === 'email' ? 'email' : 'tel'}
-                    value={method === 'email' ? email : phone}
-                    onChange={(e) => method === 'email' ? setEmail(e.target.value) : setPhone(e.target.value)}
-                    placeholder={method === 'email' ? 'name@example.com' : '0123456789'}
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="name@example.com"
                     className="w-full pl-11 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition-all text-gray-900"
                   />
                 </div>
@@ -417,7 +393,7 @@ export default function ForgotPasswordModal({ isOpen, onClose }: ForgotPasswordM
                 </button>
                 <button
                   onClick={handleSendOTP}
-                  disabled={isLoading || (method === 'email' ? !email : !phone)}
+                  disabled={isLoading || !email}
                   className="flex-1 px-4 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold rounded-xl hover:from-indigo-700 hover:to-purple-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
                 >
                   {isLoading ? (
