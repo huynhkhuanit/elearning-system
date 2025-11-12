@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { queryOneBuilder, queryBuilder } from '@/lib/db';
+import { supabaseAdmin } from '@/lib/supabase';
 import { ActivityData, ActivityDay } from '@/types/profile';
 
 export async function GET(
@@ -35,37 +36,52 @@ export async function GET(
     oneYearAgo.setMonth(oneYearAgo.getMonth() - 12);
     const oneYearAgoStr = oneYearAgo.toISOString().split('T')[0];
 
-    // Try to get activities from learning_activities table first
-    // If that fails, calculate from lesson_progress
-    let activities: Array<{
-      activity_data: string;
-      lessons_completed: number;
-      quizzes_completed: number;
-      study_time: number | null;
-    }> = [];
-
-    try {
-      // Try to query learning_activities table
-      activities = await queryBuilder<{
-        activity_data: string;
-        lessons_completed: number;
-        quizzes_completed: number;
-        study_time: number | null;
-      }>(
-        'learning_activities',
-        {
-          select: 'activity_data, lessons_completed, quizzes_completed, study_time',
-          filters: { user_id: userId },
-          orderBy: { column: 'activity_data', ascending: true }
-        }
-      );
-    } catch (error: any) {
-      // If learning_activities table doesn't have the columns, calculate from lesson_progress
-      console.warn('learning_activities table structure different, calculating from lesson_progress:', error?.message);
+    // Helper function to parse date and convert to YYYY-MM-DD format
+    const parseDateToDateString = (dateValue: any): string | null => {
+      if (!dateValue) return null;
       
-      // Get completed lessons grouped by date
+      try {
+        let date: Date;
+        
+        if (typeof dateValue === 'string') {
+          // Handle MySQL datetime format (YYYY-MM-DD HH:MM:SS) without timezone
+          if (dateValue.match(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/) && !dateValue.includes('T') && !dateValue.includes('Z')) {
+            // MySQL datetime - treat as UTC
+            date = new Date(dateValue + 'Z');
+          } else if (dateValue.includes('T') && dateValue.includes('Z')) {
+            // ISO string with Z - already UTC
+            date = new Date(dateValue);
+          } else if (dateValue.includes('T') && !dateValue.includes('Z')) {
+            // ISO string without Z - add Z to treat as UTC
+            date = new Date(dateValue.endsWith('+00:00') || dateValue.endsWith('+0000') ? dateValue : dateValue + 'Z');
+          } else {
+            // Try parsing as-is
+            date = new Date(dateValue);
+          }
+        } else {
+          date = new Date(dateValue);
+        }
+        
+        // Check if date is valid
+        if (isNaN(date.getTime())) {
+          console.warn('Invalid date value:', dateValue);
+          return null;
+        }
+        
+        return date.toISOString().split('T')[0];
+      } catch (error) {
+        console.warn('Error parsing date:', dateValue, error);
+        return null;
+      }
+    };
+
+    // Collect all activities from multiple sources
+    const dateActivityMap = new Map<string, number>();
+
+    // 1. Get completed lessons from lesson_progress
+    try {
       const completedLessons = await queryBuilder<{
-        completed_at: string;
+        completed_at: string | null;
       }>(
         'lesson_progress',
         {
@@ -75,28 +91,187 @@ export async function GET(
         }
       );
 
-      // Group by date
-      const dateCountMap = new Map<string, number>();
       completedLessons.forEach((lesson) => {
-        if (lesson.completed_at) {
-          const dateStr = new Date(lesson.completed_at).toISOString().split('T')[0];
-          dateCountMap.set(dateStr, (dateCountMap.get(dateStr) || 0) + 1);
+        const dateStr = parseDateToDateString(lesson.completed_at);
+        if (dateStr && new Date(dateStr) >= new Date(oneYearAgoStr)) {
+          dateActivityMap.set(dateStr, (dateActivityMap.get(dateStr) || 0) + 1);
         }
       });
-
-      // Convert to activities format
-      activities = Array.from(dateCountMap.entries()).map(([date, count]) => ({
-        activity_data: date,
-        lessons_completed: count,
-        quizzes_completed: 0,
-        study_time: null,
-      }));
+    } catch (error: any) {
+      console.warn('Error fetching lesson progress:', error?.message);
     }
 
-    // Filter activities from last 12 months
-    const filteredActivities = activities.filter(a => 
-      new Date(a.activity_data) >= new Date(oneYearAgoStr)
-    );
+    // 2. Get blog comments
+    try {
+      const blogComments = await queryBuilder<{
+        created_at: string | null;
+      }>(
+        'blog_comments',
+        {
+          select: 'created_at',
+          filters: { user_id: userId },
+          orderBy: { column: 'created_at', ascending: true }
+        }
+      );
+
+      blogComments.forEach((comment) => {
+        const dateStr = parseDateToDateString(comment.created_at);
+        if (dateStr && new Date(dateStr) >= new Date(oneYearAgoStr)) {
+          dateActivityMap.set(dateStr, (dateActivityMap.get(dateStr) || 0) + 1);
+        }
+      });
+    } catch (error: any) {
+      console.warn('Error fetching blog comments:', error?.message);
+    }
+
+    // 3. Get lesson comments
+    try {
+      const lessonComments = await queryBuilder<{
+        created_at: string | null;
+      }>(
+        'comments',
+        {
+          select: 'created_at',
+          filters: { user_id: userId },
+          orderBy: { column: 'created_at', ascending: true }
+        }
+      );
+
+      lessonComments.forEach((comment) => {
+        const dateStr = parseDateToDateString(comment.created_at);
+        if (dateStr && new Date(dateStr) >= new Date(oneYearAgoStr)) {
+          dateActivityMap.set(dateStr, (dateActivityMap.get(dateStr) || 0) + 1);
+        }
+      });
+    } catch (error: any) {
+      console.warn('Error fetching lesson comments:', error?.message);
+    }
+
+    // 4. Get forum topics (questions/posts)
+    try {
+      const forumTopics = await queryBuilder<{
+        created_at: string | null;
+      }>(
+        'forum_topics',
+        {
+          select: 'created_at',
+          filters: { user_id: userId },
+          orderBy: { column: 'created_at', ascending: true }
+        }
+      );
+
+      forumTopics.forEach((topic) => {
+        const dateStr = parseDateToDateString(topic.created_at);
+        if (dateStr && new Date(dateStr) >= new Date(oneYearAgoStr)) {
+          dateActivityMap.set(dateStr, (dateActivityMap.get(dateStr) || 0) + 1);
+        }
+      });
+    } catch (error: any) {
+      console.warn('Error fetching forum topics:', error?.message);
+    }
+
+    // 5. Get forum replies - Use Supabase client directly for better reliability
+    try {
+      if (!supabaseAdmin) {
+        throw new Error('Supabase admin client not initialized');
+      }
+
+      const { data: forumReplies, error: forumRepliesError } = await supabaseAdmin
+        .from('forum_replies')
+        .select('created_at')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: true });
+
+      if (forumRepliesError) {
+        throw forumRepliesError;
+      }
+
+      console.log(`[ACTIVITIES] Found ${forumReplies?.length || 0} forum replies for user ${userId}`);
+      
+      if (forumReplies) {
+        forumReplies.forEach((reply: any) => {
+          const dateStr = parseDateToDateString(reply.created_at);
+          if (dateStr && new Date(dateStr) >= new Date(oneYearAgoStr)) {
+            dateActivityMap.set(dateStr, (dateActivityMap.get(dateStr) || 0) + 1);
+          }
+        });
+      }
+    } catch (error: any) {
+      console.error('Error fetching forum replies:', error?.message, error);
+    }
+
+    // 6. Get lesson questions (questions asked in lessons)
+    try {
+      if (!supabaseAdmin) {
+        throw new Error('Supabase admin client not initialized');
+      }
+
+      const { data: lessonQuestions, error: lessonQuestionsError } = await supabaseAdmin
+        .from('lesson_questions')
+        .select('created_at')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: true });
+
+      if (lessonQuestionsError) {
+        throw lessonQuestionsError;
+      }
+
+      console.log(`[ACTIVITIES] Found ${lessonQuestions?.length || 0} lesson questions for user ${userId}`);
+      
+      if (lessonQuestions) {
+        lessonQuestions.forEach((question: any) => {
+          const dateStr = parseDateToDateString(question.created_at);
+          if (dateStr && new Date(dateStr) >= new Date(oneYearAgoStr)) {
+            dateActivityMap.set(dateStr, (dateActivityMap.get(dateStr) || 0) + 1);
+          }
+        });
+      }
+    } catch (error: any) {
+      console.error('Error fetching lesson questions:', error?.message, error);
+    }
+
+    // 7. Get lesson answers (answers to lesson questions)
+    try {
+      if (!supabaseAdmin) {
+        throw new Error('Supabase admin client not initialized');
+      }
+
+      const { data: lessonAnswers, error: lessonAnswersError } = await supabaseAdmin
+        .from('lesson_answers')
+        .select('created_at')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: true });
+
+      if (lessonAnswersError) {
+        throw lessonAnswersError;
+      }
+
+      console.log(`[ACTIVITIES] Found ${lessonAnswers?.length || 0} lesson answers for user ${userId}`);
+      
+      if (lessonAnswers) {
+        lessonAnswers.forEach((answer: any) => {
+          const dateStr = parseDateToDateString(answer.created_at);
+          if (dateStr && new Date(dateStr) >= new Date(oneYearAgoStr)) {
+            dateActivityMap.set(dateStr, (dateActivityMap.get(dateStr) || 0) + 1);
+            console.log(`[ACTIVITIES] Lesson answer date: ${answer.created_at} -> ${dateStr}, added to activity`);
+          }
+        });
+      }
+    } catch (error: any) {
+      console.error('Error fetching lesson answers:', error?.message, error);
+    }
+
+    // Log summary for debugging
+    console.log(`[ACTIVITIES] Total unique activity days: ${dateActivityMap.size}`);
+    console.log(`[ACTIVITIES] Activity map sample:`, Array.from(dateActivityMap.entries()).slice(0, 5));
+
+    // Convert to activities format
+    const filteredActivities = Array.from(dateActivityMap.entries()).map(([date, count]) => ({
+      activity_data: date,
+      lessons_completed: count,
+      quizzes_completed: 0,
+      study_time: null,
+    }));
 
     // Create a map of all days in the last 12 months
     const activityMap = new Map<string, ActivityDay>();
@@ -118,9 +293,7 @@ export async function GET(
     let totalCount = 0;
     filteredActivities.forEach((activity) => {
       const dateStr = new Date(activity.activity_data).toISOString().split('T')[0];
-      const count = 
-        (activity.lessons_completed || 0) + 
-        (activity.quizzes_completed || 0);
+      const count = activity.lessons_completed || 0; // This now includes all activities
       
       totalCount += count;
 

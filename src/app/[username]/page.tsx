@@ -246,7 +246,7 @@ export default function UserProfilePage() {
   const savedArticlesDragScroll = useDragToScroll();
 
   const tabs: ProfileTab[] = [
-    { id: 'enrolled', label: 'Khóa học đã đăng ký', count: profile?.total_courses_enrolled },
+    { id: 'enrolled', label: 'Khoá học đã đăng ký', count: profile?.total_courses_enrolled },
     { id: 'completed', label: 'Khóa học đã hoàn thành', count: profile?.total_courses_completed },
     { id: 'articles', label: 'Bài viết', count: profile?.total_articles_published },
     { id: 'saved', label: 'Bài viết đã lưu' },
