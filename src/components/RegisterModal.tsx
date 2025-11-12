@@ -64,7 +64,7 @@ export default function RegisterModal({ isOpen, onClose, onSwitchToLogin }: Regi
       setSuccess(true);
       
       // Get recovery keys from response
-      if (response?.data?.recoveryKeys && Array.isArray(response.data.recoveryKeys)) {
+      if (response && response.data && response.data.recoveryKeys && Array.isArray(response.data.recoveryKeys)) {
         setRecoveryKeys(response.data.recoveryKeys);
         setShowRecoveryKeysModal(true);
       } else {

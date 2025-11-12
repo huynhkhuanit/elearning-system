@@ -3,13 +3,22 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { PublicUser } from '@/types/auth';
 
+interface RegisterResponse {
+  success: boolean;
+  message: string;
+  data?: {
+    user?: PublicUser;
+    recoveryKeys?: string[];
+  };
+}
+
 interface AuthContextType {
   user: PublicUser | null;
   token: string | null;
   isLoading: boolean;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (data: RegisterData) => Promise<void>;
+  register: (data: RegisterData) => Promise<RegisterResponse>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
 }
