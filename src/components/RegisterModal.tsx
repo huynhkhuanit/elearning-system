@@ -4,6 +4,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Mail, Lock, User, UserCircle, Eye, EyeOff, ArrowRight, CheckCircle2, Shield } from "lucide-react";
 import Modal from "./Modal";
+import RecoveryKeysModal from "./RecoveryKeysModal";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/contexts/ToastContext";
 
@@ -28,6 +29,8 @@ export default function RegisterModal({ isOpen, onClose, onSwitchToLogin }: Regi
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [recoveryKeys, setRecoveryKeys] = useState<string[]>([]);
+  const [showRecoveryKeysModal, setShowRecoveryKeysModal] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,7 +54,7 @@ export default function RegisterModal({ isOpen, onClose, onSwitchToLogin }: Regi
     }
 
     try {
-      await register({
+      const response = await register({
         email: formData.email,
         password: formData.password,
         username: formData.username,
@@ -59,23 +62,29 @@ export default function RegisterModal({ isOpen, onClose, onSwitchToLogin }: Regi
       });
       
       setSuccess(true);
-      toast.success("Đăng ký thành công! Vui lòng đăng nhập.");
       
-      // Reset form and switch to login after 1.5 seconds
-      setTimeout(() => {
-        setFormData({
-          email: "",
-          password: "",
-          confirmPassword: "",
-          username: "",
-          full_name: "",
-        });
-        setSuccess(false);
-        onClose();
-        if (onSwitchToLogin) {
-          onSwitchToLogin();
-        }
-      }, 1500);
+      // Get recovery keys from response
+      if (response?.data?.recoveryKeys && Array.isArray(response.data.recoveryKeys)) {
+        setRecoveryKeys(response.data.recoveryKeys);
+        setShowRecoveryKeysModal(true);
+      } else {
+        toast.success("Đăng ký thành công! Vui lòng đăng nhập.");
+        // Reset form and switch to login after 1.5 seconds
+        setTimeout(() => {
+          setFormData({
+            email: "",
+            password: "",
+            confirmPassword: "",
+            username: "",
+            full_name: "",
+          });
+          setSuccess(false);
+          onClose();
+          if (onSwitchToLogin) {
+            onSwitchToLogin();
+          }
+        }, 1500);
+      }
     } catch (err: any) {
       const errorMessage = err.message || "Đăng ký thất bại. Vui lòng thử lại.";
       toast.error(errorMessage);
@@ -90,6 +99,24 @@ export default function RegisterModal({ isOpen, onClose, onSwitchToLogin }: Regi
   };
 
   const handleSwitchToLogin = () => {
+    onClose();
+    if (onSwitchToLogin) {
+      onSwitchToLogin();
+    }
+  };
+
+  const handleRecoveryKeysModalClose = () => {
+    setShowRecoveryKeysModal(false);
+    setRecoveryKeys([]);
+    // Reset form and switch to login
+    setFormData({
+      email: "",
+      password: "",
+      confirmPassword: "",
+      username: "",
+      full_name: "",
+    });
+    setSuccess(false);
     onClose();
     if (onSwitchToLogin) {
       onSwitchToLogin();
@@ -325,6 +352,13 @@ export default function RegisterModal({ isOpen, onClose, onSwitchToLogin }: Regi
           </button>
         </p>
       </div>
+
+      {/* Recovery Keys Modal */}
+      <RecoveryKeysModal
+        isOpen={showRecoveryKeysModal}
+        onClose={handleRecoveryKeysModalClose}
+        recoveryKeys={recoveryKeys}
+      />
     </Modal>
   );
 }

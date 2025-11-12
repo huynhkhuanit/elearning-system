@@ -3,6 +3,7 @@ import { queryOneBuilder, insert } from '@/lib/db';
 import { hashPassword } from '@/lib/auth';
 import { registerSchema } from '@/lib/validations/auth';
 import { User } from '@/types/auth';
+import crypto from 'crypto';
 
 export async function POST(request: NextRequest) {
   try {
@@ -84,6 +85,40 @@ export async function POST(request: NextRequest) {
       throw new Error('Failed to create user');
     }
 
+    // Generate 16 recovery keys
+    const recoveryKeys: string[] = [];
+    const recoveryKeyHashes: Array<{ key: string; hash: string }> = [];
+
+    for (let i = 0; i < 16; i++) {
+      // Generate 16-character alphanumeric key (8 bytes = 16 hex characters)
+      const key = crypto.randomBytes(8).toString('hex').toUpperCase();
+      const hash = crypto
+        .createHash('sha256')
+        .update(key + (process.env.JWT_SECRET || 'fallback-secret'))
+        .digest('hex');
+      
+      recoveryKeys.push(key);
+      recoveryKeyHashes.push({ key, hash });
+    }
+
+    // Store recovery keys in user_metadata
+    // Format: { keys: [{ hash: "...", createdAt: "..." }, ...] }
+    const recoveryKeysMetaValue = JSON.stringify({
+      keys: recoveryKeyHashes.map(({ hash }) => ({
+        hash,
+        createdAt: new Date().toISOString(),
+      })),
+      createdAt: new Date().toISOString(),
+    });
+
+    await insert('user_metadata', {
+      user_id: newUser.id,
+      meta_key: 'recovery_keys',
+      meta_value: recoveryKeysMetaValue,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    });
+
     return NextResponse.json(
       {
         success: true,
@@ -102,6 +137,7 @@ export async function POST(request: NextRequest) {
             is_verified: newUser.is_verified,
             created_at: newUser.created_at,
           },
+          recoveryKeys, // Return recovery keys for immediate display
         },
       },
       { status: 201 }

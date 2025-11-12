@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode, useEffect } from "react";
+import React, { ReactNode, useEffect, useState } from "react";
 import { X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -67,9 +67,36 @@ export default function Modal({
     };
   }, [isOpen, onClose]);
 
-  const handleBackdropClick = (e: React.MouseEvent) => {
+  // Track mouse down position to detect drag vs click
+  const [mouseDownTarget, setMouseDownTarget] = useState<EventTarget | null>(null);
+
+  const handleBackdropMouseDown = (e: React.MouseEvent) => {
+    // Only track if clicking directly on backdrop (not on modal content)
     if (e.target === e.currentTarget && closeOnBackdropClick) {
+      setMouseDownTarget(e.target);
+    }
+  };
+
+  const handleBackdropClick = (e: React.MouseEvent) => {
+    // Only close if:
+    // 1. Click target is the backdrop (not modal content)
+    // 2. Mouse down started on backdrop (not dragged from inside)
+    // 3. Close on backdrop click is enabled
+    if (
+      e.target === e.currentTarget &&
+      mouseDownTarget === e.target &&
+      closeOnBackdropClick
+    ) {
       onClose();
+    }
+    // Reset mouse down target
+    setMouseDownTarget(null);
+  };
+
+  const handleBackdropMouseUp = (e: React.MouseEvent) => {
+    // Reset if mouse up happens outside (user dragged and released outside)
+    if (e.target !== e.currentTarget) {
+      setMouseDownTarget(null);
     }
   };
 
@@ -84,6 +111,8 @@ export default function Modal({
         transition={{ duration: 0.2 }}
         className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 pointer-events-auto"
         style={{ position: 'fixed', zIndex: 9999, isolation: 'isolate' }}
+        onMouseDown={handleBackdropMouseDown}
+        onMouseUp={handleBackdropMouseUp}
         onClick={handleBackdropClick}
         role="dialog"
         aria-modal="true"
