@@ -377,6 +377,7 @@ export default function ForgotPasswordModal({ isOpen, onClose }: ForgotPasswordM
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
+                    autoComplete="email"
                     placeholder="name@example.com"
                     className="w-full pl-11 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition-all text-gray-900"
                   />
@@ -432,6 +433,8 @@ export default function ForgotPasswordModal({ isOpen, onClose }: ForgotPasswordM
                     const value = e.target.value.replace(/\D/g, '').slice(0, 6);
                     setOtp(value);
                   }}
+                  autoComplete="one-time-code"
+                  inputMode="numeric"
                   placeholder="000000"
                   maxLength={6}
                   className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition-all text-gray-900 text-center text-2xl tracking-widest font-mono"
@@ -494,6 +497,9 @@ export default function ForgotPasswordModal({ isOpen, onClose }: ForgotPasswordM
                   type="password"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
+                  autoComplete="new-password"
+                  data-1p-ignore
+                  data-lpignore="true"
                   placeholder="Nhập mật khẩu mới (ít nhất 6 ký tự)"
                   className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition-all text-gray-900"
                 />
@@ -507,6 +513,9 @@ export default function ForgotPasswordModal({ isOpen, onClose }: ForgotPasswordM
                   type="password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
+                  autoComplete="new-password"
+                  data-1p-ignore
+                  data-lpignore="true"
                   placeholder="Nhập lại mật khẩu mới"
                   className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition-all text-gray-900"
                 />
@@ -564,6 +573,7 @@ export default function ForgotPasswordModal({ isOpen, onClose }: ForgotPasswordM
                   type="email"
                   value={recoveryEmail}
                   onChange={(e) => setRecoveryEmail(e.target.value)}
+                  autoComplete="email"
                   placeholder="name@example.com"
                   className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition-all text-gray-900"
                 />
@@ -580,6 +590,9 @@ export default function ForgotPasswordModal({ isOpen, onClose }: ForgotPasswordM
                     const value = e.target.value.replace(/[^A-Za-z0-9]/g, '').slice(0, 16).toUpperCase();
                     setRecoveryKey(value);
                   }}
+                  autoComplete="off"
+                  data-1p-ignore
+                  data-lpignore="true"
                   placeholder="ABCD1234EFGH5678"
                   maxLength={16}
                   className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition-all text-gray-900 font-mono text-center tracking-wider"
@@ -594,6 +607,9 @@ export default function ForgotPasswordModal({ isOpen, onClose }: ForgotPasswordM
                   type="password"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
+                  autoComplete="new-password"
+                  data-1p-ignore
+                  data-lpignore="true"
                   placeholder="Nhập mật khẩu mới (ít nhất 6 ký tự)"
                   className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition-all text-gray-900"
                 />
@@ -607,6 +623,9 @@ export default function ForgotPasswordModal({ isOpen, onClose }: ForgotPasswordM
                   type="password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
+                  autoComplete="new-password"
+                  data-1p-ignore
+                  data-lpignore="true"
                   placeholder="Nhập lại mật khẩu mới"
                   className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition-all text-gray-900"
                 />

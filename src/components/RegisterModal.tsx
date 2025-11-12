@@ -165,6 +165,7 @@ export default function RegisterModal({ isOpen, onClose, onSwitchToLogin }: Regi
                   name="full_name"
                   value={formData.full_name}
                   onChange={handleChange}
+                  autoComplete="name"
                   required
                   className="w-full pl-11 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition-all duration-200 text-gray-900 placeholder:text-gray-400"
                   placeholder="Nguyễn Văn A"
@@ -185,6 +186,7 @@ export default function RegisterModal({ isOpen, onClose, onSwitchToLogin }: Regi
                   name="username"
                   value={formData.username}
                   onChange={handleChange}
+                  autoComplete="username"
                   required
                   className="w-full pl-11 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition-all duration-200 text-gray-900 placeholder:text-gray-400"
                   placeholder="nguyen_van_a"
@@ -206,6 +208,7 @@ export default function RegisterModal({ isOpen, onClose, onSwitchToLogin }: Regi
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
+                autoComplete="email"
                 required
                 className="w-full pl-11 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition-all duration-200 text-gray-900 placeholder:text-gray-400"
                 placeholder="name@example.com"
@@ -228,6 +231,9 @@ export default function RegisterModal({ isOpen, onClose, onSwitchToLogin }: Regi
                   name="password"
                   value={formData.password}
                   onChange={handleChange}
+                  autoComplete="new-password"
+                  data-1p-ignore
+                  data-lpignore="true"
                   required
                   className="w-full pl-11 pr-12 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition-all duration-200 text-gray-900 placeholder:text-gray-400"
                   placeholder="••••••••"
@@ -255,6 +261,9 @@ export default function RegisterModal({ isOpen, onClose, onSwitchToLogin }: Regi
                   name="confirmPassword"
                   value={formData.confirmPassword}
                   onChange={handleChange}
+                  autoComplete="new-password"
+                  data-1p-ignore
+                  data-lpignore="true"
                   required
                   className="w-full pl-11 pr-12 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition-all duration-200 text-gray-900 placeholder:text-gray-400"
                   placeholder="••••••••"

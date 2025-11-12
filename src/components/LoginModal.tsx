@@ -95,6 +95,7 @@ export default function LoginModal({ isOpen, onClose, onSwitchToRegister }: Logi
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
+                autoComplete="email"
                 required
                 className="w-full pl-11 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition-all duration-200 text-gray-900 placeholder:text-gray-400"
                 placeholder="name@example.com"
@@ -124,6 +125,9 @@ export default function LoginModal({ isOpen, onClose, onSwitchToRegister }: Logi
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
+                autoComplete="current-password"
+                data-1p-ignore
+                data-lpignore="true"
                 required
                 className="w-full pl-11 pr-12 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition-all duration-200 text-gray-900 placeholder:text-gray-400"
                 placeholder="Nhập mật khẩu"
