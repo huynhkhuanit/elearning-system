@@ -36,7 +36,7 @@ export default function Footer() {
     <footer 
       className="bg-gray-900 text-white pointer-events-none"
       style={{
-        position: 'static',
+        position: 'relative',
         zIndex: 30,
       }}
     >
