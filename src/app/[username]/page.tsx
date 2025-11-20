@@ -257,9 +257,14 @@ export default function UserProfilePage() {
       try {
         setLoading(true);
         
-        // Fetch profile
-        const profileRes = await fetch(`/api/users/${username}`);
+        // Fetch profile and activities in parallel
+        const [profileRes, activitiesRes] = await Promise.all([
+          fetch(`/api/users/${username}`),
+          fetch(`/api/users/${username}/activities`)
+        ]);
+
         const profileData = await profileRes.json();
+        const activitiesData = await activitiesRes.json();
         
         if (!profileData.success) {
           throw new Error(profileData.message);
@@ -267,10 +272,6 @@ export default function UserProfilePage() {
         
         setProfile(profileData.data);
 
-        // Fetch activities
-        const activitiesRes = await fetch(`/api/users/${username}/activities`);
-        const activitiesData = await activitiesRes.json();
-        
         if (activitiesData.success) {
           setActivityData(activitiesData.data);
         }
