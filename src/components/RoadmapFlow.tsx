@@ -134,19 +134,38 @@ export default function RoadmapFlow({ roadmapId, roadmapTitle, roadmapData }: Ro
 
     // Layout configuration
     const NODE_WIDTH = 220;
-    const NODE_HEIGHT = 100;
-    const VERTICAL_SPACING = 180;
-    const HORIZONTAL_SPACING = 280;
+    const NODE_HEIGHT = 100; // Approximate height including content
+    const GAP_X = 40; // Horizontal gap between nodes
+    const GAP_Y = 80; // Vertical gap between levels
 
-    function processNode(node: RoadmapNode, x: number, y: number, parentId?: string, level: number = 0): string {
+    // Helper to calculate subtree dimensions
+    const getSubtreeDimensions = (node: RoadmapNode, isVertical: boolean): number => {
+      if (!node.children || node.children.length === 0) {
+        return isVertical ? NODE_WIDTH : NODE_HEIGHT;
+      }
+
+      const childrenDimension = node.children.reduce((acc, child) => {
+        return acc + getSubtreeDimensions(child, isVertical);
+      }, 0);
+
+      const gapTotal = (node.children.length - 1) * (isVertical ? GAP_X : GAP_Y);
+      return Math.max(isVertical ? NODE_WIDTH : NODE_HEIGHT, childrenDimension + gapTotal);
+    };
+
+    // Recursive function to assign positions
+    function processNode(
+      node: RoadmapNode, 
+      x: number, 
+      y: number, 
+      parentId?: string
+    ): string {
       const currentId = node.id || `node-${nodeId++}`;
 
-      // Determine the actual status based on completedNodes state
+      // Determine status
       let actualStatus = node.status;
       if (completedNodes.has(currentId)) {
         actualStatus = 'completed';
       } else if (node.status === 'completed') {
-        // If node was originally completed but removed from completedNodes, set to available
         actualStatus = 'available';
       }
 
@@ -167,13 +186,12 @@ export default function RoadmapFlow({ roadmapId, roadmapTitle, roadmapData }: Ro
         },
       });
 
-      // Create edge from parent to current node
       if (parentId) {
         edges.push({
           id: `edge-${parentId}-${currentId}`,
           source: parentId,
           target: currentId,
-          type: 'default', // Bezier curve
+          type: 'default',
           style: {
             stroke: '#94a3b8',
             strokeWidth: 3,
@@ -182,54 +200,38 @@ export default function RoadmapFlow({ roadmapId, roadmapTitle, roadmapData }: Ro
         });
       }
 
-      // Process children nodes with layout mode support
       if (node.children && node.children.length > 0) {
-        if (layoutMode === 'vertical') {
-          // Vertical layout (top to bottom)
-          const childY = y + VERTICAL_SPACING;
+        const isVertical = layoutMode === 'vertical';
+        const subtreeSize = getSubtreeDimensions(node, isVertical);
+        
+        let currentPos = isVertical 
+          ? x - subtreeSize / 2 
+          : y - subtreeSize / 2;
+
+        node.children.forEach((child) => {
+          const childSubtreeSize = getSubtreeDimensions(child, isVertical);
           
-          const totalChildrenWidth = node.children.length * HORIZONTAL_SPACING - (HORIZONTAL_SPACING - NODE_WIDTH);
-          let startX = x - (totalChildrenWidth - NODE_WIDTH) / 2;
-
-          // Ensure minimum spacing and prevent overlap
-          const minSpacing = NODE_WIDTH + 40;
-          const actualSpacing = Math.max(minSpacing, HORIZONTAL_SPACING);
-
-          if (actualSpacing > HORIZONTAL_SPACING) {
-            startX = x - ((node.children.length - 1) * actualSpacing) / 2;
+          if (isVertical) {
+            const childX = currentPos + childSubtreeSize / 2;
+            const childY = y + NODE_HEIGHT + GAP_Y;
+            processNode(child, childX, childY, currentId);
+            currentPos += childSubtreeSize + GAP_X;
+          } else {
+            const childX = x + NODE_WIDTH + GAP_X;
+            const childY = currentPos + childSubtreeSize / 2;
+            processNode(child, childX, childY, currentId);
+            currentPos += childSubtreeSize + GAP_Y;
           }
-
-          node.children.forEach((child, index) => {
-            const childX = startX + (index * actualSpacing);
-            processNode(child, childX, childY, currentId, level + 1);
-          });
-        } else {
-          // Horizontal layout (left to right)
-          const childX = x + HORIZONTAL_SPACING;
-          const totalChildrenHeight = node.children.length * VERTICAL_SPACING - (VERTICAL_SPACING - NODE_HEIGHT);
-          let startY = y - (totalChildrenHeight - NODE_HEIGHT) / 2;
-
-          // Ensure minimum spacing and prevent overlap
-          const minSpacing = NODE_HEIGHT + 40;
-          const actualSpacing = Math.max(minSpacing, VERTICAL_SPACING);
-
-          if (actualSpacing > VERTICAL_SPACING) {
-            startY = y - ((node.children.length - 1) * actualSpacing) / 2;
-          }
-
-          node.children.forEach((child, index) => {
-            const childY = startY + (index * actualSpacing);
-            processNode(child, childX, childY, currentId, level + 1);
-          });
-        }
+        });
       }
 
       return currentId;
     }
 
-    // Start with root node centered
-    const startX = typeof window !== 'undefined' ? Math.max(600, window.innerWidth / 2 - NODE_WIDTH / 2) : 600;
+    // Start layout from center
+    const startX = 600;
     const startY = 50;
+    
     processNode(roadmapData, startX, startY);
 
     return { nodes, edges };
@@ -278,6 +280,12 @@ export default function RoadmapFlow({ roadmapId, roadmapTitle, roadmapData }: Ro
     (params: Connection) => setEdges((eds) => addEdge(params, eds)),
     [setEdges]
   );
+
+  // Re-initialize nodes when layout mode changes
+  useEffect(() => {
+    setNodes(initialNodes);
+    setEdges(initialEdges);
+  }, [initialNodes, initialEdges, setNodes, setEdges]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -328,7 +336,6 @@ export default function RoadmapFlow({ roadmapId, roadmapTitle, roadmapData }: Ro
         {/* React Flow Container */}
         <div className="h-[calc(100vh-80px)]">
           <ReactFlow
-            key={layoutMode} // Force re-render when layout changes
             nodes={nodes}
             edges={edges}
             onNodesChange={onNodesChange}
