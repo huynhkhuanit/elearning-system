@@ -359,8 +359,48 @@ export default function LearnCoursePage() {
   const goToNextLesson = async () => {
     if (!course || !currentLesson) return;
 
+    // 1. Identify next lesson immediately
+    const allLessons = course.sections.flatMap((s: Section) => s.lessons);
+    const currentIndex = allLessons.findIndex((l: Lesson) => l.id === currentLesson.id);
+    const nextLesson = currentIndex < allLessons.length - 1 ? allLessons[currentIndex + 1] : null;
+
+    // 2. Optimistic UI Update
+    // Update local state immediately to mark current as completed
+    setCourse((prev: CourseData | null) => {
+      if (!prev) return prev;
+      
+      const updatedSections = prev.sections.map((section: Section) => ({
+        ...section,
+        lessons: section.lessons.map((lesson: Lesson) => 
+          lesson.id === currentLesson.id 
+            ? { ...lesson, isCompleted: true }
+            : lesson
+        )
+      }));
+
+      const completedLessons = updatedSections.reduce((acc: number, section: Section) => 
+        acc + section.lessons.filter((l: Lesson) => l.isCompleted).length, 0
+      );
+
+      return {
+        ...prev,
+        sections: updatedSections,
+        completedLessons,
+        progress: Math.round((completedLessons / prev.totalLessons) * 100)
+      };
+    });
+
+    // Navigate immediately
+    if (nextLesson) {
+      setCurrentLesson(nextLesson);
+      triggerFireworks();
+    } else {
+      toast.success("Chúc mừng! Bạn đã hoàn thành khóa học!");
+      triggerFireworks();
+    }
+
+    // 3. Background API Call
     try {
-      // Mark current lesson as completed
       const response = await fetch(`/api/lessons/${currentLesson.id}/complete`, {
         method: 'POST',
         credentials: 'include',
@@ -368,47 +408,15 @@ export default function LearnCoursePage() {
 
       const data = await response.json();
 
-      if (data.success) {
-        // Update local state
-        setCourse((prev: CourseData | null) => {
-          if (!prev) return prev;
-          
-          const updatedSections = prev.sections.map((section: Section) => ({
-            ...section,
-            lessons: section.lessons.map((lesson: Lesson) => 
-              lesson.id === currentLesson.id 
-                ? { ...lesson, isCompleted: true }
-                : lesson
-            )
-          }));
-
-          const completedLessons = updatedSections.reduce((acc: number, section: Section) => 
-            acc + section.lessons.filter((l: Lesson) => l.isCompleted).length, 0
-          );
-
-          return {
-            ...prev,
-            sections: updatedSections,
-            completedLessons,
-            progress: Math.round((completedLessons / prev.totalLessons) * 100)
-          };
-        });
-      }
-
-      // Navigate to next lesson
-      const allLessons = course.sections.flatMap((s: Section) => s.lessons);
-      const currentIndex = allLessons.findIndex((l: Lesson) => l.id === currentLesson.id);
-      
-      if (currentIndex < allLessons.length - 1) {
-        setCurrentLesson(allLessons[currentIndex + 1]);
-        triggerFireworks();
-      } else {
-        toast.success("Chúc mừng! Bạn đã hoàn thành khóa học!");
-        triggerFireworks();
+      if (!data.success) {
+        // If API fails, we might want to revert or just notify user
+        console.error("Failed to mark lesson as complete on server:", data.message);
+        toast.error("Không thể lưu trạng thái hoàn thành. Vui lòng kiểm tra kết nối mạng.");
+        // Optional: Revert state here if strict consistency is required
       }
     } catch (error) {
       console.error("Error marking lesson as completed:", error);
-      toast.error("Đã có lỗi xảy ra");
+      toast.error("Đã có lỗi xảy ra khi lưu tiến độ");
     }
   };
 
