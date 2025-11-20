@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import confetti from "canvas-confetti";
 import { 
   Play, PlayCircle, CheckCircle, Lock, Clock, FileText, 
   ChevronDown, ChevronRight, BookOpen, Award, Star, 
@@ -316,6 +317,45 @@ export default function LearnCoursePage() {
     }
   };
 
+  const triggerFireworks = () => {
+    const duration = 3 * 1000;
+    const animationEnd = Date.now() + duration;
+    const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+
+    const randomInRange = (min: number, max: number) => {
+      return Math.random() * (max - min) + min;
+    }
+
+    const interval: any = setInterval(function() {
+      const timeLeft = animationEnd - Date.now();
+
+      if (timeLeft <= 0) {
+        return clearInterval(interval);
+      }
+
+      const particleCount = 50 * (timeLeft / duration);
+      
+      // since particles fall down, start a bit higher than random
+      confetti({
+        ...defaults,
+        particleCount,
+        origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 }
+      });
+      confetti({
+        ...defaults,
+        particleCount,
+        origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 }
+      });
+    }, 250);
+
+    // Also fire a central burst
+    confetti({
+      particleCount: 100,
+      spread: 70,
+      origin: { y: 0.6 }
+    });
+  };
+
   const goToNextLesson = async () => {
     if (!course || !currentLesson) return;
 
@@ -361,8 +401,10 @@ export default function LearnCoursePage() {
       
       if (currentIndex < allLessons.length - 1) {
         setCurrentLesson(allLessons[currentIndex + 1]);
+        triggerFireworks();
       } else {
         toast.success("Chúc mừng! Bạn đã hoàn thành khóa học!");
+        triggerFireworks();
       }
     } catch (error) {
       console.error("Error marking lesson as completed:", error);

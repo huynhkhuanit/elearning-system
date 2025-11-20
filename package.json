@@ -28,6 +28,7 @@
     "ai": "^5.0.86",
     "axios": "^1.12.2",
     "bcryptjs": "^3.0.2",
+    "canvas-confetti": "^1.9.4",
     "cloudinary": "^2.7.0",
     "dotenv": "^17.2.3",
     "framer-motion": "^11.11.17",
@@ -54,6 +55,7 @@
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@types/bcryptjs": "^3.0.0",
+    "@types/canvas-confetti": "^1.9.0",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^20",
     "@types/react": "^19",
