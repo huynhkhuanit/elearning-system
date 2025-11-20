@@ -253,38 +253,39 @@ export default function UserProfilePage() {
   ];
 
   useEffect(() => {
+    if (!username) return;
+
     const fetchProfileData = async () => {
-      try {
-        setLoading(true);
-        
-        // Fetch profile and activities in parallel
-        const [profileRes, activitiesRes] = await Promise.all([
-          fetch(`/api/users/${username}`),
-          fetch(`/api/users/${username}/activities`)
-        ]);
+      setLoading(true);
+      
+      // 1. Fetch Profile (Critical)
+      fetch(`/api/users/${username}`)
+        .then(res => res.json())
+        .then(data => {
+          if (!data.success) {
+            throw new Error(data.message);
+          }
+          setProfile(data.data);
+        })
+        .catch(err => {
+          setError(err.message || 'Không thể tải thông tin người dùng');
+        })
+        .finally(() => {
+          setLoading(false);
+        });
 
-        const profileData = await profileRes.json();
-        const activitiesData = await activitiesRes.json();
-        
-        if (!profileData.success) {
-          throw new Error(profileData.message);
-        }
-        
-        setProfile(profileData.data);
-
-        if (activitiesData.success) {
-          setActivityData(activitiesData.data);
-        }
-      } catch (err: any) {
-        setError(err.message || 'Không thể tải thông tin người dùng');
-      } finally {
-        setLoading(false);
-      }
+      // 2. Fetch Activities (Non-critical, load in background)
+      fetch(`/api/users/${username}/activities`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            setActivityData(data.data);
+          }
+        })
+        .catch(console.error);
     };
 
-    if (username) {
-      fetchProfileData();
-    }
+    fetchProfileData();
   }, [username]);
 
   // Fetch articles when articles tab is selected
