@@ -17,18 +17,21 @@ import {
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 
-// Custom styles for roadmap edges - Simple & Clean
+// Custom styles for roadmap edges - Smooth & Thick
 const edgeStyles = `
   .react-flow__edge-path {
-    stroke: #d1d5db;
-    stroke-width: 2;
+    stroke: #94a3b8;
+    stroke-width: 3;
+    stroke-linecap: round;
   }
 
   .react-flow__edge.selected .react-flow__edge-path {
     stroke: #6366f1;
+    stroke-width: 4;
   }
 `;
-import { ArrowLeft, Play, CheckCircle, Clock, BookOpen, Users, Star, Award, Zap, Code, Server, Database, Layers, Cloud, Gamepad2, Brain, BarChart3, Palette, Briefcase, Shield, Smartphone, Monitor, Grid3X3, List } from 'lucide-react';
+
+import { ArrowLeft, BookOpen, Grid3X3, List } from 'lucide-react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import RoadmapNode from './RoadmapNode';
@@ -130,10 +133,10 @@ export default function RoadmapFlow({ roadmapId, roadmapTitle, roadmapData }: Ro
     let nodeId = 1;
 
     // Layout configuration
-    const NODE_WIDTH = 280;
-    const NODE_HEIGHT = 120;
-    const VERTICAL_SPACING = 250;
-    const HORIZONTAL_SPACING = 350;
+    const NODE_WIDTH = 220;
+    const NODE_HEIGHT = 100;
+    const VERTICAL_SPACING = 180;
+    const HORIZONTAL_SPACING = 280;
 
     function processNode(node: RoadmapNode, x: number, y: number, parentId?: string, level: number = 0): string {
       const currentId = node.id || `node-${nodeId++}`;
@@ -170,10 +173,10 @@ export default function RoadmapFlow({ roadmapId, roadmapTitle, roadmapData }: Ro
           id: `edge-${parentId}-${currentId}`,
           source: parentId,
           target: currentId,
-          type: 'smoothstep',
+          type: 'default', // Bezier curve
           style: {
-            stroke: '#d1d5db',
-            strokeWidth: 2,
+            stroke: '#94a3b8',
+            strokeWidth: 3,
           },
           animated: actualStatus === 'current',
         });
@@ -184,6 +187,7 @@ export default function RoadmapFlow({ roadmapId, roadmapTitle, roadmapData }: Ro
         if (layoutMode === 'vertical') {
           // Vertical layout (top to bottom)
           const childY = y + VERTICAL_SPACING;
+          
           const totalChildrenWidth = node.children.length * HORIZONTAL_SPACING - (HORIZONTAL_SPACING - NODE_WIDTH);
           let startX = x - (totalChildrenWidth - NODE_WIDTH) / 2;
 
