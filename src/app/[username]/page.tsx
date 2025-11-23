@@ -1243,6 +1243,7 @@ export default function UserProfilePage() {
           isOpen={!!selectedCertificate}
           onClose={() => setSelectedCertificate(null)}
           data={selectedCertificate}
+          disableCelebration={true}
         />
       )}
     </PageContainer>

@@ -16,13 +16,14 @@ interface CertificateModalProps {
     instructorName: string;
     courseDuration: string;
   };
+  disableCelebration?: boolean;
 }
 
-export default function CertificateModal({ isOpen, onClose, data }: CertificateModalProps) {
+export default function CertificateModal({ isOpen, onClose, data, disableCelebration = false }: CertificateModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && !disableCelebration) {
       // Trigger confetti when modal opens
       const duration = 3 * 1000;
       const animationEnd = Date.now() + duration;
@@ -61,7 +62,7 @@ export default function CertificateModal({ isOpen, onClose, data }: CertificateM
         document.body.style.overflow = 'unset';
       };
     }
-  }, [isOpen]);
+  }, [isOpen, disableCelebration]);
 
   const handlePrint = () => {
     window.print();
@@ -101,7 +102,7 @@ export default function CertificateModal({ isOpen, onClose, data }: CertificateM
                 className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium shadow-lg shadow-indigo-500/30"
               >
                 <Printer className="w-4 h-4" />
-                <span>In / Tải PDF</span>
+                <span>In / Lưu PDF</span>
               </button>
               <button
                 onClick={onClose}
