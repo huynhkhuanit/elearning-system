@@ -50,27 +50,30 @@ export async function GET(
         updated_at,
         categories!left(id, name, slug),
         users!left(id, full_name, username, avatar_url, bio),
-        sections (
+        chapters!left (
           id,
           title,
-          order_index,
-          lessons (
+          sort_order,
+          lessons!left (
             id,
             title,
-            duration,
-            is_free,
-            order_index,
-            type
+            video_duration,
+            is_preview,
+            sort_order
           )
         )
       `)
       .eq('slug', slug)
       .eq('is_published', true)
-      .order('order_index', { foreignTable: 'sections', ascending: true })
-      .order('order_index', { foreignTable: 'sections.lessons', ascending: true })
+      .order('sort_order', { foreignTable: 'chapters', ascending: true })
       .single();
 
-    if (courseError || !courseData) {
+    if (courseError) {
+      console.error("Supabase Query Error:", courseError);
+    }
+    
+    if (!courseData) {
+      console.log("Course not found for slug:", slug);
       return NextResponse.json(
         {
           success: false,
@@ -84,19 +87,18 @@ export async function GET(
     const category = course.categories as any;
     const instructor = course.users as any;
     
-    // Format sections and lessons
-    const sections = (course.sections || []).map((section: any) => ({
-      id: section.id,
-      title: section.title,
-      order: section.order_index,
-      lessons: (section.lessons || []).map((lesson: any) => ({
+    // Format sections (chapters) and lessons
+    const sections = (course.chapters || []).map((chapter: any) => ({
+      id: chapter.id,
+      title: chapter.title,
+      order: chapter.sort_order,
+      lessons: (chapter.lessons || []).map((lesson: any) => ({
         id: lesson.id,
         title: lesson.title,
-        duration: formatDuration(lesson.duration || 0), // Assuming duration is in minutes
-        durationMinutes: lesson.duration || 0,
-        isFree: lesson.is_free,
-        type: lesson.type,
-        order: lesson.order_index
+        duration: formatDuration(lesson.video_duration || 0),
+        durationMinutes: lesson.video_duration || 0,
+        isFree: Boolean(lesson.is_preview),
+        order: lesson.sort_order
       })).sort((a: any, b: any) => a.order - b.order)
     })).sort((a: any, b: any) => a.order - b.order);
 
