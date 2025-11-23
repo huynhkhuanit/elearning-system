@@ -16,6 +16,8 @@ import Image from "next/image";
 import PageContainer from "@/components/PageContainer";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/contexts/ToastContext";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 interface CourseDetail {
   id: string;
@@ -390,8 +392,52 @@ export default function CourseDetailPage() {
             {/* Description */}
             <div>
               <h2 className="text-2xl font-bold text-gray-900 mb-4">Mô tả</h2>
-              <div className="prose prose-indigo max-w-none text-gray-700">
-                <p className="whitespace-pre-line leading-relaxed">{course.description}</p>
+              <div className="prose prose-gray max-w-none">
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm]}
+                  components={{
+                    h1: ({ children }) => <h1 className="text-3xl font-bold text-gray-900 mt-8 mb-4">{children}</h1>,
+                    h2: ({ children }) => <h2 className="text-2xl font-bold text-gray-900 mt-6 mb-3">{children}</h2>,
+                    h3: ({ children }) => <h3 className="text-xl font-semibold text-gray-900 mt-4 mb-2">{children}</h3>,
+                    h4: ({ children }) => <h4 className="text-lg font-semibold text-gray-900 mt-3 mb-2">{children}</h4>,
+                    p: ({ children }) => <p className="mb-4 text-gray-700 leading-relaxed">{children}</p>,
+                    ul: ({ children }) => <ul className="list-disc list-inside mb-4 space-y-2 text-gray-700">{children}</ul>,
+                    ol: ({ children }) => <ol className="list-decimal list-inside mb-4 space-y-2 text-gray-700">{children}</ol>,
+                    li: ({ children }) => <li className="ml-4">{children}</li>,
+                    strong: ({ children }) => <strong className="font-bold text-gray-900">{children}</strong>,
+                    em: ({ children }) => <em className="italic text-gray-700">{children}</em>,
+                    a: ({ href, children }) => (
+                      <a href={href} className="text-indigo-600 hover:text-indigo-700 underline font-medium" target="_blank" rel="noopener noreferrer">
+                        {children}
+                      </a>
+                    ),
+                    code: ({ className, children, ...props }) => {
+                      const isInline = !className;
+                      return isInline ? (
+                        <code className="bg-gray-100 text-red-600 px-1.5 py-0.5 rounded text-sm font-mono" {...props}>
+                          {children}
+                        </code>
+                      ) : (
+                        <code className={`${className} block bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto text-sm font-mono`} {...props}>
+                          {children}
+                        </code>
+                      );
+                    },
+                    pre: ({ children }) => <pre className="mb-4 overflow-x-auto">{children}</pre>,
+                    blockquote: ({ children }) => (
+                      <blockquote className="border-l-4 border-indigo-500 pl-4 py-2 mb-4 italic text-gray-600 bg-indigo-50 rounded-r">
+                        {children}
+                      </blockquote>
+                    ),
+                    hr: () => <hr className="my-6 border-gray-300" />,
+                    table: ({ children }) => <table className="min-w-full border-collapse border border-gray-300 mb-4">{children}</table>,
+                    thead: ({ children }) => <thead className="bg-gray-100">{children}</thead>,
+                    th: ({ children }) => <th className="border border-gray-300 px-4 py-2 text-left font-semibold text-gray-900">{children}</th>,
+                    td: ({ children }) => <td className="border border-gray-300 px-4 py-2 text-gray-700">{children}</td>,
+                  }}
+                >
+                  {course.description}
+                </ReactMarkdown>
               </div>
             </div>
 
