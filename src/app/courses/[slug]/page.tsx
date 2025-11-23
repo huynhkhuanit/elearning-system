@@ -4,11 +4,16 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { 
   Star, Users, Clock, Award, CheckCircle, PlayCircle, 
-  BookOpen, Target, TrendingUp, Shield, ChevronDown, ChevronUp, Quote, Zap,
-  Code2, Layers, Database, Layout, Package, Settings, Terminal, GitBranch
+  BookOpen, Target, TrendingUp, Shield, ChevronDown, ChevronUp, ChevronRight, Quote, Zap,
+  Code2, Layers, Database, Layout, Package, Settings, Terminal, GitBranch,
+  Share2, Heart, AlertCircle, Check, MonitorPlay, FileText, Download,
+  Play, Globe
 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import Link from "next/link";
+import Image from "next/image";
+
 import PageContainer from "@/components/PageContainer";
-import Badge from "@/components/Badge";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/contexts/ToastContext";
 
@@ -30,6 +35,8 @@ interface CourseDetail {
   instructor: {
     name: string;
     avatar: string;
+    bio?: string;
+    role?: string;
   };
   category: {
     id: string;
@@ -37,6 +44,22 @@ interface CourseDetail {
     slug: string;
   };
   learningOutcomes?: string[];
+  updatedAt?: string;
+  thumbnail_url?: string;
+  sections?: {
+    id: string;
+    title: string;
+    order: number;
+    lessons: {
+      id: string;
+      title: string;
+      duration: string;
+      durationMinutes: number;
+      isFree: boolean;
+      type: string;
+      order: number;
+    }[];
+  }[];
 }
 
 const LEVEL_MAP: Record<string, string> = {
@@ -67,7 +90,7 @@ export default function CourseDetailPage() {
   const [course, setCourse] = useState<CourseDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [enrolling, setEnrolling] = useState(false);
-  const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
+  const [expandedSection, setExpandedSection] = useState<string | null>(null);
   const { isAuthenticated, user } = useAuth();
   const toast = useToast();
 
@@ -85,6 +108,10 @@ export default function CourseDetailPage() {
 
       if (data.success) {
         setCourse(data.data);
+        // Expand the first section by default if available
+        if (data.data.sections && data.data.sections.length > 0) {
+          setExpandedSection(data.data.sections[0].id);
+        }
       } else {
         toast.error("Không thể tải thông tin khóa học");
         router.push("/");
@@ -107,101 +134,49 @@ export default function CourseDetailPage() {
       return;
     }
 
-    // Prevent multiple enrollment attempts
-    if (enrolling) {
-      console.log("[COURSE DETAIL] Already enrolling, ignore");
-      return;
-    }
+    if (enrolling) return;
 
     try {
       setEnrolling(true);
-      console.log(`[COURSE DETAIL] Starting enrollment for: ${slug}`);
       
       const response = await fetch(`/api/courses/${slug}/enroll`, {
         method: "POST",
         credentials: "include",
       });
 
-      // Parse response regardless of status
       const data = await response.json();
-      console.log(`[COURSE DETAIL] Enroll response status: ${response.status}`, data);
 
-      // Check if enrollment was successful
       if (data.success) {
         toast.success(data.message || "Đăng ký khóa học thành công!");
         
-        // Handle PRO course upgrade
         if (data.data?.upgradedToPro) {
-          console.log("[COURSE DETAIL] User upgraded to PRO, reloading page...");
           setTimeout(() => {
             window.location.reload();
           }, 1500);
         } else {
-          // Normal enrollment - redirect to learn page
-          console.log(`[COURSE DETAIL] Enrollment successful, redirecting to /learn/${slug}`);
           setTimeout(() => {
             router.push(`/learn/${slug}`);
           }, 1000);
         }
       } else {
-        // Handle error cases
         if (data.message && data.message.includes('đã đăng ký')) {
-          // Already enrolled
-          console.log("[COURSE DETAIL] User already enrolled");
           toast.info("Bạn đã đăng ký khóa học này. Đang chuyển hướng...");
           setTimeout(() => {
             router.push(`/learn/${slug}`);
           }, 800);
         } else {
-          // Other errors
-          console.error("[COURSE DETAIL] Enrollment failed:", data.message);
           toast.error(data.message || "Không thể đăng ký khóa học. Vui lòng thử lại");
         }
       }
     } catch (error) {
-      console.error("[COURSE DETAIL] Exception during enrollment:", error);
+      console.error("Enrollment error:", error);
       toast.error("Đã có lỗi xảy ra khi đăng ký. Vui lòng thử lại");
     } finally {
-      // ✅ IMPORTANT: Always clear the enrolling state
       setEnrolling(false);
     }
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-indigo-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Đang tải khóa học...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!course) {
-    return null;
-  }
-
-  const faqData = [
-    {
-      question: "Khóa học này có phù hợp với người hoàn toàn mới?",
-      answer: "Khóa học này hoàn toàn phù hợp với người mới, chưa có nền tảng vì được thiết kế bài bản, chú trọng đi từ căn bản nhất tới nâng cao. Luôn hướng tới mục tiêu cung cấp nguồn kiến thức và hướng dẫn chi tiết nhất có thể."
-    },
-    {
-      question: "Tôi có thể xem video bao nhiêu lần?",
-      answer: "Với những video đã học qua, bạn có thể thỏa thích xem lại bất cứ video nào mà bạn muốn, không giới hạn số lần xem video. Chúng tôi khuyến khích bạn xem càng nhiều càng tốt để có thể nắm vững kiến thức hơn."
-    },
-    {
-      question: "Tôi có thể ứng dụng được ngay sau khi học không?",
-      answer: "Chắc chắn rồi! Chúng tôi luôn hướng tới các bạn học đi đôi với hành. Vì thế, sau mỗi bài học video hoặc văn bản, bạn sẽ được làm rất nhiều bài tập để cô đọng lại kiến thức, nắm vững cú pháp."
-    },
-    {
-      question: "Tôi có được hỗ trợ trong quá trình học không?",
-      answer: "Tất nhiên rồi! Tại mỗi bài học, bạn luôn có thể đặt câu hỏi, trao đổi và tương tác với các bạn cùng học. Ngoài ra, chuyên viên hỗ trợ sẽ luôn tận tình hướng dẫn nếu bạn gặp khó khăn."
-    },
-  ];
-
-  // Generate default learning outcomes nếu không có từ database
+  // Generate default learning outcomes if not present
   const getDefaultLearningOutcomes = () => {
     const categoryName = course?.category?.name || "lập trình";
     const level = course?.level || "BEGINNER";
@@ -215,26 +190,18 @@ export default function CourseDetailPage() {
       `Hiểu về best practices và coding standards`,
       `Tối ưu hóa hiệu suất và bảo mật`,
       `Debug và xử lý lỗi hiệu quả`,
-      `Làm việc với các công cụ và thư viện phổ biến`,
-      `Chuẩn bị cho phỏng vấn việc làm`,
-      `Xây dựng portfolio chuyên nghiệp`,
-      `Deploy ứng dụng lên production`,
     ];
 
     if (level === "ADVANCED") {
       outcomes.push(
         "Kiến trúc hệ thống quy mô lớn",
-        "Tối ưu hóa performance cao cấp",
-        "Thiết kế patterns và design principles",
-        "Microservices và distributed systems"
+        "Tối ưu hóa performance cao cấp"
       );
     }
 
     if (course?.isPro) {
       outcomes.push(
         "Truy cập vào nội dung độc quyền PRO",
-        "Hỗ trợ 1-1 từ giảng viên",
-        "Tham gia cộng đồng học viên PRO",
         "Nhận chứng chỉ hoàn thành khóa học"
       );
     }
@@ -242,715 +209,399 @@ export default function CourseDetailPage() {
     return outcomes;
   };
 
-  const learningOutcomes = course?.learningOutcomes || getDefaultLearningOutcomes();
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+          <p className="text-gray-500 font-medium">Đang tải khóa học...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!course) return null;
+
+  const learningOutcomes = course.learningOutcomes || getDefaultLearningOutcomes();
+  const pricing = calculatePricing(course.priceAmount);
+  const sections = course.sections || [];
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Hero Section - Simple & Clean như F8 */}
-      <div className="bg-gradient-to-br from-orange-50 via-yellow-50 to-pink-50 border-b border-gray-200">
-        <PageContainer size="lg" className="py-12">
-          <div className="max-w-4xl mx-auto text-center">
-            {/* Pro Badge */}
-            {course.isPro && (
-              <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-orange-500 to-yellow-500 text-white px-5 py-2 rounded-full text-sm font-bold mb-6 shadow-md">
-                <span>⭐</span>
-                <span>KHÓA HỌC PRO</span>
+    <div className="min-h-screen bg-gray-50">
+      {/* Hero Section */}
+      <div className="bg-[#1C1D1F] text-white py-12 lg:py-16 relative overflow-hidden">
+        {/* Background Decoration */}
+        <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-indigo-900/20 to-transparent pointer-events-none"></div>
+        
+        <PageContainer>
+          <div className="grid lg:grid-cols-3 gap-8 lg:gap-12">
+            {/* Left Content */}
+            <div className="lg:col-span-2 relative z-10">
+              {/* Breadcrumb */}
+              <div className="flex items-center gap-2 text-sm text-indigo-200 mb-6 font-medium">
+                <Link href="/courses" className="hover:text-white transition-colors">Khóa học</Link>
+                <ChevronRight className="w-4 h-4" />
+                <Link href={`/courses?category=${course.category.slug}`} className="hover:text-white transition-colors">
+                  {course.category.name}
+                </Link>
+                <ChevronRight className="w-4 h-4" />
+                <span className="text-white truncate max-w-[200px]">{course.title}</span>
               </div>
-            )}
-            
-            {/* Title */}
-            <h1 className="text-4xl lg:text-5xl font-black text-gray-900 mb-6 leading-tight">
-              {course.title}
-            </h1>
-            
-            {/* Subtitle */}
-            <p className="text-xl text-gray-700 mb-8 leading-relaxed max-w-3xl mx-auto">
-              {course.subtitle}
-            </p>
 
-            {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
-              <button
-                onClick={handleEnroll}
-                disabled={enrolling}
-                className="w-full sm:w-auto bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600 text-white font-bold py-4 px-10 rounded-full transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed text-lg"
-              >
-                {enrolling ? "Đang xử lý..." : course.isFree ? "HỌC THỬ MIỄN PHÍ" : "MUA NGAY"}
-              </button>
+              <h1 className="text-3xl lg:text-4xl font-bold mb-4 leading-tight">
+                {course.title}
+              </h1>
               
-              {!course.isFree && (
-                <div className="text-center sm:text-left">
-                  <div className="flex items-center gap-3 mb-1">
-                    <span className="text-lg text-gray-500 line-through">
-                      {new Intl.NumberFormat('vi-VN').format(calculatePricing(course.priceAmount).originalPrice)}₫
-                    </span>
-                    <span className="text-sm font-bold px-2 py-1 rounded bg-red-500 text-white">
-                      -{calculatePricing(course.priceAmount).discountPercent}%
-                    </span>
-                  </div>
-                  <p className="text-3xl font-black text-indigo-600">
-                    {new Intl.NumberFormat('vi-VN').format(course.priceAmount)}₫
-                  </p>
-                  <p className="text-sm text-gray-600">Mua một lần, học mãi mãi</p>
-                </div>
-              )}
-            </div>
+              <p className="text-lg text-gray-300 mb-6 leading-relaxed max-w-2xl">
+                {course.subtitle}
+              </p>
 
-            {/* Stats */}
-            <div className="flex flex-wrap items-center justify-center gap-6 text-gray-700">
-              <div className="flex items-center space-x-2">
-                <Star className="w-5 h-5 fill-yellow-500 text-yellow-500" />
-                <span className="font-bold">{course.rating}</span>
-                <span className="text-gray-600">({course.students.toLocaleString()} đánh giá)</span>
+              <div className="flex flex-wrap items-center gap-4 lg:gap-6 text-sm mb-8">
+                <div className="flex items-center gap-1">
+                  <span className="bg-yellow-400 text-black px-1.5 py-0.5 rounded font-bold text-xs">BESTSELLER</span>
+                </div>
+                <div className="flex items-center gap-1 text-yellow-400">
+                  <span className="font-bold text-base">{course.rating}</span>
+                  <div className="flex">
+                    {[...Array(5)].map((_, i) => (
+                      <Star key={i} className={`w-4 h-4 ${i < Math.floor(course.rating) ? "fill-current" : "text-gray-600"}`} />
+                    ))}
+                  </div>
+                  <span className="text-indigo-200 underline ml-1">({course.students.toLocaleString()} đánh giá)</span>
+                </div>
+                <div className="flex items-center gap-1 text-white">
+                  <Users className="w-4 h-4" />
+                  <span>{course.students.toLocaleString()} học viên</span>
+                </div>
               </div>
-              <span className="text-gray-400">•</span>
-              <div className="flex items-center space-x-2">
-                <Users className="w-5 h-5 text-gray-600" />
-                <span className="font-semibold">{course.students.toLocaleString()} học viên</span>
-              </div>
-              <span className="text-gray-400">•</span>
-              <div className="flex items-center space-x-2">
-                <Clock className="w-5 h-5 text-gray-600" />
-                <span className="font-semibold">{course.duration}</span>
+
+              <div className="flex items-center gap-3 text-sm text-gray-300 border-t border-gray-700 pt-6">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-white font-bold">
+                    {course.instructor.name.charAt(0)}
+                  </div>
+                  <span>Được tạo bởi <span className="text-indigo-400 underline cursor-pointer">{course.instructor.name}</span></span>
+                </div>
+                <span className="hidden sm:inline">•</span>
+                <div className="flex items-center gap-1">
+                  <AlertCircle className="w-4 h-4" />
+                  <span>Cập nhật lần cuối {new Date().toLocaleDateString('vi-VN', { month: 'long', year: 'numeric' })}</span>
+                </div>
+                <span className="hidden sm:inline">•</span>
+                <div className="flex items-center gap-1">
+                  <Globe className="w-4 h-4" />
+                  <span>Tiếng Việt</span>
+                </div>
               </div>
             </div>
           </div>
         </PageContainer>
       </div>
 
-
-      {/* Khoá học này dành cho ai? - F8 Style */}
-      <PageContainer size="lg" className="py-16">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl lg:text-4xl font-black text-gray-900 mb-4">
-            Khoá học này dành cho ai?
-          </h2>
-        </div>
-
-        <div className="grid md:grid-cols-3 gap-6">
-          <div className="bg-white border-2 border-gray-200 rounded-2xl p-8 hover:border-orange-400 hover:shadow-lg transition-all">
-            <div className="w-16 h-16 bg-gradient-to-br from-orange-400 to-yellow-400 rounded-2xl flex items-center justify-center mb-4 mx-auto">
-              <span className="text-3xl font-bold text-white">1</span>
-            </div>
-            <h3 className="text-xl font-bold text-gray-900 mb-3 text-center">Sinh Viên IT</h3>
-            <p className="text-gray-700 text-center leading-relaxed">
-              Bạn muốn học các kiến thức thực tế ở trường không dạy? Bạn muốn có kiến thức vững chắc để đi thực tập tại doanh nghiệp?
-            </p>
-          </div>
-
-          <div className="bg-white border-2 border-gray-200 rounded-2xl p-8 hover:border-orange-400 hover:shadow-lg transition-all">
-            <div className="w-16 h-16 bg-gradient-to-br from-orange-400 to-yellow-400 rounded-2xl flex items-center justify-center mb-4 mx-auto">
-              <span className="text-3xl font-bold text-white">2</span>
-            </div>
-            <h3 className="text-xl font-bold text-gray-900 mb-3 text-center">Người Trái Ngành</h3>
-            <p className="text-gray-700 text-center leading-relaxed">
-              Bạn là người mới bắt đầu và đang tìm hiểu về nghề lập trình? Bạn đang chưa biết bắt đầu từ đâu và cần một lộ trình bài bản?
-            </p>
-          </div>
-
-          <div className="bg-white border-2 border-gray-200 rounded-2xl p-8 hover:border-orange-400 hover:shadow-lg transition-all">
-            <div className="w-16 h-16 bg-gradient-to-br from-orange-400 to-yellow-400 rounded-2xl flex items-center justify-center mb-4 mx-auto">
-              <span className="text-3xl font-bold text-white">3</span>
-            </div>
-            <h3 className="text-xl font-bold text-gray-900 mb-3 text-center">Người Đã Đi Làm</h3>
-            <p className="text-gray-700 text-center leading-relaxed">
-              Bạn muốn nâng cao tay nghề? Bạn đang làm Backend muốn chuyển sang Frontend hoặc trở thành Fullstack Developer?
-            </p>
-          </div>
-        </div>
-      </PageContainer>
-
-      {/* Bạn sẽ học được những gì? - F8 Style Grid */}
-      <div className="bg-gradient-to-br from-orange-50 via-yellow-50 to-pink-50 py-16">
-        <PageContainer size="lg">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl lg:text-4xl font-black text-gray-900 mb-4">
-              Bạn sẽ học được những gì?
-            </h2>
-          </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {[
-              "Nắm vững kiến thức nền tảng từ cơ bản đến nâng cao",
-              "Thực hành với 10+ dự án thực tế có thể áp dụng ngay",
-              "Áp dụng vào công việc và tăng thu nhập ngay lập tức",
-              "Phát triển tư duy lập trình và giải quyết vấn đề",
-              "Chuẩn bị đầy đủ cho phỏng vấn việc làm cao cấp",
-              "Xây dựng portfolio chuyên nghiệp và ấn tượng",
-              "Networking với cộng đồng developer chất lượng cao",
-              "Được mentor trực tiếp từ giảng viên giàu kinh nghiệm",
-              "Hiểu rõ best practices và coding standards",
-              "Làm chủ các công cụ và thư viện phổ biến",
-              "Tối ưu hiệu suất và bảo mật cho ứng dụng",
-              "Deploy và quản lý ứng dụng trên production",
-            ].map((item, index) => (
-              <div key={index} className="flex items-start space-x-3 p-4 bg-white rounded-lg border border-gray-200 hover:border-orange-400 hover:shadow-md transition-all">
-                <CheckCircle className="w-5 h-5 text-orange-500 flex-shrink-0 mt-0.5" />
-                <span className="text-gray-800 font-medium leading-relaxed">{item}</span>
-              </div>
-            ))}
-          </div>
-        </PageContainer>
-      </div>
-
-      {/* Bạn sẽ làm được những gì? */}
-      <PageContainer size="lg" className="py-20">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl lg:text-4xl font-black text-gray-900 mb-4">
-            Bạn sẽ làm được những gì?
-          </h2>
-          <p className="text-xl text-gray-700 max-w-3xl mx-auto leading-relaxed">
-            Khóa học hướng dẫn bạn thực hành nhiều dự án thực tế. Từ đó, bạn có thể tự làm hầu hết mọi ứng dụng mà bạn thấy.
-          </p>
-        </div>
-
-        <div className="grid md:grid-cols-2 gap-8">
-          {[
-            { 
-              number: 1, 
-              title: "Website Thương mại điện tử", 
-              desc: "Xây dựng trang web bán hàng với giỏ hàng, thanh toán",
-              features: ["Shopping Cart", "Payment Gateway", "Product Management"],
-              gradient: "from-blue-500 to-cyan-500",
-              icon: "🛒"
-            },
-            { 
-              number: 2, 
-              title: "Ứng dụng Quản lý", 
-              desc: "Dashboard admin với CRUD operations đầy đủ",
-              features: ["Admin Dashboard", "Data Management", "Analytics"],
-              gradient: "from-purple-500 to-pink-500",
-              icon: "📊"
-            },
-            { 
-              number: 3, 
-              title: "Landing Page Marketing", 
-              desc: "Trang giới thiệu sản phẩm chuyển đổi cao",
-              features: ["Responsive Design", "SEO Optimized", "High Conversion"],
-              gradient: "from-orange-500 to-red-500",
-              icon: "🚀"
-            },
-            { 
-              number: 4, 
-              title: "Blog/Portfolio cá nhân", 
-              desc: "Trang blog và portfolio để showcase dự án",
-              features: ["Personal Branding", "Project Showcase", "Content Management"],
-              gradient: "from-green-500 to-emerald-500",
-              icon: "💼"
-            },
-          ].map((project) => (
-            <div 
-              key={project.number} 
-              className="group relative bg-white rounded-3xl overflow-hidden border-2 border-gray-200 hover:border-transparent hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2"
-            >
-              {/* Gradient Border Effect on Hover */}
-              <div className={`absolute inset-0 bg-gradient-to-br ${project.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10`}></div>
-              
-              {/* Content */}
-              <div className="relative bg-white m-[2px] rounded-3xl p-8">
-                {/* Header with Icon and Number */}
-                <div className="flex items-center justify-between mb-6">
-                  <div className={`w-16 h-16 bg-gradient-to-br ${project.gradient} rounded-2xl flex items-center justify-center text-3xl shadow-lg transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-300`}>
-                    {project.icon}
-                  </div>
-                  <div className={`text-6xl font-black bg-gradient-to-br ${project.gradient} bg-clip-text text-transparent opacity-20 group-hover:opacity-30 transition-opacity`}>
-                    0{project.number}
-                  </div>
-                </div>
-
-                {/* Title and Description */}
-                <h3 className="text-2xl font-black text-gray-900 mb-3 group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:bg-clip-text group-hover:from-orange-500 group-hover:to-yellow-500 transition-all">
-                  {project.title}
-                </h3>
-                <p className="text-gray-600 leading-relaxed mb-6">
-                  {project.desc}
-                </p>
-
-                {/* Features Tags */}
-                <div className="flex flex-wrap gap-2">
-                  {project.features.map((feature, idx) => (
-                    <span 
-                      key={idx} 
-                      className="px-3 py-1.5 bg-gray-100 group-hover:bg-gradient-to-r group-hover:from-orange-100 group-hover:to-yellow-100 text-gray-700 group-hover:text-orange-700 text-sm font-semibold rounded-full transition-all duration-300"
-                    >
-                      {feature}
-                    </span>
-                  ))}
-                </div>
-
-                {/* Bottom Arrow Indicator */}
-                <div className="mt-6 flex items-center text-orange-500 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-0 group-hover:translate-x-2">
-                  <span className="font-bold text-sm mr-2">Xem chi tiết</span>
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Bottom CTA */}
-        <div className="mt-16 text-center">
-          <div className="inline-flex items-center justify-center space-x-3 bg-gradient-to-r from-orange-50 to-yellow-50 border-2 border-orange-200 rounded-2xl px-8 py-4">
-            <div className="w-12 h-12 bg-gradient-to-br from-orange-400 to-yellow-400 rounded-xl flex items-center justify-center">
-              <Target className="w-6 h-6 text-white" />
-            </div>
-            <div className="text-left">
-              <p className="font-black text-gray-900 text-lg">+10 dự án thực tế khác</p>
-              <p className="text-gray-600 text-sm">Giúp bạn thành thạo mọi kỹ năng cần thiết</p>
-            </div>
-          </div>
-        </div>
-      </PageContainer>
-
-      {/* Nội dung khóa học */}
-      <div className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl lg:text-5xl font-black text-white mb-6">
-              Bạn sẽ học được những gì?
-            </h2>
-            <div className="flex items-center justify-center gap-8 text-white/80 text-lg">
-              <div className="flex items-center gap-2">
-                <BookOpen className="w-6 h-6 text-orange-400" />
-                <span className="font-bold">{course.totalLessons}</span>
-                <span>Bài học</span>
-              </div>
-              <span className="text-white/40">•</span>
-              <div className="flex items-center gap-2">
-                <Clock className="w-6 h-6 text-orange-400" />
-                <span className="font-bold">{course.duration}</span>
-                <span>Thời lượng</span>
-              </div>
-              <span className="text-white/40">•</span>
-              <div className="flex items-center gap-2">
-                <Target className="w-6 h-6 text-orange-400" />
-                <span className="font-bold">{LEVEL_MAP[course.level]}</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Course Content Grid */}
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-x-12 gap-y-6 text-white">
-            {learningOutcomes.map((item, index) => (
-              <div key={index} className="flex items-start space-x-3 group">
-                <CheckCircle className="w-5 h-5 text-orange-400 flex-shrink-0 mt-0.5 group-hover:scale-110 transition-transform" />
-                <span className="text-white/90 leading-relaxed hover:text-white transition-colors text-[15px]">
-                  {item}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Mô tả khóa học */}
-      <PageContainer size="lg" className="py-16">
-        <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl lg:text-4xl font-black text-gray-900 mb-8 text-center">
-            Mô tả khóa học
-          </h2>
+      <PageContainer className="py-8">
+        <div className="grid lg:grid-cols-3 gap-8 lg:gap-12 relative">
           
-          <div className="bg-white rounded-2xl border-2 border-gray-200 p-8 lg:p-12">
-            {/* Parse and display markdown content */}
-            <div className="space-y-6">
-              {(() => {
-                const text = course.description;
-                const sections: React.ReactElement[] = [];
-                let currentHeading: string | null = null;
-                let currentItems: string[] = [];
-                let currentParagraph: string[] = [];
-                let sectionKey = 0;
-
-                const flushItems = () => {
-                  if (currentItems.length > 0 && currentHeading) {
-                    sections.push(
-                      <div key={`section-${sectionKey++}`} className="space-y-4">
-                        <h3 className="text-xl font-bold text-gray-900 flex items-center gap-3 pb-3 border-b-2 border-orange-200">
-                          <div className="w-1.5 h-6 bg-gradient-to-b from-orange-400 to-yellow-400 rounded-full"></div>
-                          {currentHeading}
-                        </h3>
-                        <ul className="space-y-3 pl-2">
-                          {currentItems.map((item, idx) => {
-                            const parts = item.split(/\*\*(.*?)\*\*/g);
-                            return (
-                              <li key={idx} className="flex items-start space-x-3 group">
-                                <div className="w-2 h-2 bg-orange-500 rounded-full flex-shrink-0 mt-2 group-hover:scale-125 transition-transform"></div>
-                                <span className="text-gray-700 leading-relaxed flex-1 break-words whitespace-normal">
-                                  {parts.map((part, pIdx) => 
-                                    pIdx % 2 === 1 ? (
-                                      <strong key={pIdx} className="font-bold text-gray-900">{part}</strong>
-                                    ) : part
-                                  )}
-                                </span>
-                              </li>
-                            );
-                          })}
-                        </ul>
-                      </div>
-                    );
-                    currentItems = [];
-                    currentHeading = null;
-                  }
-                };
-
-                const flushParagraph = () => {
-                  if (currentParagraph.length > 0) {
-                    const paragraphText = currentParagraph.join(' ').trim();
-                    if (paragraphText) {
-                      const parts = paragraphText.split(/\*\*(.*?)\*\*/g);
-                      sections.push(
-                        <p key={`para-${sectionKey++}`} className="text-gray-700 leading-relaxed text-base break-words whitespace-normal">
-                          {parts.map((part, pIdx) => 
-                            pIdx % 2 === 1 ? (
-                              <strong key={pIdx} className="font-bold text-gray-900">{part}</strong>
-                            ) : part
-                          )}
-                        </p>
-                      );
-                    }
-                    currentParagraph = [];
-                  }
-                };
-
-                const lines = text.split('\n');
-                
-                for (const line of lines) {
-                  const trimmed = line.trim();
-                  
-                  if (!trimmed) {
-                    flushParagraph();
-                    continue;
-                  }
-
-                  // Check for heading
-                  if (trimmed.startsWith('**') && (trimmed.includes(':**') || trimmed.includes('**:'))) {
-                    flushItems();
-                    flushParagraph();
-                    currentHeading = trimmed.replace(/\*\*/g, '').replace(/:/g, '').trim();
-                  }
-                  // Check for list item
-                  else if (trimmed.startsWith('-')) {
-                    flushParagraph();
-                    const itemText = trimmed.substring(1).trim();
-                    currentItems.push(itemText);
-                  }
-                  // Regular text
-                  else {
-                    if (currentItems.length > 0 && currentHeading) {
-                      flushItems();
-                    }
-                    currentParagraph.push(trimmed);
-                  }
-                }
-
-                // Flush any remaining content
-                flushItems();
-                flushParagraph();
-
-                return sections.length > 0 ? sections : (
-                  <p className="text-gray-700 leading-relaxed break-words whitespace-normal">
-                    {text}
-                  </p>
-                );
-              })()}
-            </div>
-
-            {/* Additional Info Box */}
-            <div className="mt-10 bg-gradient-to-br from-orange-50 to-yellow-50 rounded-xl p-6 border-2 border-orange-200">
-              <div className="flex items-start space-x-4">
-                <div className="w-12 h-12 bg-gradient-to-br from-orange-400 to-yellow-400 rounded-xl flex items-center justify-center flex-shrink-0">
-                  <BookOpen className="w-6 h-6 text-white" />
-                </div>
-                <div className="flex-1">
-                  <h4 className="font-bold text-gray-900 mb-2 text-lg">Cam kết chất lượng</h4>
-                  <p className="text-gray-700 leading-relaxed">
-                    Khóa học được thiết kế bài bản, cập nhật thường xuyên và có đội ngũ hỗ trợ tận tình. 
-                    Bạn sẽ nhận được kiến thức thực tế, có thể áp dụng ngay vào công việc.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </PageContainer>
-
-      {/* Người hướng dẫn tận tâm */}
-      <div className="bg-gradient-to-br from-orange-50 via-yellow-50 to-pink-50 py-16">
-        <PageContainer size="lg">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl lg:text-4xl font-black text-gray-900 mb-4">
-              Người hướng dẫn tận tâm
-            </h2>
-          </div>
-
-          <div className="max-w-4xl mx-auto bg-white rounded-2xl border-2 border-gray-200 p-8 lg:p-12">
-            <div className="flex flex-col lg:flex-row items-center lg:items-start gap-8">
-              <div className="w-32 h-32 lg:w-40 lg:h-40 rounded-full bg-gradient-to-br from-orange-400 to-yellow-400 flex items-center justify-center text-white font-bold text-5xl shadow-xl flex-shrink-0">
-                {course.instructor.name.charAt(0).toUpperCase()}
-              </div>
-              
-              <div className="flex-1 text-center lg:text-left">
-                <h3 className="text-2xl lg:text-3xl font-black text-gray-900 mb-2">
-                  {course.instructor.name}
-                </h3>
-                <p className="text-lg text-gray-600 mb-6">
-                  Senior Developer & Technical Instructor
-                </p>
-                
-                <div className="grid grid-cols-3 gap-4 mb-6">
-                  <div className="bg-orange-50 rounded-xl p-4">
-                    <div className="text-3xl font-black text-orange-500 mb-1">{course.rating}</div>
-                    <div className="text-sm text-gray-600 font-semibold">Đánh giá</div>
+          {/* Main Content (Left Column) */}
+          <div className="lg:col-span-2 space-y-10">
+            
+            {/* What you'll learn */}
+            <div className="bg-white border border-gray-200 rounded-xl p-6 lg:p-8">
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">Bạn sẽ học được gì?</h2>
+              <div className="grid sm:grid-cols-2 gap-4">
+                {learningOutcomes.map((item, idx) => (
+                  <div key={idx} className="flex items-start gap-3">
+                    <Check className="w-5 h-5 text-gray-900 flex-shrink-0 mt-0.5" />
+                    <span className="text-gray-600 text-sm leading-relaxed">{item}</span>
                   </div>
-                  <div className="bg-orange-50 rounded-xl p-4">
-                    <div className="text-3xl font-black text-orange-500 mb-1">{course.students.toLocaleString()}</div>
-                    <div className="text-sm text-gray-600 font-semibold">Học viên</div>
-                  </div>
-                  <div className="bg-orange-50 rounded-xl p-4">
-                    <div className="text-3xl font-black text-orange-500 mb-1">10+</div>
-                    <div className="text-sm text-gray-600 font-semibold">Khóa học</div>
-                  </div>
-                </div>
-
-                <p className="text-gray-700 leading-relaxed text-lg mb-4">
-                  Với hơn 10 năm kinh nghiệm trong lĩnh vực phát triển phần mềm và đào tạo, 
-                  tôi đã giúp hàng nghìn học viên thành công trong sự nghiệp lập trình.
-                </p>
-                <p className="text-orange-600 font-bold italic">
-                  *Tôi đã bỏ ra nhiều tháng để làm nội dung cho khóa học này!
-                </p>
-              </div>
-            </div>
-          </div>
-        </PageContainer>
-      </div>
-
-      {/* Phản hồi từ học viên */}
-      <PageContainer size="lg" className="py-16">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl lg:text-4xl font-black text-gray-900 mb-4">
-            Phản hồi từ học viên
-          </h2>
-        </div>
-
-        <div className="grid md:grid-cols-2 gap-6">
-          {[
-            {
-              name: "Nguyễn Văn A",
-              role: "Frontend Developer",
-              content: "Khóa học rất chi tiết và dễ hiểu. Thầy giảng dạy tận tâm, mỗi video đều ngắn gọn nhưng đầy đủ kiến thức. Sau khi học xong tôi đã có thể tự làm được nhiều dự án thực tế.",
-              rating: 5
-            },
-            {
-              name: "Trần Thị B",
-              role: "Học viên khóa Pro",
-              content: "Đây là khóa học đáng giá nhất mà tôi từng tham gia. Giá cả phải chăng, nội dung chất lượng, hỗ trợ tận tình. Recommend cho bất kỳ ai muốn học lập trình!",
-              rating: 5
-            },
-          ].map((review, index) => (
-            <div key={index} className="bg-white border-2 border-gray-200 rounded-2xl p-8 hover:border-orange-400 hover:shadow-lg transition-all">
-              <div className="flex items-center space-x-1 mb-4">
-                {[...Array(review.rating)].map((_, i) => (
-                  <Star key={i} className="w-5 h-5 fill-yellow-400 text-yellow-400" />
                 ))}
               </div>
-              <Quote className="w-8 h-8 text-orange-200 mb-3" />
-              <p className="text-gray-700 leading-relaxed mb-6 italic">
-                "{review.content}"
-              </p>
-              <div className="flex items-center space-x-3">
-                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-orange-400 to-yellow-400 flex items-center justify-center text-white font-bold">
-                  {review.name.charAt(0)}
-                </div>
-                <div>
-                  <p className="font-bold text-gray-900">{review.name}</p>
-                  <p className="text-sm text-gray-600">{review.role}</p>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </PageContainer>
-
-      {/* Tại sao nên học khóa học này? */}
-      <div className="bg-gray-50 py-16">
-        <PageContainer size="lg">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl lg:text-4xl font-black text-gray-900 mb-4">
-              Tại sao nên học khóa học này?
-            </h2>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            {/* Khác biệt khóa Pro */}
-            <div className="bg-white rounded-2xl border-2 border-gray-200 p-8">
-              <div className="w-14 h-14 bg-gradient-to-br from-orange-400 to-yellow-400 rounded-xl flex items-center justify-center mb-4">
-                <Award className="w-8 h-8 text-white" />
-              </div>
-              <h3 className="text-xl font-black text-gray-900 mb-4">Khác biệt khóa Pro</h3>
-              <ul className="space-y-3 text-gray-700">
-                <li className="flex items-start space-x-2">
-                  <span className="text-orange-500 font-bold">•</span>
-                  <span>Khóa học đầy đủ và chi tiết nhất</span>
-                </li>
-                <li className="flex items-start space-x-2">
-                  <span className="text-orange-500 font-bold">•</span>
-                  <span>Thực hành nhiều dự án thực tế</span>
-                </li>
-                <li className="flex items-start space-x-2">
-                  <span className="text-orange-500 font-bold">•</span>
-                  <span>400+ bài học, 300+ bài tập</span>
-                </li>
-                <li className="flex items-start space-x-2">
-                  <span className="text-orange-500 font-bold">•</span>
-                  <span>Đáp án cho mọi bài tập</span>
-                </li>
-                <li className="flex items-start space-x-2">
-                  <span className="text-orange-500 font-bold">•</span>
-                  <span>Kênh hỏi đáp riêng tư</span>
-                </li>
-              </ul>
             </div>
 
-            {/* Nền tảng hàng đầu */}
-            <div className="bg-white rounded-2xl border-2 border-gray-200 p-8">
-              <div className="w-14 h-14 bg-gradient-to-br from-blue-400 to-indigo-400 rounded-xl flex items-center justify-center mb-4">
-                <Zap className="w-8 h-8 text-white" />
+            {/* Course Content (Curriculum) */}
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">Nội dung khóa học</h2>
+              <div className="flex items-center gap-2 text-sm text-gray-600 mb-4">
+                <span className="font-bold text-gray-900">{course.totalLessons}</span> bài học
+                <span>•</span>
+                <span className="font-bold text-gray-900">{course.duration}</span> thời lượng
               </div>
-              <h3 className="text-xl font-black text-gray-900 mb-4">Nền tảng hàng đầu</h3>
-              <ul className="space-y-3 text-gray-700">
-                <li className="flex items-start space-x-2">
-                  <span className="text-blue-500 font-bold">•</span>
-                  <span>Đa dạng loại hình học: Video, Quiz, Test</span>
-                </li>
-                <li className="flex items-start space-x-2">
-                  <span className="text-blue-500 font-bold">•</span>
-                  <span>Code song song cùng video</span>
-                </li>
-                <li className="flex items-start space-x-2">
-                  <span className="text-blue-500 font-bold">•</span>
-                  <span>Chạy thử nghiệm ngay với Code Snippet</span>
-                </li>
-                <li className="flex items-start space-x-2">
-                  <span className="text-blue-500 font-bold">•</span>
-                  <span>Chức năng ghi chú Pro hỗ trợ Highlight</span>
-                </li>
-                <li className="flex items-start space-x-2">
-                  <span className="text-blue-500 font-bold">•</span>
-                  <span>Dark/Light mode cho riêng khóa Pro</span>
-                </li>
-              </ul>
-            </div>
-
-            {/* Người thầy tâm huyết */}
-            <div className="bg-white rounded-2xl border-2 border-gray-200 p-8">
-              <div className="w-14 h-14 bg-gradient-to-br from-green-400 to-emerald-400 rounded-xl flex items-center justify-center mb-4">
-                <Target className="w-8 h-8 text-white" />
-              </div>
-              <h3 className="text-xl font-black text-gray-900 mb-4">Người thầy tâm huyết</h3>
-              <ul className="space-y-3 text-gray-700">
-                <li className="flex items-start space-x-2">
-                  <span className="text-green-500 font-bold">•</span>
-                  <span>Bỏ ra nhiều tháng xây dựng khóa học</span>
-                </li>
-                <li className="flex items-start space-x-2">
-                  <span className="text-green-500 font-bold">•</span>
-                  <span>Quay 500+ videos cho khóa này</span>
-                </li>
-                <li className="flex items-start space-x-2">
-                  <span className="text-green-500 font-bold">•</span>
-                  <span>Soạn 200+ bài viết và 300+ bài tập</span>
-                </li>
-                <li className="flex items-start space-x-2">
-                  <span className="text-green-500 font-bold">•</span>
-                  <span>Trả lời 2000+ hỏi đáp của học viên</span>
-                </li>
-                <li className="flex items-start space-x-2">
-                  <span className="text-green-500 font-bold">•</span>
-                  <span>Rèn luyện kỹ năng giảng dạy</span>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </PageContainer>
-      </div>
-
-      {/* Câu hỏi thường gặp - F8 Accordion Style */}
-      <PageContainer size="lg" className="py-16">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl lg:text-4xl font-black text-gray-900 mb-4">
-            Câu hỏi thường gặp
-          </h2>
-        </div>
-
-        <div className="max-w-4xl mx-auto space-y-4">
-          {faqData.map((faq, index) => (
-            <div key={index} className="bg-white border-2 border-gray-200 rounded-xl overflow-hidden">
-              <button
-                onClick={() => setExpandedFaq(expandedFaq === index ? null : index)}
-                className="w-full p-6 flex items-center justify-between hover:bg-gray-50 transition-colors text-left"
-              >
-                <h3 className="text-lg font-bold text-gray-900 pr-4">{faq.question}</h3>
-                {expandedFaq === index ? (
-                  <ChevronUp className="w-6 h-6 text-orange-500 flex-shrink-0" />
+              
+              <div className="border border-gray-200 rounded-xl overflow-hidden bg-white">
+                {sections.length > 0 ? (
+                  sections.map((section) => (
+                    <div key={section.id} className="border-b border-gray-200 last:border-0">
+                      <button 
+                        onClick={() => setExpandedSection(expandedSection === section.id ? null : section.id)}
+                        className="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 transition-colors text-left"
+                      >
+                        <div className="flex items-center gap-3">
+                          {expandedSection === section.id ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                          <span className="font-bold text-gray-900">{section.title}</span>
+                        </div>
+                        <span className="text-sm text-gray-500">{section.lessons.length} bài học</span>
+                      </button>
+                      <AnimatePresence>
+                        {expandedSection === section.id && (
+                          <motion.div 
+                            initial={{ height: 0 }} 
+                            animate={{ height: "auto" }} 
+                            exit={{ height: 0 }}
+                            className="overflow-hidden bg-white"
+                          >
+                            <div className="p-4 space-y-3">
+                              {section.lessons.map((lesson) => (
+                                <div key={lesson.id} className="flex items-center justify-between text-sm group cursor-pointer">
+                                  <div className="flex items-center gap-3 text-gray-700 group-hover:text-indigo-600">
+                                    <PlayCircle className="w-4 h-4" />
+                                    <span>{lesson.title}</span>
+                                  </div>
+                                  <div className="flex items-center gap-3">
+                                    {lesson.isFree && (
+                                      <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">Học thử</span>
+                                    )}
+                                    <span className="text-gray-400">{lesson.duration}</span>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  ))
                 ) : (
-                  <ChevronDown className="w-6 h-6 text-gray-400 flex-shrink-0" />
+                  <div className="p-8 text-center text-gray-500">
+                    Chưa có nội dung bài học
+                  </div>
                 )}
-              </button>
-              {expandedFaq === index && (
-                <div className="px-6 pb-6">
-                  <p className="text-gray-700 leading-relaxed">{faq.answer}</p>
-                </div>
-              )}
+              </div>
             </div>
-          ))}
+
+            {/* Requirements */}
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">Yêu cầu</h2>
+              <ul className="list-disc list-inside space-y-2 text-gray-700">
+                <li>Máy tính kết nối internet (Windows, macOS hoặc Linux)</li>
+                <li>Ý thức tự học cao, kiên trì và chịu khó</li>
+                <li>Không cần kiến thức lập trình từ trước (với khóa cơ bản)</li>
+              </ul>
+            </div>
+
+            {/* Description */}
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">Mô tả</h2>
+              <div className="prose prose-indigo max-w-none text-gray-700">
+                <p className="whitespace-pre-line leading-relaxed">{course.description}</p>
+              </div>
+            </div>
+
+            {/* Instructor */}
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">Giảng viên</h2>
+              <div className="bg-white border border-gray-200 rounded-xl p-6">
+                <div className="flex items-start gap-4">
+                  <div className="w-16 h-16 rounded-full bg-indigo-600 flex items-center justify-center text-white text-2xl font-bold flex-shrink-0">
+                    {course.instructor.name.charAt(0)}
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-indigo-600 mb-1 underline cursor-pointer">{course.instructor.name}</h3>
+                    <p className="text-gray-600 text-sm mb-4">Senior Software Engineer & Instructor</p>
+                    <div className="flex items-center gap-6 text-sm text-gray-600 mb-4">
+                      <div className="flex items-center gap-1">
+                        <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                        <span>{course.rating} Xếp hạng</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Users className="w-4 h-4" />
+                        <span>{course.students.toLocaleString()} Học viên</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <PlayCircle className="w-4 h-4" />
+                        <span>10 Khóa học</span>
+                      </div>
+                    </div>
+                    <p className="text-gray-700 text-sm leading-relaxed">
+                      Tôi là một kỹ sư phần mềm với hơn 10 năm kinh nghiệm. Tôi đam mê giảng dạy và chia sẻ kiến thức. 
+                      Sứ mệnh của tôi là giúp bạn trở thành một lập trình viên chuyên nghiệp thông qua các khóa học thực tế, dễ hiểu.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Reviews (Mock) */}
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                <Star className="w-6 h-6 fill-yellow-400 text-yellow-400" />
+                {course.rating} xếp hạng khóa học
+                <span className="text-gray-500 text-lg font-normal">• {course.students.toLocaleString()} đánh giá</span>
+              </h2>
+              <div className="grid md:grid-cols-2 gap-4">
+                {[1, 2, 3, 4].map((i) => (
+                  <div key={i} className="bg-white border border-gray-200 p-5 rounded-xl">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center font-bold text-gray-500">
+                        U{i}
+                      </div>
+                      <div>
+                        <div className="font-bold text-sm">User {i}</div>
+                        <div className="flex text-yellow-400">
+                          {[...Array(5)].map((_, j) => (
+                            <Star key={j} className="w-3 h-3 fill-current" />
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                    <p className="text-gray-600 text-sm">
+                      Khóa học rất hay và bổ ích. Giảng viên dạy dễ hiểu, support nhiệt tình. Rất đáng tiền!
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+          </div>
+
+          {/* Sticky Sidebar (Right Column) */}
+          <div className="lg:col-span-1 relative">
+            <div className="sticky top-24 space-y-6">
+              {/* Enrollment Card */}
+              <div className="bg-white border border-gray-200 shadow-lg rounded-xl overflow-hidden">
+                {/* Video Preview / Thumbnail */}
+                <div className="relative aspect-video bg-gray-900 group cursor-pointer">
+                  {course.thumbnail_url ? (
+                    <Image 
+                      src={course.thumbnail_url} 
+                      alt={course.title} 
+                      fill 
+                      className="object-cover opacity-90 group-hover:opacity-75 transition-opacity" 
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-800 to-gray-900">
+                      <Code2 className="w-12 h-12 text-gray-600" />
+                    </div>
+                  )}
+                  
+                  {/* Play Button Overlay */}
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                      <Play className="w-6 h-6 text-black fill-black ml-1" />
+                    </div>
+                  </div>
+                  <div className="absolute bottom-4 left-0 right-0 text-center text-white font-bold text-sm drop-shadow-md">
+                    Xem giới thiệu khóa học
+                  </div>
+                </div>
+
+                <div className="p-6">
+                  {/* Price */}
+                  <div className="flex items-center gap-3 mb-6">
+                    {!course.isFree ? (
+                      <>
+                        <span className="text-3xl font-bold text-gray-900">
+                          {new Intl.NumberFormat('vi-VN').format(course.priceAmount)}₫
+                        </span>
+                        <span className="text-gray-500 line-through text-lg">
+                          {new Intl.NumberFormat('vi-VN').format(pricing.originalPrice)}₫
+                        </span>
+                        <span className="text-sm font-medium text-red-600 bg-red-50 px-2 py-1 rounded">
+                          -{pricing.discountPercent}%
+                        </span>
+                      </>
+                    ) : (
+                      <span className="text-3xl font-bold text-gray-900">Miễn phí</span>
+                    )}
+                  </div>
+
+                  {/* Actions */}
+                  <div className="space-y-3 mb-6">
+                    <button
+                      onClick={handleEnroll}
+                      disabled={enrolling}
+                      className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 px-4 rounded-lg transition-all shadow-lg shadow-indigo-200 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    >
+                      {enrolling ? (
+                        <>
+                          <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                          <span>Đang xử lý...</span>
+                        </>
+                      ) : (
+                        course.isFree ? "Đăng ký học ngay" : "Mua ngay"
+                      )}
+                    </button>
+                    <button className="w-full border border-gray-300 hover:bg-gray-50 text-gray-700 font-bold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2">
+                      <Heart className="w-4 h-4" />
+                      <span>Thêm vào yêu thích</span>
+                    </button>
+                  </div>
+
+                  <div className="text-center text-xs text-gray-500 mb-6">
+                    Đảm bảo hoàn tiền trong 30 ngày
+                  </div>
+
+                  {/* Includes */}
+                  <div className="space-y-4">
+                    <h4 className="font-bold text-gray-900 text-sm">Khóa học bao gồm:</h4>
+                    <ul className="space-y-3 text-sm text-gray-600">
+                      <li className="flex items-center gap-3">
+                        <MonitorPlay className="w-4 h-4" />
+                        <span>{course.duration} video bài giảng</span>
+                      </li>
+                      <li className="flex items-center gap-3">
+                        <FileText className="w-4 h-4" />
+                        <span>{course.totalLessons} bài học</span>
+                      </li>
+                      <li className="flex items-center gap-3">
+                        <Download className="w-4 h-4" />
+                        <span>Tài liệu tải xuống</span>
+                      </li>
+                      <li className="flex items-center gap-3">
+                        <Code2 className="w-4 h-4" />
+                        <span>Bài tập thực hành</span>
+                      </li>
+                      <li className="flex items-center gap-3">
+                        <MonitorPlay className="w-4 h-4" />
+                        <span>Truy cập trọn đời</span>
+                      </li>
+                      <li className="flex items-center gap-3">
+                        <MonitorPlay className="w-4 h-4" />
+                        <span>Truy cập trên mobile và TV</span>
+                      </li>
+                      {course.isPro && (
+                        <li className="flex items-center gap-3">
+                          <Award className="w-4 h-4" />
+                          <span>Chứng chỉ hoàn thành</span>
+                        </li>
+                      )}
+                    </ul>
+                  </div>
+                  
+                  {/* Share */}
+                  <div className="flex items-center justify-between pt-6 mt-6 border-t border-gray-100">
+                    <button className="text-sm font-medium text-gray-600 hover:text-gray-900 underline">Chia sẻ</button>
+                    <button className="text-sm font-medium text-gray-600 hover:text-gray-900 underline">Tặng khóa học</button>
+                    <button className="text-sm font-medium text-gray-600 hover:text-gray-900 underline">Mã giảm giá</button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Business Plan (Optional) */}
+              <div className="bg-white border border-gray-200 p-6 rounded-xl">
+                <h3 className="font-bold text-gray-900 mb-2">Đào tạo doanh nghiệp</h3>
+                <p className="text-sm text-gray-600 mb-4">
+                  Đăng ký cho đội ngũ của bạn truy cập vào khóa học này và hơn 500+ khóa học khác.
+                </p>
+                <button className="w-full border border-gray-900 text-gray-900 font-bold py-2 px-4 rounded hover:bg-gray-50 transition-colors text-sm">
+                  DHVLearnX Business
+                </button>
+              </div>
+            </div>
+          </div>
+
         </div>
       </PageContainer>
-
-      {/* CTA Final - F8 Style */}
-      <div className="bg-gradient-to-br from-orange-500 via-yellow-500 to-pink-500 py-16">
-        <PageContainer size="lg">
-          <div className="text-center text-white">
-            <h2 className="text-3xl lg:text-5xl font-black mb-6">
-              Sẵn sàng bắt đầu học ngay?
-            </h2>
-            <p className="text-xl lg:text-2xl mb-8 opacity-90">
-              Tham gia cùng {course.students.toLocaleString()}+ học viên đang tin tưởng khóa học này
-            </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <button
-                onClick={handleEnroll}
-                disabled={enrolling}
-                className="w-full sm:w-auto bg-white text-orange-600 hover:bg-gray-100 font-black py-5 px-12 rounded-full transition-all duration-300 shadow-2xl hover:shadow-3xl disabled:opacity-50 text-lg"
-              >
-                {enrolling ? "Đang xử lý..." : "ĐĂNG KÝ NGAY"}
-              </button>
-              {!course.isFree && (
-                <div className="text-center sm:text-left">
-                  <div className="flex items-center gap-3 mb-1 justify-center sm:justify-start">
-                    <span className="text-lg text-white/70 line-through">
-                      {new Intl.NumberFormat('vi-VN').format(calculatePricing(course.priceAmount).originalPrice)}₫
-                    </span>
-                    <span className="text-sm font-bold px-2 py-1 rounded bg-white text-red-600">
-                      -{calculatePricing(course.priceAmount).discountPercent}%
-                    </span>
-                  </div>
-                  <p className="text-3xl font-black text-indigo-600">{new Intl.NumberFormat('vi-VN').format(course.priceAmount)}₫</p>
-                  <p className="text-sm opacity-90">Mua một lần, học mãi mãi</p>
-                </div>
-              )}
-            </div>
-            {course.isPro && (
-              <div className="mt-6 flex items-center justify-center space-x-2">
-                <Shield className="w-6 h-6" />
-                <span className="font-bold">Đảm bảo hoàn tiền 100% trong 30 ngày</span>
-              </div>
-            )}
-          </div>
-        </PageContainer>
-      </div>
     </div>
   );
 }
+
+

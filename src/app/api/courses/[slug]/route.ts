@@ -49,10 +49,25 @@ export async function GET(
         created_at,
         updated_at,
         categories!left(id, name, slug),
-        users!left(id, full_name, username, avatar_url, bio)
+        users!left(id, full_name, username, avatar_url, bio),
+        sections (
+          id,
+          title,
+          order_index,
+          lessons (
+            id,
+            title,
+            duration,
+            is_free,
+            order_index,
+            type
+          )
+        )
       `)
       .eq('slug', slug)
       .eq('is_published', true)
+      .order('order_index', { foreignTable: 'sections', ascending: true })
+      .order('order_index', { foreignTable: 'sections.lessons', ascending: true })
       .single();
 
     if (courseError || !courseData) {
@@ -68,6 +83,22 @@ export async function GET(
     const course = courseData;
     const category = course.categories as any;
     const instructor = course.users as any;
+    
+    // Format sections and lessons
+    const sections = (course.sections || []).map((section: any) => ({
+      id: section.id,
+      title: section.title,
+      order: section.order_index,
+      lessons: (section.lessons || []).map((lesson: any) => ({
+        id: lesson.id,
+        title: lesson.title,
+        duration: formatDuration(lesson.duration || 0), // Assuming duration is in minutes
+        durationMinutes: lesson.duration || 0,
+        isFree: lesson.is_free,
+        type: lesson.type,
+        order: lesson.order_index
+      })).sort((a: any, b: any) => a.order - b.order)
+    })).sort((a: any, b: any) => a.order - b.order);
 
     // Check if user is enrolled (if authenticated)
     let isEnrolled = false;
@@ -113,6 +144,7 @@ export async function GET(
         avatar: instructor?.avatar_url || null,
         bio: instructor?.bio || null,
       },
+      sections: sections,
       createdAt: course.created_at,
       updatedAt: course.updated_at,
     };
