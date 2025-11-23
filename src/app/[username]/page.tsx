@@ -250,6 +250,7 @@ export default function UserProfilePage() {
   const tabs: ProfileTab[] = [
     { id: 'enrolled', label: 'Khoá học đã đăng ký', count: profile?.total_courses_enrolled },
     { id: 'completed', label: 'Khóa học đã hoàn thành', count: profile?.total_courses_completed },
+    { id: 'certificates', label: 'Chứng chỉ', count: profile?.total_courses_completed },
     { id: 'articles', label: 'Bài viết', count: profile?.total_articles_published },
     { id: 'saved', label: 'Bài viết đã lưu' },
   ];
@@ -870,6 +871,93 @@ export default function UserProfilePage() {
                     <Award className="w-16 h-16 text-gray-300 mx-auto mb-4" />
                     <h3 className="text-lg font-semibold text-gray-900 mb-2">
                       Chưa hoàn thành khóa học nào
+                    </h3>
+                    <p className="text-gray-600">Hoàn thành khóa học để nhận chứng chỉ</p>
+                  </div>
+                )}
+              </>
+            )}
+
+            {activeTab === "certificates" && (
+              <>
+                {completedCoursesLoading ? (
+                  <div className="flex gap-4 overflow-x-auto pb-4">
+                    {[1, 2, 3].map((i) => (
+                      <div key={i} className="flex-shrink-0 w-80 bg-white rounded-lg border border-gray-200 overflow-hidden animate-pulse">
+                        <div className="h-40 bg-gray-200"></div>
+                        <div className="p-4 space-y-3">
+                          <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                          <div className="h-2 bg-gray-100 rounded-full"></div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : completedCourses.length > 0 ? (
+                  <div 
+                    className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+                  >
+                    {completedCourses.map((course) => {
+                      return (
+                        <div key={course.id} className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+                          {/* Certificate Preview (Mock) */}
+                          <div className="relative h-48 bg-gray-50 border-b border-gray-100 flex items-center justify-center p-4 group cursor-pointer"
+                            onClick={() => {
+                              setSelectedCertificate({
+                                studentName: profile.full_name || profile.username,
+                                courseName: course.title,
+                                completionDate: new Date(course.completed_at || Date.now()).toLocaleDateString('vi-VN'),
+                                instructorName: "DHVLearnX Instructor",
+                                courseDuration: "Unknown Duration"
+                              });
+                            }}
+                          >
+                            {/* Decorative Elements */}
+                            <div className="absolute inset-4 border-4 border-double border-yellow-600/20"></div>
+                            <div className="text-center">
+                              <Award className="w-12 h-12 text-yellow-600 mx-auto mb-2" />
+                              <div className="text-xs font-serif text-gray-500 uppercase tracking-widest">Certificate of Completion</div>
+                              <div className="font-bold text-gray-900 mt-1 line-clamp-1 px-4">{course.title}</div>
+                            </div>
+                            
+                            {/* Hover Overlay */}
+                            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                              <span className="text-white font-medium flex items-center gap-2">
+                                <Eye className="w-5 h-5" />
+                                Xem chi tiết
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Content */}
+                          <div className="p-4">
+                            <h3 className="font-bold text-gray-900 mb-2 line-clamp-1">{course.title}</h3>
+                            <div className="flex items-center justify-between text-sm text-gray-500">
+                              <span>Cấp ngày: {new Date(course.completed_at || Date.now()).toLocaleDateString('vi-VN')}</span>
+                              <button 
+                                onClick={() => {
+                                  setSelectedCertificate({
+                                    studentName: profile.full_name || profile.username,
+                                    courseName: course.title,
+                                    completionDate: new Date(course.completed_at || Date.now()).toLocaleDateString('vi-VN'),
+                                    instructorName: "DHVLearnX Instructor",
+                                    courseDuration: "Unknown Duration"
+                                  });
+                                }}
+                                className="text-indigo-600 hover:text-indigo-700 font-medium"
+                              >
+                                Tải về
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <Award className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                      Chưa có chứng chỉ nào
                     </h3>
                     <p className="text-gray-600">Hoàn thành khóa học để nhận chứng chỉ</p>
                   </div>
