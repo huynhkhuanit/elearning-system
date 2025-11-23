@@ -241,10 +241,10 @@ export default function CourseDetailPage() {
             <div className="lg:col-span-2 relative z-10">
               {/* Breadcrumb */}
               <div className="flex items-center gap-2 text-sm text-indigo-200 mb-6 font-medium">
-                <Link href="/courses" className="hover:text-white transition-colors">Khóa học</Link>
+                <Link href="/" className="hover:text-white transition-colors">Trang chủ</Link>
                 <ChevronRight className="w-4 h-4" />
-                <Link href={`/courses?category=${course.category.slug}`} className="hover:text-white transition-colors">
-                  {course.category.name}
+                <Link href={`/#courses`} className="hover:text-white transition-colors">
+                  Khóa học
                 </Link>
                 <ChevronRight className="w-4 h-4" />
                 <span className="text-white truncate max-w-[200px]">{course.title}</span>
