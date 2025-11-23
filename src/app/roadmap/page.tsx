@@ -117,10 +117,15 @@ export default function RoadmapPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <Badge variant="featured" className="mb-6 bg-white/10 text-indigo-300 border-indigo-500/30 backdrop-blur-sm">
-              <Star className="w-3 h-3 mr-1 fill-current" />
-              Lộ trình chuẩn 2024
-            </Badge>
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-md shadow-lg mb-8 hover:bg-white/10 transition-all duration-300 cursor-default">
+              <span className="flex items-center justify-center w-6 h-6 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-inner">
+                <Star className="w-3 h-3 fill-current" />
+              </span>
+              <span className="text-sm font-medium text-indigo-200 tracking-wide pr-2">
+                Lộ trình chuẩn <span className="text-white font-bold">2025</span>
+              </span>
+            </div>
+            
             <h1 className="text-4xl lg:text-6xl font-extrabold mb-6 tracking-tight">
               Chọn con đường <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-cyan-400">sự nghiệp</span> của bạn
             </h1>

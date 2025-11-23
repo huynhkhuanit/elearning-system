@@ -413,7 +413,7 @@ export default function RoadmapDetailPage({ params }: { params: Promise<{ slug: 
               transition={{ duration: 0.6 }}
             >
               <Badge variant="warning" className="mb-4 bg-white/20 text-white border-none backdrop-blur-sm">
-                Lộ trình chuẩn 2024
+                Lộ trình chuẩn 2025
               </Badge>
               <h1 className="text-5xl lg:text-6xl font-[800] mb-6 leading-tight tracking-tight">
                 {roadmap.title}
