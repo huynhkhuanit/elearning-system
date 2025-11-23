@@ -10,6 +10,7 @@ import AvatarWithProBadge from '@/components/AvatarWithProBadge';
 import { Calendar, Award, Clock, BookOpen, FileText, Globe, Linkedin, Github, Twitter, Facebook, Eye, Heart, MessageCircle } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
+import CertificateModal from '@/components/CertificateModal';
 
 // Custom hook for drag-to-scroll functionality with carousel-like behavior
 function useDragToScroll() {
@@ -238,6 +239,7 @@ export default function UserProfilePage() {
   const [completedCoursesLoading, setCompletedCoursesLoading] = useState(false);
   const [savedArticles, setSavedArticles] = useState<any[]>([]);
   const [savedArticlesLoading, setSavedArticlesLoading] = useState(false);
+  const [selectedCertificate, setSelectedCertificate] = useState<any>(null);
 
   // Drag-to-scroll hooks for courses and articles
   const coursesDragScroll = useDragToScroll();
@@ -824,7 +826,7 @@ export default function UserProfilePage() {
                               </p>
 
                               {/* Completed Date */}
-                              <div className="flex items-center gap-1.5 text-xs text-gray-500 mt-auto pt-3 border-t border-gray-100">
+                              <div className="flex items-center gap-1.5 text-xs text-gray-500 mb-3">
                                 <Calendar className="w-3.5 h-3.5" />
                                 <span>
                                   {course.completed_at 
@@ -833,10 +835,29 @@ export default function UserProfilePage() {
                                         month: '2-digit',
                                         year: 'numeric'
                                       })}`
-                                    : course.progress_percentage >= 100
-                                    ? 'Đã hoàn thành 100%'
                                     : 'Đã hoàn thành'}
                                 </span>
+                              </div>
+
+                              {/* View Certificate Button */}
+                              <div className="mt-auto pt-3 border-t border-gray-100">
+                                <button
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    setSelectedCertificate({
+                                      studentName: profile.full_name || profile.username,
+                                      courseName: course.title,
+                                      completionDate: new Date(course.completed_at || Date.now()).toLocaleDateString('vi-VN'),
+                                      instructorName: "DHVLearnX Instructor",
+                                      courseDuration: "Unknown Duration"
+                                    });
+                                  }}
+                                  className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 rounded-lg text-sm font-medium transition-colors"
+                                >
+                                  <Award className="w-4 h-4" />
+                                  <span>Xem chứng chỉ</span>
+                                </button>
                               </div>
                             </div>
                           </div>
@@ -850,7 +871,7 @@ export default function UserProfilePage() {
                     <h3 className="text-lg font-semibold text-gray-900 mb-2">
                       Chưa hoàn thành khóa học nào
                     </h3>
-                    <p className="text-gray-600">Người dùng này chưa hoàn thành khóa học nào</p>
+                    <p className="text-gray-600">Hoàn thành khóa học để nhận chứng chỉ</p>
                   </div>
                 )}
               </>
@@ -1128,6 +1149,14 @@ export default function UserProfilePage() {
           </div>
         </div>
       </div>
+      {/* Certificate Modal */}
+      {selectedCertificate && (
+        <CertificateModal
+          isOpen={!!selectedCertificate}
+          onClose={() => setSelectedCertificate(null)}
+          data={selectedCertificate}
+        />
+      )}
     </PageContainer>
   );
 }

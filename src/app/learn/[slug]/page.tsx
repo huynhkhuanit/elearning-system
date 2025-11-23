@@ -22,6 +22,7 @@ import AskQuestionModal from "@/components/AskQuestionModal";
 import QuestionDetailModal from "@/components/QuestionDetailModal";
 import CodePlayground from "@/components/CodePlayground";
 import LearnCourseSidebar from "@/components/LearnCourseSidebar";
+import CertificateModal from "@/components/CertificateModal";
 import "@/app/markdown.css";
 import "@/app/markdown.css";
 
@@ -92,7 +93,8 @@ export default function LearnCoursePage() {
   const [showModeTooltip, setShowModeTooltip] = useState(false);
   const [isSwitching, setIsSwitching] = useState(false);
   const [switchDirection, setSwitchDirection] = useState<'on' | 'off' | null>(null);
-  const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const [showCertificateModal, setShowCertificateModal] = useState(false);
+  const { isAuthenticated, user, isLoading: authLoading } = useAuth();
   const toast = useToast();
   
   // Update page title when course changes
@@ -397,6 +399,7 @@ export default function LearnCoursePage() {
     } else {
       toast.success("Chúc mừng! Bạn đã hoàn thành khóa học!");
       triggerFireworks();
+      setShowCertificateModal(true);
     }
 
     // 3. Background API Call
@@ -801,13 +804,28 @@ export default function LearnCoursePage() {
           onClose={() => setIsQAModalOpen(false)}
           lessonId={currentLesson.id}
           lessonTitle={currentLesson.title}
+          onQuestionClick={(questionId) => {
+            setSelectedQuestionId(questionId);
+            setIsQAModalOpen(false);
+          }}
           onAskQuestion={() => {
             setIsQAModalOpen(false);
             setIsAskQuestionModalOpen(true);
           }}
-          onQuestionClick={(questionId) => {
-            setSelectedQuestionId(questionId);
-            setIsQAModalOpen(false);
+        />
+      )}
+
+      {/* Certificate Modal */}
+      {course && (
+        <CertificateModal
+          isOpen={showCertificateModal}
+          onClose={() => setShowCertificateModal(false)}
+          data={{
+            studentName: user?.full_name || user?.username || "Học viên",
+            courseName: course.title,
+            completionDate: new Date().toLocaleDateString('vi-VN'),
+            instructorName: course.instructor.name,
+            courseDuration: course.totalDuration
           }}
         />
       )}
