@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft, CheckCircle, Clock, Users, Star, Play, BookOpen, Trophy, Award, Zap } from "lucide-react";
+import { ArrowLeft, CheckCircle, Clock, Users, Star, Play, BookOpen, Trophy, Award, Zap, ChevronRight, Target, Briefcase, DollarSign, BarChart } from "lucide-react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -21,7 +21,8 @@ interface RoadmapDetail {
   whatYouWillLearn: string[];
   careerPaths: string[];
   salary: string;
-  roadmapTree?: any;
+  color: string;
+  gradient: string;
 }
 
 const roadmapDetails: Record<string, RoadmapDetail> = {
@@ -56,117 +57,8 @@ const roadmapDetails: Record<string, RoadmapDetail> = {
       "Vue.js Developer"
     ],
     salary: "15-30 triệu VNĐ",
-    roadmapTree: {
-      id: "frontend-root",
-      title: "Front-end",
-      description: "Web Development",
-      type: "core",
-      status: "available",
-      children: [
-        {
-          id: "internet",
-          title: "Internet",
-          type: "core",
-          status: "completed",
-          duration: "1 week",
-          children: [
-            {
-              id: "how-internet-works",
-              title: "How does the internet work?",
-              type: "beginner",
-              status: "completed",
-              duration: "2 days"
-            },
-            {
-              id: "what-is-http",
-              title: "What is HTTP?",
-              type: "beginner",
-              status: "completed", 
-              duration: "1 day"
-            },
-            {
-              id: "domain-name",
-              title: "What is Domain Name?",
-              type: "beginner",
-              status: "completed",
-              duration: "1 day"
-            },
-            {
-              id: "hosting",
-              title: "What is hosting?",
-              type: "beginner",
-              status: "current",
-              duration: "1 day"
-            },
-            {
-              id: "dns",
-              title: "DNS and how it works?",
-              type: "beginner",
-              status: "available",
-              duration: "2 days"
-            },
-            {
-              id: "browsers",
-              title: "Browsers and how they work?",
-              type: "beginner",
-              status: "available",
-              duration: "1 day"
-            }
-          ]
-        },
-        {
-          id: "html-css-js",
-          title: "HTML, CSS & JavaScript",
-          type: "core",
-          status: "current",
-          children: [
-            {
-              id: "html",
-              title: "HTML",
-              type: "core",
-              status: "completed",
-              duration: "2 weeks"
-            },
-            {
-              id: "css",
-              title: "CSS",
-              type: "core", 
-              status: "completed",
-              duration: "3 weeks"
-            },
-            {
-              id: "javascript",
-              title: "JavaScript",
-              type: "core",
-              status: "current",
-              duration: "4 weeks"
-            }
-          ]
-        },
-        {
-          id: "package-managers",
-          title: "Package Managers",
-          type: "optional",
-          status: "available",
-          children: [
-            {
-              id: "npm",
-              title: "npm",
-              type: "optional",
-              status: "available",
-              duration: "1 week"
-            },
-            {
-              id: "yarn",
-              title: "yarn", 
-              type: "alternative",
-              status: "available",
-              duration: "1 week"
-            }
-          ]
-        }
-      ]
-    }
+    color: "blue",
+    gradient: "from-blue-600 to-indigo-600"
   },
   backend: {
     id: "backend",
@@ -199,89 +91,8 @@ const roadmapDetails: Record<string, RoadmapDetail> = {
       "Database Administrator"
     ],
     salary: "18-35 triệu VNĐ",
-    roadmapTree: {
-      id: "backend-root",
-      title: "Back-end",
-      description: "Server Development",
-      type: "core",
-      status: "available",
-      children: [
-        {
-          id: "internet-basics",
-          title: "Internet Basics",
-          type: "core",
-          status: "completed",
-          duration: "1 week",
-          children: [
-            {
-              id: "how-internet-works-backend",
-              title: "How does internet work?",
-              type: "beginner",
-              status: "completed",
-              duration: "2 days"
-            },
-            {
-              id: "http-https",
-              title: "HTTP/HTTPS",
-              type: "beginner",
-              status: "completed",
-              duration: "1 day"
-            }
-          ]
-        },
-        {
-          id: "programming-language",
-          title: "Programming Language",
-          type: "core",
-          status: "current",
-          children: [
-            {
-              id: "nodejs",
-              title: "Node.js",
-              type: "core",
-              status: "current",
-              duration: "4 weeks"
-            },
-            {
-              id: "python",
-              title: "Python",
-              type: "alternative",
-              status: "available",
-              duration: "4 weeks"
-            },
-            {
-              id: "php",
-              title: "PHP",
-              type: "alternative",
-              status: "available",
-              duration: "4 weeks"
-            }
-          ]
-        },
-        {
-          id: "database",
-          title: "Database",
-          type: "core",
-          status: "available",
-          children: [
-            {
-              id: "mysql",
-              title: "MySQL",
-              type: "core",
-              status: "available",
-              duration: "3 weeks"
-            },
-            {
-              id: "mongodb",
-              title: "MongoDB",
-              type: "alternative",
-              status: "available",
-              duration: "2 weeks"
-            }
-          ]
-        }
-      ]
-    }
+    color: "purple",
+    gradient: "from-purple-600 to-violet-600"
   },
   fullstack: {
     id: "fullstack",
@@ -314,104 +125,8 @@ const roadmapDetails: Record<string, RoadmapDetail> = {
       "Freelance Developer"
     ],
     salary: "20-40 triệu VNĐ",
-    roadmapTree: {
-      id: "fullstack-root",
-      title: "Full-stack",
-      description: "Complete Web Development",
-      type: "core",
-      status: "available",
-      children: [
-        {
-          id: "frontend-basics",
-          title: "Front-end Basics",
-          type: "core",
-          status: "available",
-          duration: "6 weeks",
-          children: [
-            {
-              id: "html-css",
-              title: "HTML & CSS",
-              type: "core",
-              status: "available",
-              duration: "3 weeks"
-            },
-            {
-              id: "javascript-fundamentals",
-              title: "JavaScript Fundamentals",
-              type: "core",
-              status: "available",
-              duration: "3 weeks"
-            }
-          ]
-        },
-        {
-          id: "frontend-advanced",
-          title: "Advanced Front-end",
-          type: "core",
-          status: "available",
-          children: [
-            {
-              id: "react-framework",
-              title: "React Framework",
-              type: "core",
-              status: "available",
-              duration: "6 weeks"
-            },
-            {
-              id: "build-tools",
-              title: "Build Tools",
-              type: "optional",
-              status: "available",
-              duration: "2 weeks"
-            }
-          ]
-        },
-        {
-          id: "backend-development",
-          title: "Back-end Development",
-          type: "core",
-          status: "available",
-          children: [
-            {
-              id: "nodejs-backend",
-              title: "Node.js Backend",
-              type: "core",
-              status: "available",
-              duration: "4 weeks"
-            },
-            {
-              id: "database-integration",
-              title: "Database Integration",
-              type: "core",
-              status: "available",
-              duration: "3 weeks"
-            }
-          ]
-        },
-        {
-          id: "deployment-devops",
-          title: "Deployment & DevOps",
-          type: "optional",
-          status: "available",
-          children: [
-            {
-              id: "cloud-deployment",
-              title: "Cloud Deployment",
-              type: "optional",
-              status: "available",
-              duration: "2 weeks"
-            },
-            {
-              id: "ci-cd",
-              title: "CI/CD",
-              type: "optional",
-              status: "available",
-              duration: "2 weeks"
-            }
-          ]
-        }
-      ]
-    }
+    color: "indigo",
+    gradient: "from-indigo-600 to-blue-600"
   },
   mobile: {
     id: "mobile",
@@ -445,82 +160,8 @@ const roadmapDetails: Record<string, RoadmapDetail> = {
       "App Developer"
     ],
     salary: "18-35 triệu VNĐ",
-    roadmapTree: {
-      id: "mobile-root",
-      title: "Mobile Development",
-      description: "Cross-platform Mobile Apps",
-      type: "core",
-      status: "available",
-      children: [
-        {
-          id: "programming-basics",
-          title: "Programming Basics",
-          type: "core",
-          status: "available",
-          duration: "4 weeks",
-          children: [
-            {
-              id: "javascript-mobile",
-              title: "JavaScript for Mobile",
-              type: "core",
-              status: "available",
-              duration: "2 weeks"
-            },
-            {
-              id: "react-basics",
-              title: "React Basics",
-              type: "core",
-              status: "available",
-              duration: "2 weeks"
-            }
-          ]
-        },
-        {
-          id: "react-native",
-          title: "React Native",
-          type: "core",
-          status: "available",
-          children: [
-            {
-              id: "rn-fundamentals",
-              title: "React Native Fundamentals",
-              type: "core",
-              status: "available",
-              duration: "4 weeks"
-            },
-            {
-              id: "navigation",
-              title: "Navigation",
-              type: "core",
-              status: "available",
-              duration: "2 weeks"
-            }
-          ]
-        },
-        {
-          id: "mobile-features",
-          title: "Mobile Features",
-          type: "optional",
-          status: "available",
-          children: [
-            {
-              id: "device-features",
-              title: "Device Features",
-              type: "optional",
-              status: "available",
-              duration: "3 weeks"
-            },
-            {
-              id: "api-integration",
-              title: "API Integration",
-              type: "optional",
-              status: "available",
-              duration: "2 weeks"
-            }
-          ]
-        }
-      ]
-    }
+    color: "green",
+    gradient: "from-emerald-600 to-teal-600"
   },
   devops: {
     id: "devops",
@@ -554,97 +195,8 @@ const roadmapDetails: Record<string, RoadmapDetail> = {
       "Platform Engineer"
     ],
     salary: "25-45 triệu VNĐ",
-    roadmapTree: {
-      id: "devops-root",
-      title: "DevOps Engineering",
-      description: "Infrastructure and Deployment",
-      type: "core",
-      status: "available",
-      children: [
-        {
-          id: "linux-basics",
-          title: "Linux Basics",
-          type: "core",
-          status: "available",
-          duration: "3 weeks",
-          children: [
-            {
-              id: "command-line",
-              title: "Command Line",
-              type: "core",
-              status: "available",
-              duration: "1 week"
-            },
-            {
-              id: "system-admin",
-              title: "System Administration",
-              type: "core",
-              status: "available",
-              duration: "2 weeks"
-            }
-          ]
-        },
-        {
-          id: "version-control",
-          title: "Version Control",
-          type: "core",
-          status: "available",
-          children: [
-            {
-              id: "git-advanced",
-              title: "Advanced Git",
-              type: "core",
-              status: "available",
-              duration: "2 weeks"
-            }
-          ]
-        },
-        {
-          id: "cloud-platforms",
-          title: "Cloud Platforms",
-          type: "core",
-          status: "available",
-          children: [
-            {
-              id: "aws-services",
-              title: "AWS Services",
-              type: "core",
-              status: "available",
-              duration: "4 weeks"
-            },
-            {
-              id: "docker-containers",
-              title: "Docker & Containers",
-              type: "core",
-              status: "available",
-              duration: "3 weeks"
-            }
-          ]
-        },
-        {
-          id: "ci-cd-pipelines",
-          title: "CI/CD Pipelines",
-          type: "core",
-          status: "available",
-          children: [
-            {
-              id: "jenkins-github",
-              title: "Jenkins & GitHub Actions",
-              type: "core",
-              status: "available",
-              duration: "3 weeks"
-            },
-            {
-              id: "monitoring",
-              title: "Monitoring & Logging",
-              type: "optional",
-              status: "available",
-              duration: "2 weeks"
-            }
-          ]
-        }
-      ]
-    }
+    color: "red",
+    gradient: "from-red-600 to-orange-600"
   }
 };
 
@@ -657,129 +209,187 @@ export default function RoadmapDetailPage({ params }: { params: Promise<{ slug: 
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50">
-      <PageContainer size="md" className="py-12">
-        {/* Breadcrumb */}
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          className="mb-8"
-        >
-          <Link href="/roadmap" className="inline-flex items-center text-indigo-600 hover:text-indigo-700 font-medium">
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Quay lại lộ trình học
-          </Link>
-        </motion.div>
-
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-12"
-        >
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            {roadmap.title}
-          </h1>
-          <p className="text-xl text-indigo-600 font-medium mb-6">
-            {roadmap.subtitle}
-          </p>
-          <p className="text-gray-600 leading-relaxed mb-8 max-w-2xl mx-auto">
-            {roadmap.description}
-          </p>
-
-          {/* Key Stats */}
-          <div className="flex justify-center gap-6 mb-8">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-indigo-600">{roadmap.totalDuration}</div>
-              <div className="text-sm text-gray-500">Thời gian</div>
-            </div>
-            <div className="text-center">
-              <Badge 
-                variant={roadmap.difficulty === 'Cơ bản' ? 'success' : roadmap.difficulty === 'Trung cấp' ? 'warning' : 'danger'}
-                size="sm"
-              >
-                {roadmap.difficulty}
-              </Badge>
-              <div className="text-sm text-gray-500 mt-1">Độ khó</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-green-600">{roadmap.salary}</div>
-              <div className="text-sm text-gray-500">Lương khởi điểm</div>
-            </div>
-          </div>
-
-          {/* Main Action Button */}
+    <div className="min-h-screen bg-gray-50">
+      {/* Hero Section */}
+      <div className={`relative bg-gradient-to-br ${roadmap.gradient} text-white overflow-hidden`}>
+        <div className="absolute inset-0 bg-[url('/grid-pattern.svg')] opacity-10"></div>
+        <div className="absolute inset-0 bg-black/10"></div>
+        
+        <PageContainer size="lg" className="relative py-16 lg:py-24">
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.3 }}
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="mb-6"
           >
-            <Link href={`/roadmap/${slug}/flow`}>
-              <button className="px-8 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold rounded-xl transition-all duration-300 flex items-center space-x-3 shadow-lg hover:shadow-xl mx-auto">
-                <Zap className="w-6 h-6" />
-                <span className="text-lg">Xem sơ đồ lộ trình</span>
-              </button>
+            <Link href="/roadmap" className="inline-flex items-center text-white/80 hover:text-white transition-colors text-sm font-medium bg-white/10 px-4 py-2 rounded-full backdrop-blur-sm">
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Quay lại danh sách lộ trình
             </Link>
           </motion.div>
-        </motion.div>
 
-        {/* Quick Overview */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="grid md:grid-cols-2 gap-8 mb-12"
-        >
-          <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm">
-            <h3 className="font-semibold text-gray-900 mb-4 flex items-center">
-              <BookOpen className="w-5 h-5 text-indigo-600 mr-2" />
-              Bạn sẽ học được
-            </h3>
-            <ul className="space-y-2">
-              {roadmap.whatYouWillLearn.slice(0, 4).map((item, index) => (
-                <li key={index} className="flex items-start space-x-2">
-                  <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
-                  <span className="text-sm text-gray-700">{item}</span>
-                </li>
-              ))}
-            </ul>
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+            >
+              <h1 className="text-4xl lg:text-5xl font-bold mb-4 leading-tight">
+                {roadmap.title}
+              </h1>
+              <p className="text-xl text-white/90 font-medium mb-6 leading-relaxed">
+                {roadmap.subtitle}
+              </p>
+              
+              <div className="flex flex-wrap gap-4 mb-8">
+                <div className="flex items-center bg-white/20 backdrop-blur-md px-4 py-2 rounded-lg">
+                  <Clock className="w-5 h-5 mr-2" />
+                  <span className="font-medium">{roadmap.totalDuration}</span>
+                </div>
+                <div className="flex items-center bg-white/20 backdrop-blur-md px-4 py-2 rounded-lg">
+                  <Users className="w-5 h-5 mr-2" />
+                  <span className="font-medium">{roadmap.totalStudents.toLocaleString()} học viên</span>
+                </div>
+                <div className="flex items-center bg-white/20 backdrop-blur-md px-4 py-2 rounded-lg">
+                  <BarChart className="w-5 h-5 mr-2" />
+                  <span className="font-medium">{roadmap.difficulty}</span>
+                </div>
+              </div>
+            </motion.div>
+            
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.2 }}
+              className="hidden lg:block relative"
+            >
+              <div className="absolute inset-0 bg-white/20 blur-3xl rounded-full transform -translate-y-1/2"></div>
+              {/* Abstract Illustration or Icon could go here */}
+            </motion.div>
+          </div>
+        </PageContainer>
+      </div>
+
+      <PageContainer size="lg" className="py-12 -mt-10 relative z-10">
+        <div className="grid lg:grid-cols-3 gap-8">
+          {/* Main Content - Left Column */}
+          <div className="lg:col-span-2 space-y-8">
+            {/* Description Card */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100"
+            >
+              <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center">
+                <BookOpen className={`w-6 h-6 mr-3 text-${roadmap.color}-600`} />
+                Tổng quan lộ trình
+              </h2>
+              <p className="text-gray-600 leading-relaxed text-lg">
+                {roadmap.description}
+              </p>
+            </motion.div>
+
+            {/* What You Will Learn */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100"
+            >
+              <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+                <Target className={`w-6 h-6 mr-3 text-${roadmap.color}-600`} />
+                Bạn sẽ học được gì?
+              </h2>
+              <div className="grid md:grid-cols-2 gap-4">
+                {roadmap.whatYouWillLearn.map((item, index) => (
+                  <div key={index} className="flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
+                    <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+                    <span className="text-gray-700 font-medium">{item}</span>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+
+            {/* Prerequisites */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+              className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100"
+            >
+              <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+                <Zap className={`w-6 h-6 mr-3 text-${roadmap.color}-600`} />
+                Yêu cầu đầu vào
+              </h2>
+              <ul className="space-y-4">
+                {roadmap.prerequisites.map((item, index) => (
+                  <li key={index} className="flex items-center space-x-3">
+                    <div className={`w-2 h-2 rounded-full bg-${roadmap.color}-500`}></div>
+                    <span className="text-gray-700">{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </motion.div>
           </div>
 
-          <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm">
-            <h3 className="font-semibold text-gray-900 mb-4 flex items-center">
-              <Trophy className="w-5 h-5 text-purple-600 mr-2" />
-              Con đường sự nghiệp
-            </h3>
-            <ul className="space-y-2">
-              {roadmap.careerPaths.slice(0, 4).map((path, index) => (
-                <li key={index} className="flex items-center space-x-2">
-                  <div className="w-2 h-2 bg-purple-600 rounded-full"></div>
-                  <span className="text-sm text-gray-700">{path}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </motion.div>
+          {/* Sidebar - Right Column */}
+          <div className="lg:col-span-1">
+            <div className="sticky top-24 space-y-6">
+              {/* Action Card */}
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.3 }}
+                className="bg-white rounded-2xl p-6 shadow-xl border border-gray-100 overflow-hidden relative"
+              >
+                <div className={`absolute top-0 left-0 w-full h-2 bg-gradient-to-r ${roadmap.gradient}`}></div>
+                
+                <div className="mb-6">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-gray-500 font-medium">Mức lương trung bình</span>
+                    <Badge variant="success" size="sm">Hấp dẫn</Badge>
+                  </div>
+                  <div className="text-2xl font-bold text-gray-900 flex items-center">
+                    <DollarSign className="w-6 h-6 text-green-500 mr-1" />
+                    {roadmap.salary}
+                  </div>
+                </div>
 
-        {/* Call to Action */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-          className="text-center"
-        >
-          <div className="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-2xl p-8 text-white">
-            <h3 className="text-2xl font-bold mb-4">Sẵn sàng bắt đầu hành trình?</h3>
-            <p className="mb-6 opacity-90">
-              Khám phá sơ đồ lộ trình chi tiết với các node kỹ năng và đường dẫn học tập rõ ràng.
-            </p>
-            <Link href={`/roadmap/${slug}/flow`}>
-              <button className="px-8 py-3 bg-white text-indigo-600 font-semibold rounded-lg hover:bg-gray-100 transition-colors duration-200">
-                Khám phá sơ đồ lộ trình
-              </button>
-            </Link>
+                <Link href={`/roadmap/${slug}/flow`} className="block w-full">
+                  <button className={`w-full py-4 bg-gradient-to-r ${roadmap.gradient} hover:opacity-90 text-white font-bold rounded-xl transition-all duration-300 flex items-center justify-center space-x-2 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5`}>
+                    <Zap className="w-5 h-5" />
+                    <span>Bắt đầu học ngay</span>
+                  </button>
+                </Link>
+                
+                <p className="text-center text-xs text-gray-500 mt-4">
+                  Truy cập miễn phí trọn đời • Cập nhật liên tục
+                </p>
+              </motion.div>
+
+              {/* Career Paths */}
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.4 }}
+                className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100"
+              >
+                <h3 className="font-bold text-gray-900 mb-4 flex items-center">
+                  <Briefcase className={`w-5 h-5 mr-2 text-${roadmap.color}-600`} />
+                  Cơ hội nghề nghiệp
+                </h3>
+                <div className="space-y-3">
+                  {roadmap.careerPaths.map((path, index) => (
+                    <div key={index} className="flex items-center justify-between group cursor-default">
+                      <span className="text-gray-600 group-hover:text-gray-900 transition-colors">{path}</span>
+                      <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-gray-500" />
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            </div>
           </div>
-        </motion.div>
+        </div>
       </PageContainer>
     </div>
   );
