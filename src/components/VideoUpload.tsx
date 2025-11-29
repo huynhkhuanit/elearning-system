@@ -84,29 +84,93 @@ export default function VideoUpload({
 
     try {
       setIsUploading(true);
+      setUploadProgress(0);
 
+      // 1. Get signature from server
+      const timestamp = Math.round(new Date().getTime() / 1000);
+      const paramsToSign = {
+        folder: "dhvlearnx/videos",
+        timestamp: timestamp,
+        eager: "w_300,h_300,c_fill,f_jpg", // Thumbnail generation
+        eager_async: true,
+      };
+
+      const signResponse = await fetch("/api/cloudinary/sign", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ paramsToSign }),
+      });
+
+      if (!signResponse.ok) {
+        throw new Error("Failed to get upload signature");
+      }
+
+      const { signature } = await signResponse.json();
+
+      // 2. Upload to Cloudinary
       const formData = new FormData();
-      formData.append("video", file);
+      formData.append("file", file);
+      formData.append("api_key", process.env.CLOUDINARY_API_KEY || "");
+      formData.append("timestamp", timestamp.toString());
+      formData.append("signature", signature);
+      formData.append("folder", "dhvlearnx/videos");
+      formData.append("eager", "w_300,h_300,c_fill,f_jpg");
+      formData.append("eager_async", "true");
 
-      const response = await fetch(
+      const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
+      if (!cloudName) throw new Error("Missing Cloudinary Cloud Name");
+
+      const xhr = new XMLHttpRequest();
+      
+      const uploadPromise = new Promise<{ secure_url: string; duration: number }>((resolve, reject) => {
+        xhr.upload.addEventListener("progress", (event) => {
+          if (event.lengthComputable) {
+            const progress = Math.round((event.loaded * 100) / event.total);
+            setUploadProgress(progress);
+          }
+        });
+
+        xhr.addEventListener("load", () => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            const response = JSON.parse(xhr.responseText);
+            resolve(response);
+          } else {
+            reject(new Error("Cloudinary upload failed"));
+          }
+        });
+
+        xhr.addEventListener("error", () => reject(new Error("Network error during upload")));
+        xhr.addEventListener("abort", () => reject(new Error("Upload aborted")));
+
+        xhr.open("POST", `https://api.cloudinary.com/v1_1/${cloudName}/video/upload`);
+        xhr.send(formData);
+      });
+
+      const cloudinaryData = await uploadPromise;
+
+      // 3. Save URL to database
+      const saveResponse = await fetch(
         `/api/lessons/${lessonId}/video/upload`,
         {
           method: "POST",
-          body: formData,
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            videoUrl: cloudinaryData.secure_url,
+            duration: cloudinaryData.duration,
+          }),
         }
       );
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Upload failed");
+      if (!saveResponse.ok) {
+        throw new Error("Failed to save video URL");
       }
 
-      const data = await response.json();
+      const data = await saveResponse.json();
 
-      if (data.success && data.videoUrl) {
-        setUploadedUrl(data.videoUrl);
+      if (data.success) {
+        setUploadedUrl(cloudinaryData.secure_url);
         setSuccess(true);
-        onUploadComplete?.(data.videoUrl, data.videoDuration || 0);
+        onUploadComplete?.(cloudinaryData.secure_url, cloudinaryData.duration || 0);
 
         // Clear input
         if (fileInputRef.current) {

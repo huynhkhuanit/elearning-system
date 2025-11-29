@@ -3,8 +3,9 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import MDEditor from '@uiw/react-md-editor';
-import { Save, ArrowLeft, Loader, Check, AlertCircle, Eye, Code, Lightbulb, Info, CheckCircle, AlertTriangle, Upload, Play, Trash2, X } from 'lucide-react';
+import { Save, ArrowLeft, Loader, Check, AlertCircle, Lightbulb, Info, CheckCircle, AlertTriangle, Upload, Play, Trash2 } from 'lucide-react';
 import { useAdminAccess } from '@/lib/hooks/useAdminAccess';
+import VideoUpload from '@/components/VideoUpload';
 import '@uiw/react-md-editor/markdown-editor.css';
 import '@uiw/react-markdown-preview/markdown.css';
 
@@ -30,16 +31,7 @@ export default function LessonContentEditor() {
   const [saving, setSaving] = useState(false);
   const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [message, setMessage] = useState('');
-  const [viewMode, setViewMode] = useState<'edit' | 'preview' | 'split'>('edit');
   
-  // Video upload states
-  const [videoFile, setVideoFile] = useState<File | null>(null);
-  const [isDragging, setIsDragging] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const [uploadStatus, setUploadStatus] = useState<'idle' | 'success' | 'error'>('idle');
-  const [uploadMessage, setUploadMessage] = useState('');
-
   // Fetch lesson data
   useEffect(() => {
     if (!authLoading && hasAccess) {
@@ -120,125 +112,13 @@ export default function LessonContentEditor() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleSave]);
 
-  // Video upload handlers
-  const handleDragEnter = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(true);
-  };
-
-  const handleDragLeave = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(false);
-  };
-
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(false);
-
-    const files = e.dataTransfer.files;
-    if (files.length > 0) {
-      const file = files[0];
-      if (file.type.startsWith('video/')) {
-        setVideoFile(file);
-      } else {
-        setUploadStatus('error');
-        setUploadMessage('Vui lòng chọn file video');
-      }
-    }
-  };
-
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.currentTarget.files;
-    if (files && files.length > 0) {
-      const file = files[0];
-      if (file.type.startsWith('video/')) {
-        setVideoFile(file);
-      } else {
-        setUploadStatus('error');
-        setUploadMessage('Vui lòng chọn file video');
-      }
-    }
-  };
-
-  const handleUploadVideo = async () => {
-    if (!videoFile || !lessonId) {
-      setUploadStatus('error');
-      setUploadMessage('Vui lòng chọn file video');
-      return;
-    }
-
-    try {
-      setIsUploading(true);
-      setUploadStatus('idle');
-      setUploadProgress(0);
-
-      const formData = new FormData();
-      formData.append('video', videoFile);
-
-      const response = await fetch(`/api/lessons/${lessonId}/video/upload`, {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Lỗi khi upload video');
-      }
-
-      const result = await response.json();
-      setUploadStatus('success');
-      setUploadMessage(`Upload thành công! Thời lượng: ${Math.round(result.videoDuration)}s`);
-      setVideoFile(null);
-
-      // Update lesson
+  const handleUploadComplete = (videoUrl: string, duration: number) => {
+    if (lesson) {
       setLesson({
-        ...lesson!,
-        video_url: result.videoUrl,
-        video_duration: result.videoDuration,
+        ...lesson,
+        video_url: videoUrl,
+        video_duration: duration,
       });
-
-      setTimeout(() => setUploadStatus('idle'), 3000);
-    } catch (error) {
-      setUploadStatus('error');
-      setUploadMessage(error instanceof Error ? error.message : 'Lỗi khi upload video');
-    } finally {
-      setIsUploading(false);
-    }
-  };
-
-  const handleDeleteVideo = async () => {
-    if (!lessonId) return;
-
-    try {
-      setIsUploading(true);
-      const response = await fetch(`/api/lessons/${lessonId}/video/upload`, {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) throw new Error('Lỗi khi xóa video');
-
-      setLesson({
-        ...lesson!,
-        video_url: undefined,
-        video_duration: undefined,
-      });
-
-      setUploadStatus('success');
-      setUploadMessage('Xóa video thành công');
-      setTimeout(() => setUploadStatus('idle'), 2000);
-    } catch (error) {
-      setUploadStatus('error');
-      setUploadMessage(error instanceof Error ? error.message : 'Lỗi khi xóa video');
-    } finally {
-      setIsUploading(false);
     }
   };
 
@@ -356,125 +236,12 @@ export default function LessonContentEditor() {
             <p className="text-sm text-slate-400 mt-1">Upload video cho bài học này</p>
           </div>
 
-          <div className="p-6 space-y-4">
-            {/* Upload Area */}
-            {!lesson?.video_url ? (
-              <div
-                onDragEnter={handleDragEnter}
-                onDragLeave={handleDragLeave}
-                onDragOver={handleDragOver}
-                onDrop={handleDrop}
-                className={`border-2 border-dashed rounded-lg p-8 text-center transition cursor-pointer ${
-                  isDragging
-                    ? 'border-indigo-400 bg-indigo-500/10'
-                    : 'border-slate-600 hover:border-slate-500 hover:bg-slate-800/50'
-                }`}
-              >
-                <input
-                  type="file"
-                  id="video-upload"
-                  accept="video/*"
-                  onChange={handleFileSelect}
-                  className="hidden"
-                  disabled={isUploading}
-                />
-
-                <label htmlFor="video-upload" className="cursor-pointer flex flex-col items-center">
-                  <Upload className="w-12 h-12 text-slate-500 mb-3" />
-                  <p className="text-slate-200 font-medium mb-1">
-                    {videoFile ? videoFile.name : isDragging ? 'Thả file video ở đây' : 'Kéo video vào đây hoặc click để chọn'}
-                  </p>
-                  <p className="text-sm text-slate-400">
-                    Hỗ trợ: MP4, WebM, OGG, MOV... (Tối đa 2GB)
-                  </p>
-                </label>
-              </div>
-            ) : (
-              <div className="p-4 bg-green-500/10 border border-green-500/30 rounded-lg">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-3">
-                    <Play className="w-6 h-6 text-green-400 flex-shrink-0" />
-                    <div>
-                      <p className="text-green-300 font-medium">Video đã upload</p>
-                      <p className="text-sm text-green-400/70">
-                        Thời lượng: {Math.round(lesson.video_duration || 0)}s
-                      </p>
-                    </div>
-                  </div>
-                  <button
-                    onClick={handleDeleteVideo}
-                    disabled={isUploading}
-                    className="p-2 hover:bg-red-500/20 text-red-400 rounded transition disabled:opacity-50"
-                    title="Xóa video"
-                  >
-                    <Trash2 className="w-5 h-5" />
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* Upload Status */}
-            {uploadStatus !== 'idle' && (
-              <div
-                className={`flex items-center gap-2 px-4 py-3 rounded-lg transition text-sm font-medium ${
-                  uploadStatus === 'success'
-                    ? 'bg-green-500/20 text-green-300 border border-green-500/30'
-                    : 'bg-red-500/20 text-red-300 border border-red-500/30'
-                }`}
-              >
-                {uploadStatus === 'success' ? (
-                  <Check className="w-4 h-4" />
-                ) : (
-                  <AlertCircle className="w-4 h-4" />
-                )}
-                <span>{uploadMessage}</span>
-              </div>
-            )}
-
-            {/* Upload Progress */}
-            {isUploading && uploadProgress > 0 && (
-              <div className="space-y-2">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-slate-400">Đang upload...</span>
-                  <span className="text-indigo-400 font-medium">{uploadProgress}%</span>
-                </div>
-                <div className="w-full h-2 bg-slate-700 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-indigo-500 transition-all duration-300"
-                    style={{ width: `${uploadProgress}%` }}
-                  />
-                </div>
-              </div>
-            )}
-
-            {/* Upload Button */}
-            {videoFile && !lesson?.video_url && (
-              <button
-                onClick={handleUploadVideo}
-                disabled={isUploading}
-                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-600 text-white rounded-lg transition disabled:cursor-not-allowed font-medium"
-              >
-                {isUploading ? (
-                  <>
-                    <Loader className="w-4 h-4 animate-spin" />
-                    Đang upload...
-                  </>
-                ) : (
-                  <>
-                    <Upload className="w-4 h-4" />
-                    Upload Video ({Math.round(videoFile.size / 1024 / 1024)}MB)
-                  </>
-                )}
-              </button>
-            )}
-
-            {/* Video URL Display */}
-            {lesson?.video_url && (
-              <div className="p-3 bg-slate-800/50 rounded-lg">
-                <p className="text-xs text-slate-400 mb-1">Video URL:</p>
-                <code className="text-xs text-green-400 break-all">{lesson.video_url}</code>
-              </div>
-            )}
+          <div className="p-6">
+            <VideoUpload
+              lessonId={lessonId}
+              currentVideoUrl={lesson.video_url}
+              onUploadComplete={handleUploadComplete}
+            />
           </div>
         </div>
 
