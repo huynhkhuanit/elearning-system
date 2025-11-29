@@ -110,14 +110,14 @@ export default function VideoUpload({
       // 2. Upload to Cloudinary
       const formData = new FormData();
       formData.append("file", file);
-      formData.append("api_key", process.env.CLOUDINARY_API_KEY || "");
+      formData.append("api_key", process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY || "");
       formData.append("timestamp", timestamp.toString());
       formData.append("signature", signature);
       formData.append("folder", "dhvlearnx/videos");
       formData.append("eager", "w_300,h_300,c_fill,f_jpg");
       formData.append("eager_async", "true");
 
-      const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
+      const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
       if (!cloudName) throw new Error("Missing Cloudinary Cloud Name");
 
       const xhr = new XMLHttpRequest();
