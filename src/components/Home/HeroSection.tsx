@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronLeft, ChevronRight, Star, Users, Clock } from "lucide-react";
+import { ChevronLeft, ChevronRight, Star, Users, Clock, ArrowRight, BookOpen, Sparkles, PlayCircle } from "lucide-react";
 import Badge from "@/components/Badge";
 import PageContainer from "@/components/PageContainer";
 import { useState, useEffect } from "react";
@@ -37,9 +37,7 @@ const LEVEL_MAP: Record<string, "Cơ bản" | "Trung cấp" | "Nâng cao"> = {
 
 // Helper function to calculate original price and discount for PRO courses
 const calculatePricing = (currentPrice: number) => {
-  // Original price is ~40% higher than current price (seller strategy)
   const originalPrice = Math.round(currentPrice * 1.4);
-  // Round to nearest 100k for cleaner display
   const roundedOriginalPrice = Math.round(originalPrice / 100000) * 100000;
   const discountPercent = Math.round(((roundedOriginalPrice - currentPrice) / roundedOriginalPrice) * 100);
   
@@ -56,7 +54,7 @@ export default function HeroSection() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
-  const [slideKey, setSlideKey] = useState(0); // Unique key for each slide to ensure proper animation
+  const [slideKey, setSlideKey] = useState(0);
   const router = useRouter();
 
   useEffect(() => {
@@ -72,7 +70,7 @@ export default function HeroSection() {
       if (data.success) {
         const fetchedCourses = data.data.courses.map((course: any, index: number) => ({
           ...course,
-          featured: index === 0, // First course is featured
+          featured: index === 0,
         }));
         setCourses(fetchedCourses);
       }
@@ -87,16 +85,19 @@ export default function HeroSection() {
     enter: (direction: number) => ({
       x: direction > 0 ? 1000 : -1000,
       opacity: 0,
+      scale: 0.9,
     }),
     center: {
       zIndex: 1,
       x: 0,
       opacity: 1,
+      scale: 1,
     },
     exit: (direction: number) => ({
       zIndex: 0,
       x: direction < 0 ? 1000 : -1000,
       opacity: 0,
+      scale: 0.9,
     }),
   };
 
@@ -108,9 +109,6 @@ export default function HeroSection() {
   const paginate = (newDirection: number) => {
     if (courses.length === 0) return;
     
-    // Always keep direction consistent: 
-    // direction = 1 (right/next) -> slide from right to left
-    // direction = -1 (left/prev) -> slide from left to right
     setDirection(newDirection);
     
     setCurrentIndex((prevIndex) => {
@@ -118,17 +116,13 @@ export default function HeroSection() {
         (newDirection === 1 && prevIndex === courses.length - 1) ||
         (newDirection === -1 && prevIndex === 0);
       
-      // Update slideKey when wrapping to ensure AnimatePresence recognizes the transition
-      // This ensures each wrap-around gets a unique key combination
       if (isWrapping) {
         setSlideKey(prev => prev + 1);
       }
       
       if (newDirection === 1) {
-        // Moving forward (right) - slide from right to left
         return prevIndex === courses.length - 1 ? 0 : prevIndex + 1;
       } else {
-        // Moving backward (left) - slide from left to right
         return prevIndex === 0 ? courses.length - 1 : prevIndex - 1;
       }
     });
@@ -136,151 +130,178 @@ export default function HeroSection() {
 
   // Skeleton loading component
   const SkeletonCard = () => (
-    <div className="h-full bg-gradient-to-br from-white to-gray-50 flex flex-col sm:flex-row animate-pulse">
-      <div className="flex-1 p-3 sm:p-4 md:p-6 flex flex-col justify-between">
-        <div>
-          <div className="h-4 w-16 bg-gray-200 rounded mb-2"></div>
-          <div className="h-6 w-3/4 bg-gray-200 rounded mb-2"></div>
-          <div className="h-4 w-full bg-gray-200 rounded mb-2"></div>
-          <div className="h-4 w-2/3 bg-gray-200 rounded mb-3"></div>
-          <div className="flex items-center space-x-3 mb-3">
-            <div className="h-4 w-12 bg-gray-200 rounded"></div>
-            <div className="h-4 w-16 bg-gray-200 rounded"></div>
-            <div className="h-5 w-16 bg-gray-200 rounded"></div>
-          </div>
-        </div>
-        <div className="flex items-center justify-between">
-          <div className="h-6 w-24 bg-gray-200 rounded"></div>
-          <div className="h-10 w-28 bg-gray-200 rounded-lg"></div>
-        </div>
+    <div className="h-full bg-white rounded-2xl shadow-lg p-4 animate-pulse border border-gray-100">
+      <div className="w-full h-48 bg-gray-200 rounded-xl mb-4"></div>
+      <div className="h-6 w-3/4 bg-gray-200 rounded mb-2"></div>
+      <div className="h-4 w-1/2 bg-gray-200 rounded mb-4"></div>
+      <div className="flex justify-between items-center">
+        <div className="h-8 w-24 bg-gray-200 rounded"></div>
+        <div className="h-8 w-24 bg-gray-200 rounded"></div>
       </div>
-      <div className="w-full h-24 sm:w-32 sm:h-auto md:w-40 bg-gray-200"></div>
     </div>
   );
 
   return (
-    <section className="relative w-full bg-gradient-to-br from-indigo-50 via-white to-purple-50 py-8 sm:py-12 md:py-16 overflow-hidden">
-      <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
+    <section className="relative w-full bg-white overflow-hidden">
+      {/* Background Elements */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-indigo-50 via-white to-white opacity-70"></div>
+      <div className="absolute top-0 left-0 w-full h-full bg-grid-pattern opacity-[0.03]"></div>
+      
+      {/* Decorative Blobs */}
+      <div className="absolute top-20 right-0 -translate-y-1/2 translate-x-1/3 w-[500px] h-[500px] bg-purple-200/30 rounded-full blur-3xl"></div>
+      <div className="absolute bottom-0 left-0 translate-y-1/3 -translate-x-1/4 w-[400px] h-[400px] bg-indigo-200/30 rounded-full blur-3xl"></div>
 
-      <PageContainer size="lg" className="relative py-0">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-8 sm:mb-10 md:mb-12"
-        >
-          <h1 className="font-bold text-gray-900 mb-3 sm:mb-4 px-4">
-            Khám phá <span className="bg-gradient-to-r font-[900] from-indigo-600 to-purple-600 bg-clip-text text-transparent">khóa học</span> hàng đầu
-          </h1>
-          <p className="text-base sm:text-lg md:text-xl text-gray-600 max-w-3xl mx-auto px-4">
-            Nâng cao kỹ năng lập trình với lộ trình học tập bài bản từ cơ bản đến chuyên sâu
-          </p>
-        </motion.div>
+      <PageContainer size="lg" className="relative pt-12 pb-20 sm:pt-16 sm:pb-24 lg:pt-24 lg:pb-32">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center">
+          
+          {/* Left Column: Content */}
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6 }}
+            className="flex flex-col items-start text-left z-10"
+          >
+            <div className="inline-flex items-center space-x-2 bg-indigo-50 border border-indigo-100 rounded-full px-3 py-1 mb-6">
+              <span className="flex h-2 w-2 rounded-full bg-indigo-600 animate-pulse"></span>
+              <span className="text-xs font-medium text-indigo-700 uppercase tracking-wide">Nền tảng học lập trình trực tuyến</span>
+            </div>
 
-        {/* Main Carousel */}
-        <div className="relative w-full px-4 sm:px-0">
-          <div className="overflow-hidden rounded-xl sm:rounded-2xl shadow-xl sm:shadow-2xl bg-white">
-            <div className="relative h-[220px] sm:h-[250px] md:h-[270px]">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-gray-900 leading-[1.15] mb-6 tracking-tight">
+              Khởi đầu hành trình <br className="hidden sm:block" />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">Công nghệ</span> của bạn
+            </h1>
+
+            <p className="text-lg text-gray-600 mb-8 max-w-lg leading-relaxed">
+              Truy cập hơn 100+ khóa học chất lượng cao từ các chuyên gia hàng đầu. 
+              Học mọi lúc, mọi nơi và xây dựng sự nghiệp vững chắc.
+            </p>
+
+            <div className="flex flex-wrap gap-4 mb-10">
+              <button 
+                onClick={() => router.push('/courses')}
+                className="group relative px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl shadow-lg shadow-indigo-200 transition-all hover:shadow-indigo-300 hover:-translate-y-0.5 flex items-center space-x-2"
+              >
+                <span>Khám phá khóa học</span>
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </button>
+              
+              <button 
+                onClick={() => router.push('/roadmap')}
+                className="px-6 py-3 bg-white border border-gray-200 hover:border-indigo-200 text-gray-700 hover:text-indigo-600 font-semibold rounded-xl transition-all hover:bg-indigo-50 flex items-center space-x-2"
+              >
+                <BookOpen className="w-4 h-4" />
+                <span>Lộ trình học</span>
+              </button>
+            </div>
+
+            {/* Stats */}
+            <div className="grid grid-cols-3 gap-6 w-full max-w-md pt-6 border-t border-gray-100">
+              <div>
+                <p className="text-2xl font-bold text-gray-900">10k+</p>
+                <p className="text-sm text-gray-500">Học viên</p>
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-gray-900">50+</p>
+                <p className="text-sm text-gray-500">Giảng viên</p>
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-gray-900">4.8</p>
+                <div className="flex items-center space-x-1">
+                  <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />
+                  <p className="text-sm text-gray-500">Đánh giá</p>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Right Column: Carousel */}
+          <div className="relative w-full max-w-lg mx-auto lg:max-w-none lg:mx-0 h-[400px] sm:h-[450px] flex items-center justify-center">
+            {/* Abstract Background behind card */}
+            <div className="absolute inset-0 bg-gradient-to-tr from-indigo-100 to-purple-100 rounded-[2rem] -rotate-6 scale-90 opacity-50 blur-sm"></div>
+            
+            <div className="relative w-full h-full z-10">
               {loading ? (
                 <SkeletonCard />
-              ) : courses.length === 0 ? null : (
-                <AnimatePresence initial={false} custom={direction}>
-                  <motion.div
-                    key={`${currentIndex}-${slideKey}`}
-                    custom={direction}
-                    variants={slideVariants}
-                    initial="enter"
-                    animate="center"
-                    exit="exit"
-                    transition={{
-                      x: { type: "spring", stiffness: 300, damping: 30 },
-                      opacity: { duration: 0.2 },
-                    }}
-                    drag="x"
-                    dragConstraints={{ left: 0, right: 0 }}
-                    dragElastic={1}
-                    onDragStart={() => {
-                      setIsDragging(true);
-                    }}
-                    onDragEnd={(e, { offset, velocity }) => {
-                      const swipe = swipePower(offset.x, velocity.x);
-                      if (swipe < -swipeConfidenceThreshold) {
-                        paginate(1);
-                      } else if (swipe > swipeConfidenceThreshold) {
-                        paginate(-1);
-                      }
-                      // Reset dragging state after a delay to prevent accidental clicks
-                      setTimeout(() => {
-                        setIsDragging(false);
-                      }, 200);
-                    }}
-                    onDrag={(e, info) => {
-                      // Keep dragging state true while dragging
-                      if (!isDragging) {
-                        setIsDragging(true);
-                      }
-                    }}
-                    className="absolute inset-0"
-                  >
-                    <CourseCard 
-                      course={courses[currentIndex]} 
-                      featured={courses[currentIndex].featured}
-                      isDragging={isDragging}
-                    />
-                  </motion.div>
-                </AnimatePresence>
+              ) : courses.length === 0 ? (
+                <div className="flex items-center justify-center h-full bg-gray-50 rounded-2xl border border-dashed border-gray-300">
+                  <p className="text-gray-500">Chưa có khóa học nào</p>
+                </div>
+              ) : (
+                <div className="relative w-full h-full flex items-center justify-center">
+                  <AnimatePresence initial={false} custom={direction} mode="popLayout">
+                    <motion.div
+                      key={`${currentIndex}-${slideKey}`}
+                      custom={direction}
+                      variants={slideVariants}
+                      initial="enter"
+                      animate="center"
+                      exit="exit"
+                      transition={{
+                        x: { type: "spring", stiffness: 300, damping: 30 },
+                        opacity: { duration: 0.2 },
+                        scale: { duration: 0.2 },
+                      }}
+                      drag="x"
+                      dragConstraints={{ left: 0, right: 0 }}
+                      dragElastic={1}
+                      onDragStart={() => setIsDragging(true)}
+                      onDragEnd={(e, { offset, velocity }) => {
+                        const swipe = swipePower(offset.x, velocity.x);
+                        if (swipe < -swipeConfidenceThreshold) {
+                          paginate(1);
+                        } else if (swipe > swipeConfidenceThreshold) {
+                          paginate(-1);
+                        }
+                        setTimeout(() => setIsDragging(false), 200);
+                      }}
+                      className="absolute w-full max-w-[380px]"
+                    >
+                      <CourseCard 
+                        course={courses[currentIndex]} 
+                        featured={courses[currentIndex].featured}
+                        isDragging={isDragging}
+                      />
+                    </motion.div>
+                  </AnimatePresence>
+
+                  {/* Navigation Buttons */}
+                  <div className="absolute -bottom-12 left-1/2 -translate-x-1/2 flex items-center space-x-4">
+                    <button
+                      onClick={() => paginate(-1)}
+                      className="p-3 rounded-full bg-white border border-gray-200 text-gray-600 hover:text-indigo-600 hover:border-indigo-200 hover:shadow-md transition-all"
+                    >
+                      <ChevronLeft className="w-5 h-5" />
+                    </button>
+                    
+                    <div className="flex space-x-2">
+                      {courses.map((_, index) => (
+                        <button
+                          key={index}
+                          onClick={() => {
+                            const dir = index > currentIndex ? 1 : -1;
+                            setDirection(dir);
+                            setCurrentIndex(index);
+                          }}
+                          className={`h-2 rounded-full transition-all duration-300 ${
+                            index === currentIndex ? "w-8 bg-indigo-600" : "w-2 bg-gray-300 hover:bg-gray-400"
+                          }`}
+                        />
+                      ))}
+                    </div>
+
+                    <button
+                      onClick={() => paginate(1)}
+                      className="p-3 rounded-full bg-white border border-gray-200 text-gray-600 hover:text-indigo-600 hover:border-indigo-200 hover:shadow-md transition-all"
+                    >
+                      <ChevronRight className="w-5 h-5" />
+                    </button>
+                  </div>
+                </div>
               )}
             </div>
           </div>
 
-          {/* Navigation Arrows - positioned outside carousel */}
-          {!loading && courses.length > 0 && (
-            <>
-              <button
-                onClick={() => paginate(-1)}
-                className="absolute left-0 sm:left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 w-7 h-7 sm:w-8 sm:h-8 bg-white/90 hover:bg-white shadow-lg rounded-full flex items-center justify-center text-gray-700 hover:text-indigo-600 transition-all duration-200 z-20"
-              >
-                <ChevronLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-              </button>
-              <button
-                onClick={() => paginate(1)}
-                className="absolute right-0 sm:right-0 top-1/2 -translate-y-1/2 translate-x-1/2 w-7 h-7 sm:w-8 sm:h-8 bg-white/90 hover:bg-white shadow-lg rounded-full flex items-center justify-center text-gray-700 hover:text-indigo-600 transition-all duration-200 z-20"
-              >
-                <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-              </button>
-            </>
-          )}
         </div>
-
-        {/* Dots Indicator */}
-        {!loading && courses.length > 0 && (
-          <div className="flex justify-center space-x-2 mt-4 sm:mt-5 md:mt-6">
-            {courses.map((course, index) => {
-              const handleDotClick = () => {
-                if (index === currentIndex) return;
-                
-                // Consistent direction: right (next) = 1, left (prev) = -1
-                const direction = index > currentIndex ? 1 : -1;
-                setDirection(direction);
-                setCurrentIndex(index);
-              };
-              
-              return (
-                <button
-                  key={course.id}
-                  onClick={handleDotClick}
-                  className={`h-2 sm:h-3 rounded-full transition-all duration-200 ${
-                    index === currentIndex
-                      ? "bg-indigo-600 w-6 sm:w-8"
-                      : "bg-gray-300 hover:bg-gray-400 w-2 sm:w-3"
-                  }`}
-                />
-              );
-            })}
-          </div>
-        )}
-
       </PageContainer>
     </section>
   );
@@ -293,7 +314,6 @@ function CourseCard({ course, featured, isDragging }: { course: Course; featured
   const [startPos, setStartPos] = useState<{ x: number; y: number } | null>(null);
 
   const handleClick = (e: React.MouseEvent) => {
-    // Prevent navigation if user was dragging or moved mouse significantly
     if (isDragging || hasMoved) {
       e.preventDefault();
       e.stopPropagation();
@@ -311,7 +331,6 @@ function CourseCard({ course, featured, isDragging }: { course: Course; featured
     if (startPos) {
       const deltaX = Math.abs(e.clientX - startPos.x);
       const deltaY = Math.abs(e.clientY - startPos.y);
-      // If mouse moved more than 5px, consider it a drag
       if (deltaX > 5 || deltaY > 5) {
         setHasMoved(true);
       }
@@ -319,7 +338,6 @@ function CourseCard({ course, featured, isDragging }: { course: Course; featured
   };
 
   const handleMouseUp = () => {
-    // Reset after a short delay to allow click to process
     setTimeout(() => {
       setHasMoved(false);
       setStartPos(null);
@@ -328,109 +346,93 @@ function CourseCard({ course, featured, isDragging }: { course: Course; featured
 
   return (
     <div 
-      className={`h-full bg-gradient-to-br from-white to-gray-50 flex flex-col sm:flex-row ${isDragging ? 'cursor-grabbing' : 'cursor-pointer'}`}
+      className={`bg-white rounded-2xl shadow-xl shadow-indigo-100/50 overflow-hidden border border-gray-100 transition-transform duration-300 hover:shadow-2xl hover:shadow-indigo-200/50 ${isDragging ? 'cursor-grabbing' : 'cursor-pointer'}`}
       onClick={handleClick}
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseUp}
     >
-      {/* Content Section */}
-      <div className="flex-1 p-3 sm:p-4 md:p-6 flex flex-col justify-between">
-        <div>
-          {featured && (
-            <Badge variant="featured" size="sm" className="mb-2">
-              ⭐ Nổi bật
-            </Badge>
-          )}
-
-          <h3 className="course-card-title font-bold text-gray-900 mb-2 line-clamp-2">
-            {course.title}
-          </h3>
-
-          <p className="text-gray-600 mb-2 sm:mb-3 text-sm line-clamp-1">
-            {course.subtitle}
-          </p>
-
-          {course.instructor?.name && (
-            <p className="text-gray-600 mb-2 sm:mb-3 text-sm">
-              GV: <span className="font-semibold text-indigo-600">{course.instructor.name}</span>
-            </p>
-          )}
-
-          <div className="flex items-center space-x-2 sm:space-x-3 mb-2 sm:mb-3">
-            <div className="flex items-center space-x-1">
-              <Star className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-yellow-400 text-yellow-400" />
-              <span className="font-semibold text-gray-900 text-sm sm:text-base">{course.rating}</span>
-            </div>
-            <div className="flex items-center space-x-1">
-              <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-500" />
-              <span className="text-sm text-gray-600">{course.students.toLocaleString()}</span>
-            </div>
-            <Badge variant={levelDisplay === "Nâng cao" ? "warning" : levelDisplay === "Trung cấp" ? "primary" : "success"} size="sm">
-              {levelDisplay}
-            </Badge>
-          </div>
-        </div>
-
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            {course.isPro ? (
-              <div className="flex flex-col gap-1">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs sm:text-sm text-gray-500 line-through">
-                    {new Intl.NumberFormat('vi-VN').format(calculatePricing(course.priceAmount).originalPrice)}₫
-                  </span>
-                  <span className="text-xs font-bold px-1.5 py-0.5 rounded bg-red-500 text-white">
-                    -{calculatePricing(course.priceAmount).discountPercent}%
-                  </span>
-                </div>
-                <span className="text-base sm:text-lg md:text-xl font-bold text-indigo-600">
-                  {new Intl.NumberFormat('vi-VN').format(course.priceAmount)}₫
-                </span>
-              </div>
-            ) : (
-              <div className="text-base sm:text-lg md:text-xl font-bold text-gray-900">{course.price}</div>
-            )}
-          </div>
-          <button 
-            onClick={(e) => {
-              e.stopPropagation();
-              handleClick(e);
-            }}
-            className="relative inline-block text-white font-semibold rounded-lg p-[2px] bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-600 hover:to-purple-600 transition-all duration-200"
-          >
-            <span className="block px-2.5 py-1.5 sm:px-3 sm:py-2 md:px-4 md:py-2 rounded-lg bg-gradient-to-r from-indigo-600 to-purple-600 hover:bg-transparent text-sm">
-              {course.isFree ? "Học ngay" : "Xem chi tiết"}
-            </span>
-          </button>
-        </div>
-      </div>
-
-      {/* Image Section */}
-      <div className="w-full h-24 sm:w-32 sm:h-auto md:w-40 relative overflow-hidden">
+      {/* Image Header */}
+      <div className="relative h-48 w-full overflow-hidden">
         {course.thumbnailUrl ? (
           <img
             src={course.thumbnailUrl}
             alt={course.title}
-            className="w-full h-full object-cover"
-            onError={(e) => {
-              const target = e.target as HTMLImageElement;
-              target.style.display = 'none';
-              const parent = target.parentElement;
-              if (parent) {
-                parent.className = "w-full h-24 sm:w-32 sm:h-auto md:w-40 bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center";
-                parent.innerHTML = '<div class="text-center text-indigo-600"><div class="text-xs font-semibold">Course</div></div>';
-              }
-            }}
+            className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
           />
         ) : (
-          <div className="w-full h-full bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center">
-            <div className="text-center text-indigo-600">
-              <div className="text-xs font-semibold">Course</div>
-            </div>
+          <div className="w-full h-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+            <Sparkles className="w-12 h-12 text-white/50" />
           </div>
         )}
+        
+        {/* Overlay Badges */}
+        <div className="absolute top-3 left-3 flex gap-2">
+          {featured && (
+            <span className="px-2 py-1 bg-yellow-400/90 backdrop-blur-sm text-yellow-900 text-xs font-bold rounded-lg shadow-sm flex items-center gap-1">
+              <Star className="w-3 h-3 fill-current" /> Nổi bật
+            </span>
+          )}
+          <span className="px-2 py-1 bg-black/50 backdrop-blur-sm text-white text-xs font-medium rounded-lg">
+            {levelDisplay}
+          </span>
+        </div>
+
+        {/* Play Button Overlay */}
+        <div className="absolute inset-0 bg-black/0 hover:bg-black/10 transition-colors flex items-center justify-center group">
+          <div className="w-12 h-12 bg-white/90 rounded-full flex items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 transform scale-75 group-hover:scale-100 transition-all duration-300">
+            <PlayCircle className="w-6 h-6 text-indigo-600 fill-indigo-50" />
+          </div>
+        </div>
+      </div>
+
+      {/* Content Body */}
+      <div className="p-5">
+        <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-2 leading-tight min-h-[3rem]">
+          {course.title}
+        </h3>
+
+        <div className="flex items-center gap-2 mb-4">
+          {course.instructor?.avatar ? (
+             <img src={course.instructor.avatar} alt="" className="w-6 h-6 rounded-full" />
+          ) : (
+            <div className="w-6 h-6 rounded-full bg-indigo-100 flex items-center justify-center text-xs font-bold text-indigo-600">
+              {course.instructor?.name?.[0] || "G"}
+            </div>
+          )}
+          <span className="text-sm text-gray-600 truncate max-w-[150px]">
+            {course.instructor?.name || "Giảng viên"}
+          </span>
+        </div>
+
+        <div className="flex items-center justify-between pt-4 border-t border-gray-50">
+          <div className="flex items-center gap-3 text-sm text-gray-500">
+            <div className="flex items-center gap-1">
+              <Users className="w-4 h-4" />
+              <span>{course.students.toLocaleString()}</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <Clock className="w-4 h-4" />
+              <span>{course.duration || "2h 30p"}</span>
+            </div>
+          </div>
+
+          <div className="text-right">
+            {course.isPro ? (
+              <div className="flex flex-col items-end">
+                <span className="text-xs text-gray-400 line-through">
+                  {new Intl.NumberFormat('vi-VN').format(calculatePricing(course.priceAmount).originalPrice)}₫
+                </span>
+                <span className="text-lg font-bold text-indigo-600">
+                  {new Intl.NumberFormat('vi-VN').format(course.priceAmount)}₫
+                </span>
+              </div>
+            ) : (
+              <span className="text-lg font-bold text-green-600">Miễn phí</span>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
