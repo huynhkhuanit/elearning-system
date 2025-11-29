@@ -113,7 +113,7 @@ export async function POST(
       { id: lessonId },
       {
         video_url: videoUrl,
-        video_duration: videoDuration,
+        video_duration: videoDuration ? Math.round(videoDuration) : null,
         updated_at: new Date().toISOString()
       }
     );
