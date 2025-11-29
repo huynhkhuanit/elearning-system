@@ -337,7 +337,7 @@ export async function POST(request: NextRequest) {
 
         if (!tag) {
           // Create new tag
-          const [newTag] = await insert<{ id: number }>('blog_tags', {
+          const [newTag] = await insert<{ id: number; name: string; slug: string }>('blog_tags', {
             name: tagName,
             slug: generateSlug(tagName),
           })

@@ -4,7 +4,7 @@
  */
 
 import { supabaseAdmin } from './supabase';
-import { PostgrestFilterBuilder } from '@supabase/supabase-js';
+
 
 /**
  * Helper to build Supabase query with filters

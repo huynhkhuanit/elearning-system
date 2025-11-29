@@ -229,7 +229,13 @@ export async function POST(
 
     // Create question
     // Note: status column doesn't exist, it will be calculated from answers_count
-    const [newQuestion] = await insert<{ id: string }>(
+    const [newQuestion] = await insert<{
+      id: string;
+      lesson_id: string;
+      user_id: string;
+      title: string;
+      content: string;
+    }>(
       "lesson_questions",
       {
         lesson_id: lessonId,

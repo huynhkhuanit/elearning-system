@@ -67,7 +67,7 @@ const categories = [
   { id: "theory", label: "Bài học lý thuyết", icon: BookOpenText, color: "text-orange-600" },
 ];
 
-export default function QAPage() {
+function QAPageContent() {
   const { isAuthenticated } = useAuth();
   const toast = useToast();
   const router = useRouter();
@@ -452,5 +452,19 @@ export default function QAPage() {
         </div>
       </PageContainer>
     </div>
+  );
+}
+
+import { Suspense } from "react";
+
+export default function QAPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-gray-500">Đang tải...</div>
+      </div>
+    }>
+      <QAPageContent />
+    </Suspense>
   );
 }
