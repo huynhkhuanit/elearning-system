@@ -207,10 +207,48 @@ export default function WriteBlogPage() {
     }
   }
 
-  const handleAddCoverImage = () => {
-    const url = window.prompt("Nhập URL ảnh bìa:")
-    if (url) {
-      setCoverImage(url)
+  const [isUploading, setIsUploading] = useState(false)
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    // Client-side validation
+    if (!file.type.startsWith("image/")) {
+      toast.error("Vui lòng chọn file ảnh")
+      return
+    }
+
+    if (file.size > 1 * 1024 * 1024) {
+      toast.error("Kích thước ảnh không được vượt quá 1MB")
+      return
+    }
+
+    setIsUploading(true)
+    const formData = new FormData()
+    formData.append("file", file)
+
+    try {
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      })
+
+      const data = await res.json()
+
+      if (res.ok && data.success) {
+        setCoverImage(data.url)
+        toast.success("Tải ảnh lên thành công")
+      } else {
+        throw new Error(data.error || "Tải ảnh thất bại")
+      }
+    } catch (error) {
+      console.error("Upload error:", error)
+      toast.error(error instanceof Error ? error.message : "Không thể tải ảnh lên")
+    } finally {
+      setIsUploading(false)
+      // Reset input value to allow uploading same file again if needed
+      e.target.value = ""
     }
   }
 
@@ -303,30 +341,59 @@ export default function WriteBlogPage() {
           {/* Editor Area - Left (2/3) */}
           <div className="lg:col-span-2 space-y-6">
             {/* Cover Image */}
-            {coverImage ? (
-              <div className="relative group">
-                <img
-                  src={coverImage}
-                  alt="Cover"
-                  className="w-full h-64 object-cover rounded-lg"
-                />
-                <button
-                  onClick={() => setCoverImage("")}
-                  className="absolute top-2 right-2 p-2 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-            ) : (
-              <button
-                onClick={handleAddCoverImage}
-                className="w-full h-64 border-2 border-dashed border-gray-300 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors flex flex-col items-center justify-center space-y-2 text-gray-500 hover:text-blue-600"
-              >
-                <ImageIcon className="w-12 h-12" />
-                <span className="text-sm font-medium">Thêm ảnh bìa</span>
-                <span className="text-xs">Tỷ lệ khuyến nghị: 16:9</span>
-              </button>
-            )}
+            <div className="space-y-4">
+              {coverImage ? (
+                <div className="relative group">
+                  <img
+                    src={coverImage}
+                    alt="Cover"
+                    className="w-full h-64 object-cover rounded-lg"
+                  />
+                  <button
+                    onClick={() => setCoverImage("")}
+                    className="absolute top-2 right-2 p-2 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              ) : (
+                <div className="w-full">
+                  <label
+                    htmlFor="cover-upload"
+                    className={`w-full h-64 border-2 border-dashed rounded-lg flex flex-col items-center justify-center space-y-2 cursor-pointer transition-colors ${
+                      isUploading
+                        ? "border-gray-300 bg-gray-50"
+                        : "border-gray-300 hover:border-blue-500 hover:bg-blue-50"
+                    }`}
+                  >
+                    {isUploading ? (
+                      <div className="flex flex-col items-center space-y-2">
+                        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+                        <span className="text-sm text-gray-500">Đang tải lên...</span>
+                      </div>
+                    ) : (
+                      <>
+                        <ImageIcon className="w-12 h-12 text-gray-400" />
+                        <span className="text-sm font-medium text-gray-600">
+                          Click để tải ảnh bìa lên
+                        </span>
+                        <span className="text-xs text-gray-500">
+                          PNG, JPG, GIF (Tối đa 1MB)
+                        </span>
+                      </>
+                    )}
+                    <input
+                      id="cover-upload"
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleImageUpload}
+                      disabled={isUploading}
+                    />
+                  </label>
+                </div>
+              )}
+            </div>
 
             {/* Title */}
             <div>
