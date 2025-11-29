@@ -260,7 +260,7 @@ export default function CoursesSection() {
   );
 
   return (
-    <section className="py-16 bg-gradient-to-br from-gray-50 to-white">
+    <section id="courses-section" className="py-16 bg-gradient-to-br from-gray-50 to-white">
       <PageContainer size="lg">
         {loading ? (
           <>

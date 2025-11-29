@@ -6,6 +6,8 @@ import PageContainer from "@/components/PageContainer";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
+import { useToast } from "@/contexts/ToastContext";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface Course {
   id: string;
@@ -55,7 +57,11 @@ export default function HeroSection() {
   const [direction, setDirection] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [slideKey, setSlideKey] = useState(0);
+  const [enrollingCourse, setEnrollingCourse] = useState<string | null>(null);
+  
   const router = useRouter();
+  const toast = useToast();
+  const { isAuthenticated } = useAuth();
 
   useEffect(() => {
     fetchCourses();
@@ -78,6 +84,86 @@ export default function HeroSection() {
       console.error("Error fetching courses:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleEnroll = async (course: Course) => {
+    if (!isAuthenticated) {
+      toast.error("Vui lòng đăng nhập để đăng ký khóa học");
+      return;
+    }
+
+    if (enrollingCourse) return;
+
+    try {
+      setEnrollingCourse(course.id);
+      const response = await fetch(`/api/courses/${course.slug}/enroll`, {
+        method: "POST",
+        credentials: "include",
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        toast.success(data.message || "Đăng ký khóa học thành công!");
+        
+        if (data.data?.upgradedToPro) {
+          setTimeout(() => {
+            window.location.reload();
+          }, 1500);
+        } else {
+          setTimeout(() => {
+            router.push(`/learn/${course.slug}`);
+          }, 800);
+        }
+      } else {
+        if (data.message && data.message.includes('đã đăng ký')) {
+          toast.info("Bạn đã đăng ký khóa học này. Đang chuyển hướng...");
+          setTimeout(() => {
+            router.push(`/learn/${course.slug}`);
+          }, 800);
+        } else {
+          toast.error(data.message || "Không thể đăng ký khóa học");
+        }
+      }
+    } catch (error) {
+      console.error("Error during enrollment:", error);
+      toast.error("Đã có lỗi xảy ra khi đăng ký. Vui lòng thử lại");
+    } finally {
+      setEnrollingCourse(null);
+    }
+  };
+
+  const handleProCourseClick = async (course: Course) => {
+    if (!isAuthenticated) {
+      toast.error("Vui lòng đăng nhập để tiếp tục");
+      return;
+    }
+
+    if (enrollingCourse) return;
+
+    try {
+      setEnrollingCourse(course.id);
+      const response = await fetch(`/api/courses/${course.slug}`, {
+        credentials: "include",
+      });
+      
+      const data = await response.json();
+
+      if (data.success) {
+        if (data.data.isEnrolled) {
+          router.push(`/learn/${course.slug}`);
+        } else {
+          router.push(`/courses/${course.slug}`);
+        }
+      } else {
+        router.push(`/courses/${course.slug}`);
+      }
+    } catch (error) {
+      console.error("Error checking enrollment:", error);
+      router.push(`/courses/${course.slug}`);
+    } finally {
+      setEnrollingCourse(null);
     }
   };
 
@@ -178,7 +264,12 @@ export default function HeroSection() {
 
             <div className="flex flex-wrap gap-4 mb-10">
               <button 
-                onClick={() => router.push('/courses')}
+                onClick={() => {
+                  const element = document.getElementById('courses-section');
+                  if (element) {
+                    element.scrollIntoView({ behavior: 'smooth' });
+                  }
+                }}
                 className="group relative px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl shadow-lg shadow-indigo-200 transition-all hover:shadow-indigo-300 hover:-translate-y-0.5 flex items-center space-x-2"
               >
                 <span>Khám phá khóa học</span>
@@ -260,6 +351,9 @@ export default function HeroSection() {
                         course={courses[currentIndex]} 
                         featured={courses[currentIndex].featured}
                         isDragging={isDragging}
+                        onEnroll={() => handleEnroll(courses[currentIndex])}
+                        onProClick={() => handleProCourseClick(courses[currentIndex])}
+                        isEnrolling={enrollingCourse === courses[currentIndex].id}
                       />
                     </motion.div>
                   </AnimatePresence>
@@ -307,11 +401,27 @@ export default function HeroSection() {
   );
 }
 
-function CourseCard({ course, featured, isDragging }: { course: Course; featured?: boolean; isDragging?: boolean }) {
+function CourseCard({ 
+  course, 
+  featured, 
+  isDragging, 
+  onEnroll, 
+  onProClick, 
+  isEnrolling 
+}: { 
+  course: Course; 
+  featured?: boolean; 
+  isDragging?: boolean;
+  onEnroll: () => void;
+  onProClick: () => void;
+  isEnrolling: boolean;
+}) {
   const router = useRouter();
   const levelDisplay = LEVEL_MAP[course.level] || "Cơ bản";
   const [hasMoved, setHasMoved] = useState(false);
   const [startPos, setStartPos] = useState<{ x: number; y: number } | null>(null);
+  const { isAuthenticated } = useAuth();
+  const toast = useToast();
 
   const handleClick = (e: React.MouseEvent) => {
     if (isDragging || hasMoved) {
@@ -319,7 +429,36 @@ function CourseCard({ course, featured, isDragging }: { course: Course; featured
       e.stopPropagation();
       return;
     }
-    router.push(`/courses/${course.slug}`);
+
+    if (!isAuthenticated) {
+      toast.error("Vui lòng đăng nhập để tiếp tục");
+      return;
+    }
+
+    if (course.isFree) {
+      if (isEnrolling) return;
+      
+      // Check enrollment for free course
+      (async () => {
+        try {
+          const response = await fetch(`/api/courses/${course.slug}`, {
+            credentials: "include",
+          });
+          const data = await response.json();
+          
+          if (data.success && data.data.isEnrolled) {
+            router.push(`/learn/${course.slug}`);
+          } else {
+            onEnroll();
+          }
+        } catch (error) {
+          console.error("Error checking enrollment:", error);
+          toast.error("Có lỗi xảy ra. Vui lòng thử lại");
+        }
+      })();
+    } else {
+      onProClick();
+    }
   };
 
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -359,11 +498,23 @@ function CourseCard({ course, featured, isDragging }: { course: Course; featured
           <img
             src={course.thumbnailUrl}
             alt={course.title}
-            className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+            className={`w-full h-full object-cover transition-transform duration-500 hover:scale-105 ${isEnrolling ? 'opacity-50' : ''}`}
           />
         ) : (
-          <div className="w-full h-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+          <div className={`w-full h-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center ${isEnrolling ? 'opacity-50' : ''}`}>
             <Sparkles className="w-12 h-12 text-white/50" />
+          </div>
+        )}
+        
+        {/* Loading overlay when enrolling */}
+        {isEnrolling && (
+          <div className="absolute inset-0 bg-black/30 flex items-center justify-center z-10">
+            <div className="text-white text-center">
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white mx-auto mb-2"></div>
+              <div className="text-xs font-semibold opacity-90">
+                {course.isFree ? "Đang đăng ký..." : "Đang kiểm tra..."}
+              </div>
+            </div>
           </div>
         )}
         
