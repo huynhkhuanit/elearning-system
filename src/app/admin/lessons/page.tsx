@@ -131,10 +131,13 @@ export default function AdminLessonsPage() {
 
   const hasContent = (lesson: Lesson) => lesson.content && lesson.content.trim().length > 0;
 
+  const [filterStatus, setFilterStatus] = useState<'all' | 'published' | 'draft'>('all');
+  const [showFilter, setShowFilter] = useState(false);
+
   const filteredCourses = courses.filter((course) => {
-    if (!searchQuery) return true;
+    // 1. Filter by search query
     const query = searchQuery.toLowerCase();
-    return (
+    const matchesSearch = !searchQuery || (
       course.title.toLowerCase().includes(query) ||
       course.chapters?.some((chapter) =>
         chapter.title.toLowerCase().includes(query) ||
@@ -143,6 +146,17 @@ export default function AdminLessonsPage() {
         )
       )
     );
+
+    // 2. Filter by status (check if course has any lesson matching the status)
+    if (filterStatus === 'all') return matchesSearch;
+
+    const matchesStatus = course.chapters?.some(chapter => 
+      chapter.lessons?.some(lesson => 
+        filterStatus === 'published' ? lesson.is_published : !lesson.is_published
+      )
+    );
+
+    return matchesSearch && matchesStatus;
   });
 
   if (authLoading) {
@@ -254,10 +268,40 @@ export default function AdminLessonsPage() {
             className="w-full pl-10 pr-4 py-2.5 bg-slate-800 border border-slate-700 rounded-lg text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
           />
         </div>
-        <button className="flex items-center gap-2 px-4 py-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg text-slate-100 transition font-medium">
-          <Filter className="w-5 h-5" />
-          <span>Bộ Lọc</span>
-        </button>
+        <div className="relative">
+          <button 
+            onClick={() => setShowFilter(!showFilter)}
+            className={`flex items-center gap-2 px-4 py-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg text-slate-100 transition font-medium ${showFilter ? 'ring-2 ring-indigo-500' : ''}`}
+          >
+            <Filter className="w-5 h-5" />
+            <span>
+              {filterStatus === 'all' ? 'Tất cả' : filterStatus === 'published' ? 'Đã xuất bản' : 'Bản nháp'}
+            </span>
+          </button>
+
+          {showFilter && (
+            <div className="absolute right-0 top-full mt-2 w-48 bg-slate-800 border border-slate-700 rounded-lg shadow-xl z-10 overflow-hidden">
+              <button
+                onClick={() => { setFilterStatus('all'); setShowFilter(false); }}
+                className={`w-full text-left px-4 py-3 hover:bg-slate-700 transition text-sm ${filterStatus === 'all' ? 'text-indigo-400 font-medium' : 'text-slate-300'}`}
+              >
+                Tất cả
+              </button>
+              <button
+                onClick={() => { setFilterStatus('published'); setShowFilter(false); }}
+                className={`w-full text-left px-4 py-3 hover:bg-slate-700 transition text-sm ${filterStatus === 'published' ? 'text-indigo-400 font-medium' : 'text-slate-300'}`}
+              >
+                Đã xuất bản
+              </button>
+              <button
+                onClick={() => { setFilterStatus('draft'); setShowFilter(false); }}
+                className={`w-full text-left px-4 py-3 hover:bg-slate-700 transition text-sm ${filterStatus === 'draft' ? 'text-indigo-400 font-medium' : 'text-slate-300'}`}
+              >
+                Bản nháp
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Content Grid */}

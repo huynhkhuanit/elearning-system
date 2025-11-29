@@ -14,6 +14,16 @@ import {
 } from 'lucide-react';
 import { useAdminAccess } from '@/lib/hooks/useAdminAccess';
 import Link from 'next/link';
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Legend
+} from 'recharts';
 
 interface Stats {
   totalCourses: number;
@@ -24,12 +34,11 @@ interface Stats {
   completionRate: number;
 }
 
-interface RecentActivity {
-  id: string;
-  type: 'lesson' | 'course' | 'chapter';
-  action: string;
-  title: string;
-  timestamp: string;
+interface ChartData {
+  name: string;
+  lessons: number;
+  published: number;
+  content: number;
 }
 
 export default function AdminDashboard() {
@@ -42,6 +51,7 @@ export default function AdminDashboard() {
     publishedLessons: 0,
     completionRate: 0,
   });
+  const [chartData, setChartData] = useState<ChartData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -54,36 +64,14 @@ export default function AdminDashboard() {
   const fetchStats = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/admin/courses-full');
+      const response = await fetch('/api/admin/stats');
       if (!response.ok) throw new Error('Không tải được dữ liệu');
 
       const data = await response.json();
-      const courses = data.data?.courses || [];
-
-      let totalChapters = 0;
-      let totalLessons = 0;
-      let lessonsWithContent = 0;
-      let publishedLessons = 0;
-
-      courses.forEach((course: any) => {
-        course.chapters?.forEach((chapter: any) => {
-          totalChapters++;
-          chapter.lessons?.forEach((lesson: any) => {
-            totalLessons++;
-            if (lesson.content && lesson.content.trim().length > 0) lessonsWithContent++;
-            if (lesson.is_published) publishedLessons++;
-          });
-        });
-      });
-
-      setStats({
-        totalCourses: courses.length,
-        totalChapters,
-        totalLessons,
-        lessonsWithContent,
-        publishedLessons,
-        completionRate: totalLessons > 0 ? Math.round((lessonsWithContent / totalLessons) * 100) : 0,
-      });
+      if (data.success) {
+        setStats(data.data.stats);
+        setChartData(data.data.charts.courseStats);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Lỗi không xác định');
     } finally {
@@ -216,6 +204,59 @@ export default function AdminDashboard() {
               />
             </div>
             <p className="text-xs text-slate-400">Tỷ lệ nội dung hoàn thành</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Charts Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="bg-slate-800/50 border border-slate-700 rounded-lg p-6">
+          <h3 className="text-lg font-semibold text-slate-100 mb-6">Thống Kê Theo Khóa Học</h3>
+          <div className="h-[300px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={chartData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+                <XAxis 
+                  dataKey="name" 
+                  stroke="#94a3b8" 
+                  fontSize={12}
+                  tickFormatter={(value: string) => value.length > 15 ? `${value.substring(0, 15)}...` : value}
+                />
+                <YAxis stroke="#94a3b8" fontSize={12} />
+                <Tooltip 
+                  contentStyle={{ backgroundColor: '#1e293b', borderColor: '#334155', color: '#f1f5f9' }}
+                  itemStyle={{ color: '#f1f5f9' }}
+                />
+                <Legend />
+                <Bar dataKey="lessons" name="Tổng bài học" fill="#818cf8" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="content" name="Có nội dung" fill="#4ade80" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        <div className="bg-slate-800/50 border border-slate-700 rounded-lg p-6">
+          <h3 className="text-lg font-semibold text-slate-100 mb-6">Trạng Thái Xuất Bản</h3>
+          <div className="h-[300px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={chartData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+                <XAxis 
+                  dataKey="name" 
+                  stroke="#94a3b8" 
+                  fontSize={12}
+                  tickFormatter={(value: string) => value.length > 15 ? `${value.substring(0, 15)}...` : value}
+                />
+                <YAxis stroke="#94a3b8" fontSize={12} />
+                <Tooltip 
+                  contentStyle={{ backgroundColor: '#1e293b', borderColor: '#334155', color: '#f1f5f9' }}
+                  itemStyle={{ color: '#f1f5f9' }}
+                />
+                <Legend />
+                <Bar dataKey="lessons" name="Tổng bài học" fill="#818cf8" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="published" name="Đã xuất bản" fill="#34d399" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
           </div>
         </div>
       </div>

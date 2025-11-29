@@ -47,6 +47,7 @@
     "react-markdown": "^10.1.0",
     "react-redux": "^9.2.0",
     "reactflow": "^11.11.4",
+    "recharts": "^3.5.1",
     "remark-gfm": "^4.0.1",
     "resend": "^6.4.2",
     "twilio": "^5.3.5",
