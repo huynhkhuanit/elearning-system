@@ -251,7 +251,7 @@ export default function Header() {
         {/* Action Buttons */}
         <div className="flex items-center gap-3">
           {/* Mobile search button */}
-          <Link href="/search" className="lg:hidden p-2 rounded-xl text-muted-foreground hover:bg-muted transition-all duration-200 cursor-pointer">
+          <Link href="#" className="lg:hidden p-2 rounded-xl text-muted-foreground hover:bg-muted transition-all duration-200 cursor-pointer">
             <Search className="h-5 w-5" />
           </Link>
 

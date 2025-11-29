@@ -17,7 +17,7 @@ const footerLinks = {
     { name: "Blog", href: "#" },
   ],
   community: [
-    { name: "Discord", href: "#" },
+    { name: "Discord", href: "https://discord.com/invite/a6pe69KkPd" },
     { name: "Facebook Group", href: "#" },
     { name: "Telegram", href: "#" },
     { name: "Youtube", href: "#" },
@@ -28,7 +28,7 @@ const socialLinks = [
   { icon: Facebook, href: "#", label: "Facebook" },
   { icon: Twitter, href: "#", label: "Twitter" },
   { icon: Youtube, href: "#", label: "Youtube" },
-  { icon: Github, href: "#", label: "Github" },
+  { icon: Github, href: "https://github.com/huynhkhuanit", label: "Github" },
 ];
 
 export default function Footer() {
