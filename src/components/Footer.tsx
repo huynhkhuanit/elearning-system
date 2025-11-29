@@ -115,7 +115,11 @@ export default function Footer() {
             <ul className="space-y-2 mb-4">
               {footerLinks.community.map((link, index) => (
                 <li key={index}>
-                  <Link href={link.href} className="text-gray-400 text-sm hover:text-white transition-colors duration-200">
+                  <Link 
+                    href={link.href} 
+                    className="text-gray-400 text-sm hover:text-white transition-colors duration-200"
+                    {...(link.href.startsWith('http') ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+                  >
                     {link.name}
                   </Link>
                 </li>
@@ -129,6 +133,7 @@ export default function Footer() {
                   key={index}
                   href={social.href}
                   aria-label={social.label}
+                  {...(social.href.startsWith('http') ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
                   className="w-8 h-8 bg-gray-800 rounded-lg flex items-center justify-center text-gray-400 hover:text-white hover:bg-gray-700 transition-all duration-200"
                 >
                   <social.icon className="w-4 h-4" />
