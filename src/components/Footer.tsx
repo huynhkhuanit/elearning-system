@@ -40,7 +40,6 @@ export default function Footer() {
         zIndex: 30,
       }}
     >
-      {/* ✅ Footer z-30: Modal (9999) > Header (30) = Footer (30) > Menu (10) */}
       <div className="max-w-7xl mx-auto px-6 py-8 pointer-events-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {/* Company Info */}
@@ -142,7 +141,7 @@ export default function Footer() {
         {/* Bottom Section */}
         <div className="border-t border-gray-800 mt-8 pt-6 flex flex-col md:flex-row items-center justify-between pointer-events-auto">
           <div className="text-gray-400 text-xs mb-3 md:mb-0">
-            © 2026 DHV LearnX. All rights reserved.
+            © 2025 DHV LearnX. All rights reserved.
           </div>
           
           <div className="flex space-x-4 text-xs">
