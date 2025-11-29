@@ -82,7 +82,7 @@ export async function POST(request: NextRequest) {
       userId: user.id,
       email: user.email,
       username: user.username,
-      membership_type: user.membership_type,
+      membership_type: user.membership_type as 'FREE' | 'PRO',
     });
 
     // Prepare public user data
