@@ -62,6 +62,7 @@ export async function POST(request: NextRequest) {
     const [newUser] = await insert<{
       id: string;
       email: string;
+      password_hash: string;
       username: string;
       full_name: string;
       avatar_url: string | null;
@@ -70,6 +71,7 @@ export async function POST(request: NextRequest) {
       learning_streak: number;
       total_study_time: number;
       is_verified: boolean;
+      is_active: boolean;
       created_at: string;
     }>('users', {
       email,
