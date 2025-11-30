@@ -40,8 +40,8 @@ export default function Footer() {
         zIndex: 30,
       }}
     >
-      <div className="max-w-7xl mx-auto px-6 py-8 pointer-events-auto">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="w-full px-6 md:px-12 py-12 pointer-events-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
           {/* Company Info */}
           <div className="space-y-4">
             <div className="flex items-center space-x-2">
@@ -79,6 +79,23 @@ export default function Footer() {
                 <span>Hồ Chí Minh, Việt Nam</span>
               </div>
             </div>
+          </div>
+
+          {/* About DHV LearnX */}
+          <div>
+            <h4 className="font-semibold text-base mb-4">Về DHV LearnX</h4>
+            <ul className="space-y-2">
+              <li>
+                <Link href="/about" className="text-gray-400 hover:text-white transition-colors duration-200">
+                  Giới thiệu
+                </Link>
+              </li>
+              <li>
+                <Link href="/contact" className="text-gray-400 hover:text-white transition-colors duration-200">
+                  Liên hệ
+                </Link>
+              </li>
+            </ul>
           </div>
 
           {/* Courses */}
@@ -156,7 +173,7 @@ export default function Footer() {
             <Link href="#" className="text-gray-400 hover:text-white transition-colors duration-200">
               Chính sách bảo mật
             </Link>
-            <Link href="#" className="text-gray-400 hover:text-white transition-colors duration-200">
+            <Link href="/contact" className="text-gray-400 hover:text-white transition-colors duration-200">
               Liên hệ
             </Link>
           </div>
